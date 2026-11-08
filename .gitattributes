@@ -1,5 +1,9 @@
 * text=auto eol=lf
 
+# Windows only runs batch files reliably with CRLF line endings.
+*.cmd text eol=crlf
+*.sh text eol=lf
+
 # Chat exports keep the exact bytes WhatsApp wrote, line endings included.
 tests/fixtures/** -text
 
