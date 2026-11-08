@@ -4,3 +4,4 @@ export { baseName, extensionOf, fileKey, FileIndex, isRiskyFile, mediaHintFor, m
 export { chatCandidates, isZipName } from './archive';
 export { chatStats, type ChatStats, type PersonStats } from './stats';
 export { LIMITS, type Limits } from './limits';
+export { DifferentChatsError, mergeChats, sameChat } from './merge';
