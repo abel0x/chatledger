@@ -12,7 +12,7 @@ export type RichNode =
 const MARKS: Record<string, Style> = { '*': 'b', _: 'i', '~': 's', '`': 'code' };
 const WORD = /[\p{L}\p{N}]/u;
 const SPACE = /\s/;
-const ISOLATES = /[⁦-⁩]/g;
+const ISOLATES = /[\u2066-\u2069]/g;
 
 /** A marker only counts next to something that is not part of a word, as in WhatsApp. */
 function boundary(ch: string | undefined): boolean {
@@ -81,7 +81,7 @@ function parseMentions(text: string, match: ReturnType<typeof mentionMatcher>): 
     let length = 0;
     let person: number | null = null;
     let label = '';
-    const isolated = /^⁨([^⁩\n]+)⁩/.exec(rest);
+    const isolated = /^\u2068([^\u2069\n]+)\u2069/.exec(rest);
     const phone = /^\+?\d[\d ]{5,}\d/.exec(rest);
     const named = match(rest.replace(ISOLATES, ''));
     if (isolated) {

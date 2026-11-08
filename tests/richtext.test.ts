@@ -43,7 +43,7 @@ describe('richText', () => {
   });
 
   it('turns mentions into people, the longest name first', () => {
-    expect(richText('hi @Ada Yılmaz and @⁨Mert Aydın⁩, @+90 555 123 45 67', people)).toEqual([
+    expect(richText('hi @Ada Yılmaz and @\u2068Mert Aydın\u2069, @+90 555 123 45 67', people)).toEqual([
       { t: 'text', v: 'hi ' },
       { t: 'mention', v: '@Ada Yılmaz', person: 1 },
       { t: 'text', v: ' and ' },
