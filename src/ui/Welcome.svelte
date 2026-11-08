@@ -18,9 +18,63 @@
     onopensaved: (id: string) => void;
     onremove: (id: string) => void;
     onremember: (value: boolean) => void;
+    locked: boolean;
+    protectedLibrary: boolean;
+    working: boolean;
+    onunlock: (password: string) => Promise<boolean>;
+    onprotect: (password: string) => Promise<void>;
+    onunprotect: () => Promise<void>;
+    onlocknow: () => void;
+    onforget: () => Promise<void>;
   }
 
-  let { busy, progress, error, library, remember, canRemember, onopen, onopensaved, onremove, onremember }: Props = $props();
+  let {
+    busy,
+    progress,
+    error,
+    library,
+    remember,
+    canRemember,
+    onopen,
+    onopensaved,
+    onremove,
+    onremember,
+    locked,
+    protectedLibrary,
+    working,
+    onunlock,
+    onprotect,
+    onunprotect,
+    onlocknow,
+    onforget,
+  }: Props = $props();
+
+  let password = $state('');
+  let repeat = $state('');
+  let lockError = $state<string | null>(null);
+
+  async function tryUnlock(e: SubmitEvent) {
+    e.preventDefault();
+    lockError = null;
+    if (!(await onunlock(password))) lockError = t('lock.wrong');
+    else password = '';
+  }
+
+  async function setPassword(e: SubmitEvent) {
+    e.preventDefault();
+    lockError = null;
+    if (password.length < 8) lockError = t('lock.short');
+    else if (password !== repeat) lockError = t('lock.mismatch');
+    else {
+      await onprotect(password);
+      password = '';
+      repeat = '';
+    }
+  }
+
+  function forgot() {
+    if (confirm(t('lock.forgotConfirm'))) void onforget();
+  }
 
   let dragging = $state(false);
   let confirming = $state<string | null>(null);
@@ -106,6 +160,20 @@
       </label>
     {/if}
 
+    {#if canRemember && locked}
+      <form class="lock" onsubmit={tryUnlock}>
+        <h2><Icon name="lock" size={18} /> {t('lock.title')}</h2>
+        <p class="note">{t('lock.lead')}</p>
+        <div class="row">
+          <label class="visually-hidden" for="unlock-password">{t('lock.password')}</label>
+          <input id="unlock-password" type="password" autocomplete="current-password" bind:value={password} placeholder={t('lock.password')} />
+          <button class="button" type="submit" disabled={!password}>{t('lock.unlock')}</button>
+        </div>
+        {#if lockError}<p class="error" role="alert">{lockError}</p>{/if}
+        <button class="link" type="button" onclick={forgot}>{t('lock.forgot')}</button>
+      </form>
+    {/if}
+
     {#if library.length}
       <section class="saved" aria-labelledby="saved-title">
         <h2 id="saved-title">{t('welcome.saved')}</h2>
@@ -131,6 +199,31 @@
           {/each}
         </ul>
       </section>
+    {/if}
+
+    {#if canRemember && !locked}
+      {#if protectedLibrary}
+        <div class="lock-state">
+          <p class="note"><Icon name="lock" size={16} /> {t('lock.on')}</p>
+          <div class="row">
+            <button class="button secondary" type="button" onclick={onlocknow} disabled={working}>{t('lock.lockNow')}</button>
+            <button class="button secondary" type="button" onclick={() => void onunprotect()} disabled={working}>
+              {working ? t('lock.working') : t('lock.remove')}
+            </button>
+          </div>
+        </div>
+      {:else}
+        <details class="protect">
+          <summary>{t('lock.protect')}</summary>
+          <form onsubmit={setPassword}>
+            <p class="note">{t('lock.protectLead')}</p>
+            <label>{t('lock.password')} <input type="password" autocomplete="new-password" bind:value={password} /></label>
+            <label>{t('lock.repeat')} <input type="password" autocomplete="new-password" bind:value={repeat} /></label>
+            {#if lockError}<p class="error" role="alert">{lockError}</p>{/if}
+            <button class="button" type="submit" disabled={working || !password}>{working ? t('lock.working') : t('lock.set')}</button>
+          </form>
+        </details>
+      {/if}
     {/if}
 
     <details>
@@ -312,6 +405,79 @@
   .danger {
     background: var(--danger);
     color: var(--bg);
+  }
+
+  .lock,
+  .lock-state,
+  .protect {
+    display: grid;
+    gap: 8px;
+    margin-top: 20px;
+    text-align: start;
+  }
+
+  .lock h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .lock .note,
+  .lock-state .note,
+  .protect .note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lock input,
+  .protect input {
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    padding: 6px 10px;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    background: var(--bg);
+  }
+
+  .protect form {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .protect label {
+    display: grid;
+    gap: 4px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .protect .button {
+    justify-self: start;
+  }
+
+  .link {
+    justify-self: start;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--link);
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
   }
 
   details {

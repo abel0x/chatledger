@@ -5,8 +5,8 @@ import type { ChatStats } from '../core';
 import type { LoadErrorCode, Phase } from './open';
 
 export type WorkerRequest =
-  | { type: 'open'; files: File[]; save: boolean }
-  | { type: 'openSaved'; id: string }
+  | { type: 'open'; files: File[]; save: boolean; key: CryptoKey | null }
+  | { type: 'openSaved'; id: string; key: CryptoKey | null }
   | { type: 'read'; id: number; file: string }
   | { type: 'thumb'; id: number; file: string; size: number }
   | { type: 'doc'; id: number; file: string }

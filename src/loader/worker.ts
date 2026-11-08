@@ -17,7 +17,7 @@ function message(err: unknown): string | undefined {
   return err instanceof Error ? err.message : undefined;
 }
 
-async function open(files: File[], savedId: string | null, save: boolean): Promise<void> {
+async function open(files: File[], savedId: string | null, save: boolean, key: CryptoKey | null): Promise<void> {
   try {
     await opened?.close();
     let last = -1;
@@ -37,7 +37,7 @@ async function open(files: File[], savedId: string | null, save: boolean): Promi
   send({ type: 'opened', chat, found, missing, savedId });
   if (!save || !libraryAvailable()) return;
   try {
-    send({ type: 'saved', saved: await saveExport(files, chat) });
+    send({ type: 'saved', saved: await saveExport(files, chat, key) });
   } catch (err) {
     send({ type: 'saveFailed', detail: message(err) });
   }
@@ -107,16 +107,16 @@ async function documentPreview(file: string): Promise<DocPreview | null> {
 async function handle(req: WorkerRequest): Promise<void> {
   switch (req.type) {
     case 'open':
-      return open(req.files, null, req.save);
+      return open(req.files, null, req.save, req.key);
     case 'openSaved': {
       let files: File[];
       try {
-        files = await loadSaved(req.id);
+        files = await loadSaved(req.id, req.key);
       } catch (err) {
         send({ type: 'failed', code: 'notSaved', detail: message(err) });
         return;
       }
-      return open(files, req.id, false);
+      return open(files, req.id, false, req.key);
     }
     case 'read': {
       let blob: Blob | null = null;

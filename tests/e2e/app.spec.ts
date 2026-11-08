@@ -59,7 +59,7 @@ test('keeps a chat after a reload and forgets it when removed', async ({ page })
   await page.getByRole('button', { name: 'Close chat' }).click();
   await page.getByRole('button', { name: 'Remove', exact: true }).click();
   await page.getByRole('button', { name: 'Remove for good' }).click();
-  await expect(page.getByText('Saved chats')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Saved chats', exact: true })).toHaveCount(0);
 });
 
 test('switches the interface to Turkish', async ({ page }) => {

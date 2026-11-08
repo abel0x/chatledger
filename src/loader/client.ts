@@ -49,7 +49,8 @@ export class SessionError extends Error {
   }
 }
 
-export type Source = { files: File[]; save: boolean } | { savedId: string };
+/** Where a chat comes from; `key` unlocks or protects saved copies when a password is set. */
+export type Source = { files: File[]; save: boolean; key?: CryptoKey | null } | { savedId: string; key?: CryptoKey | null };
 
 /** Opens an export in a worker so the page stays responsive while it is read. */
 export type { Phase };
@@ -190,6 +191,10 @@ export function openSession(source: Source, onProgress?: (phase: Phase, fraction
         }
       }
     });
-    post('files' in source ? { type: 'open', files: source.files, save: source.save } : { type: 'openSaved', id: source.savedId });
+    post(
+      'files' in source
+        ? { type: 'open', files: source.files, save: source.save, key: source.key ?? null }
+        : { type: 'openSaved', id: source.savedId, key: source.key ?? null },
+    );
   });
 }

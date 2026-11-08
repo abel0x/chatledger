@@ -1,7 +1,19 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { openSession, SessionError, type Phase, type Session, type Source } from '../loader/client';
-  import { libraryAvailable, listSaved, loadSaved, removeSaved, type SavedChat } from '../loader/library';
+  import {
+    forgetLibrary,
+    libraryAvailable,
+    listSaved,
+    loadSaved,
+    protectLibrary,
+    readLock,
+    removeSaved,
+    unlockLibrary,
+    unprotectLibrary,
+    type LockRecord,
+    type SavedChat,
+  } from '../loader/library';
   import type { LoadErrorCode } from '../loader/open';
   import ChatView from './ChatView.svelte';
   import { readSetting, writeSetting } from './settings';
@@ -13,6 +25,10 @@
   let progress = $state<{ phase: Phase; fraction: number } | null>(null);
   let error = $state<LoadErrorCode | null>(null);
   let library = $state.raw<SavedChat[]>([]);
+  let lock = $state.raw<LockRecord | null>(null);
+  /** Unlocks password-protected saved chats; held in memory only, until the page closes. */
+  let key = $state.raw<CryptoKey | null>(null);
+  let working = $state(false);
   /** Files behind the open chat, so another export of it can be added later. */
   let openFiles: File[] | null = null;
   let openSavedId: string | null = null;
@@ -20,8 +36,60 @@
   const canRemember = libraryAvailable();
 
   async function refresh() {
-    library = await listSaved();
+    library = (await listSaved(key)).filter(c => !c.locked);
   }
+
+  function reopenLast() {
+    const last = readSetting('last');
+    if (last && canRemember && !session) void open({ savedId: last });
+  }
+
+  async function unlock(password: string): Promise<boolean> {
+    const found = await unlockLibrary(password);
+    if (!found) return false;
+    key = found;
+    await refresh();
+    reopenLast();
+    return true;
+  }
+
+  async function busyWith(task: () => Promise<void>) {
+    working = true;
+    try {
+      await task();
+    } finally {
+      working = false;
+    }
+  }
+
+  const protect = (password: string) =>
+    busyWith(async () => {
+      key = await protectLibrary(password);
+      lock = await readLock();
+      await refresh();
+    });
+
+  const unprotect = () =>
+    busyWith(async () => {
+      if (key) await unprotectLibrary(key);
+      lock = null;
+      key = null;
+      await refresh();
+    });
+
+  function lockNow() {
+    key = null;
+    library = [];
+  }
+
+  const forget = () =>
+    busyWith(async () => {
+      await forgetLibrary();
+      lock = null;
+      key = null;
+      writeSetting('last', null);
+      await refresh();
+    });
 
   async function open(source: Source) {
     if (busy) return;
@@ -29,7 +97,7 @@
     error = null;
     progress = null;
     try {
-      const next = await openSession(source, (phase, fraction) => (progress = { phase, fraction }));
+      const next = await openSession({ ...source, key }, (phase, fraction) => (progress = { phase, fraction }));
       session = next;
       openFiles = 'files' in source ? source.files : null;
       openSavedId = next.savedId;
@@ -57,10 +125,10 @@
     const current = session;
     if (!current) return null;
     const before = openSavedId;
-    const base = openFiles ?? (before ? await loadSaved(before).catch(() => null) : null);
+    const base = openFiles ?? (before ? await loadSaved(before, key).catch(() => null) : null);
     if (!base) return 'notSaved';
     try {
-      const next = await openSession({ files: [...base, ...files], save: canRemember && (remember || !!before) });
+      const next = await openSession({ files: [...base, ...files], save: canRemember && (remember || !!before), key });
       current.close();
       session = next;
       openFiles = [...base, ...files];
@@ -101,10 +169,12 @@
   }
 
   onMount(() => {
-    void refresh();
-    // Pick up where the reader left off after a reload.
-    const last = readSetting('last');
-    if (last && canRemember) void open({ savedId: last });
+    void (async () => {
+      lock = await readLock();
+      await refresh();
+      // Pick up where the reader left off after a reload; a locked library waits for its password.
+      if (!lock) reopenLast();
+    })();
   });
 </script>
 
@@ -120,6 +190,14 @@
     {library}
     {remember}
     {canRemember}
+    locked={!!lock && !key}
+    protectedLibrary={!!lock && !!key}
+    {working}
+    onunlock={unlock}
+    onprotect={protect}
+    onunprotect={unprotect}
+    onlocknow={lockNow}
+    onforget={forget}
     onopen={files => open({ files, save: canRemember && remember })}
     onopensaved={id => open({ savedId: id })}
     onremove={remove}
