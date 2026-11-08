@@ -139,6 +139,10 @@
   }
 
   $effect(() => {
+    index.prepare();
+  });
+
+  $effect(() => {
     document.title = `${chat.title ?? t('chat.untitled')} · chatledger`;
     return () => {
       document.title = 'chatledger';

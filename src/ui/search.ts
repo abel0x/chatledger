@@ -7,6 +7,7 @@ const EXTRA: Record<string, string> = {
   đ: 'd',
   ł: 'l',
   ß: 'ss',
+  ς: 'σ',
   æ: 'ae',
   œ: 'oe',
 };
@@ -17,15 +18,20 @@ function foldChar(c: string): string {
   return EXTRA[lower] ?? lower;
 }
 
+const EXTRA_RE = new RegExp(`[${Object.keys(EXTRA).join('')}]`, 'g');
+
 /**
  * Lower case without accents, so "ogretmen" finds "Öğretmen" and "isik"
- * finds "IŞIK". Each character folds on its own, which keeps positions
- * traceable for highlighting.
+ * finds "IŞIK". Works on the whole string at once, which is what keeps
+ * indexing a very long chat quick; highlighting folds one character at a
+ * time instead, to keep positions traceable.
  */
 export function fold(s: string): string {
-  let out = '';
-  for (const c of s) out += foldChar(c);
-  return out;
+  return s
+    .normalize('NFD')
+    .replace(MARKS, '')
+    .toLowerCase()
+    .replace(EXTRA_RE, c => EXTRA[c] ?? c);
 }
 
 /** Words to find, every one of them; "quoted text" stays one phrase. */
@@ -65,13 +71,37 @@ export function searchableText(m: Message): string {
   return parts.join('\n');
 }
 
+const CHUNK = 4000;
+
+function whenIdle(run: () => void): void {
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 500 });
+  else setTimeout(run, 0);
+}
+
 export class SearchIndex {
-  private folded: string[] | null = null;
+  private readonly folded: string[] = [];
 
   constructor(private readonly chat: Chat) {}
 
+  private fill(until: number): void {
+    const messages = this.chat.messages;
+    for (let i = this.folded.length; i < until && i < messages.length; i++) {
+      this.folded.push(fold(searchableText(messages[i] as Message)));
+    }
+  }
+
+  /** Builds the index a slice at a time while the browser is idle, so the first search is instant. */
+  prepare(): void {
+    const step = () => {
+      if (this.folded.length >= this.chat.messages.length) return;
+      this.fill(this.folded.length + CHUNK);
+      whenIdle(step);
+    };
+    whenIdle(step);
+  }
+
   private texts(): string[] {
-    this.folded ??= this.chat.messages.map(m => fold(searchableText(m)));
+    this.fill(this.chat.messages.length);
     return this.folded;
   }
 
