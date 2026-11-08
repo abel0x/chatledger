@@ -13,11 +13,15 @@ chatledger runs on your machine and shows the chat in your browser. Your message
 - Opens the `.zip` or `.txt` that WhatsApp exports, or a folder of loose files. Android exports are fully supported; iPhone exports are experimental for now (see *Known limits*).
 - Shows the chat the way you remember it, with photos, videos, stickers, voice messages, documents, polls and group events, and stays smooth on chats with hundreds of thousands of messages.
 - Finds messages fast. Capitals and accents do not matter, so `ogretmen` finds `Öğretmen`. Put an exact phrase in quotes, or filter by person, media or links.
-- Jumps to any date, or straight to the first or last message.
+- Shows formatting the way WhatsApp does: *bold*, _italic_, ~strikethrough~, `code`, @mentions and large emoji.
+- Jumps to any date, to the first or last message, or along a timeline beside the chat. It opens where you stopped reading, and every message has a link of its own.
+- Lets you star messages, copy them, and export or import your stars.
+- Plays voice messages at 1×, 1.5× or 2× speed and previews PDF and Word documents.
+- Shows the group's history: who created it, how its name changed, who is still in it, and what was said on this day in earlier years.
 - Collects every photo and video, file and link of the chat in one place, with a full-screen viewer.
 - Counts who wrote the most and when the chat is busiest. Also shows messages per month, favourite emoji, the longest silence and more.
 - Remembers chats you open, so they are still there after a restart. You can turn this off, and you can remove any saved chat.
-- Has an English and a Turkish interface. It reads exports made by phones set to either language.
+- Has an English and a Turkish interface, a light and a dark theme, three text sizes and keyboard shortcuts (press `?`). It reads exports made by phones set to either language.
 
 | Gallery | Statistics |
 | --- | --- |

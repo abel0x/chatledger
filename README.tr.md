@@ -13,11 +13,15 @@ chatledger sizin bilgisayarınızda çalışır ve sohbeti tarayıcınızda gös
 - WhatsApp'ın dışa aktardığı `.zip` veya `.txt` dosyasını ya da dosyaların bulunduğu bir klasörü açar. Android dökümleri tam olarak desteklenir; iPhone dökümleri şimdilik deneyseldir (bkz. *Bilinen sınırlar*).
 - Sohbeti hatırladığınız gibi gösterir: fotoğraflar, videolar, çıkartmalar, sesli mesajlar, belgeler, anketler ve grup olayları. Yüz binlerce mesajlık sohbetlerde de akıcı kalır.
 - Mesajları hızlı bulur. Büyük/küçük harf ve Türkçe karakterler fark etmez, `ogretmen` yazınca `Öğretmen` de bulunur. Tam bir ifadeyi tırnak içinde arayabilir, kişiye, medyaya ya da bağlantılara göre süzebilirsiniz.
-- İstediğiniz tarihe ya da doğrudan ilk veya son mesaja götürür.
+- Biçimlendirmeyi WhatsApp'taki gibi gösterir: *kalın*, _italik_, ~üstü çizili~, `kod`, @bahsetmeler ve büyük emojiler.
+- İstediğiniz tarihe, ilk ya da son mesaja veya sohbetin yanındaki zaman çizelgesi boyunca götürür. Kaldığınız yerden açılır ve her mesajın kendi bağlantısı vardır.
+- Mesajları yıldızlamanızı, kopyalamanızı ve yıldızlarınızı dışa ya da içe aktarmanızı sağlar.
+- Sesli mesajları 1×, 1,5× ya da 2× hızda oynatır, PDF ve Word belgelerini önizler.
+- Grubun geçmişini gösterir: kimin kurduğunu, adının nasıl değiştiğini, kimlerin hâlâ grupta olduğunu ve geçmiş yıllarda bugün neler konuşulduğunu.
 - Sohbetteki bütün fotoğraf ve videoları, dosyaları ve bağlantıları tek yerde toplar; fotoğraflar tam ekran açılır.
 - En çok kimin yazdığını ve sohbetin en hareketli olduğu saatleri sayar. Aylara göre mesajları, sevilen emojileri, en uzun sessizliği ve daha fazlasını gösterir.
 - Açtığınız sohbetleri hatırlar, yeniden başlattığınızda da yerinde olurlar. Bunu kapatabilir, kayıtlı herhangi bir sohbeti kaldırabilirsiniz.
-- Arayüzü İngilizce ve Türkçedir. İki dilde ayarlanmış telefonların dökümlerini de okur.
+- Arayüzü İngilizce ve Türkçedir; açık ve koyu tema, üç yazı boyutu ve klavye kısayolları vardır (`?` tuşuna basın). İki dilde ayarlanmış telefonların dökümlerini de okur.
 
 | Galeri | İstatistikler |
 | --- | --- |
