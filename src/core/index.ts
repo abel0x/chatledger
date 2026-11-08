@@ -1,3 +1,4 @@
 export * from './model';
-export { parseChat, NotAChatError, type ParseOptions } from './parse';
-export { mediaHintFor, extensionOf } from './files';
+export { parseChat, titleFromFileName, NotAChatError, type ParseOptions } from './parse';
+export { baseName, extensionOf, fileKey, FileIndex, mediaHintFor, mimeTypeFor } from './files';
+export { chatCandidates, isZipName } from './archive';

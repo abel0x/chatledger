@@ -1,11 +1,14 @@
-import { mediaHintFor } from './files';
+import { baseName, mediaHintFor } from './files';
 import { BIDI, detectDateOrder, detectPlatform, matchHeader, toSeconds, type RawHeader } from './header';
 import { LOCALES, type LocalePack } from './locales';
 import type { Chat, ChatEvent, Message, ParseWarning, Party, Platform, Poll } from './model';
 
 export interface ParseOptions {
-  /** Name of the exported file; WhatsApp puts the chat title in it. */
-  fileName?: string;
+  /**
+   * Name of the exported file; WhatsApp puts the chat title in it. When a
+   * list is given, the first name that carries a title wins.
+   */
+  fileName?: string | string[];
   /** Force a locale pack instead of detecting it. */
   locale?: string;
 }
@@ -41,10 +44,6 @@ function hash(s: string): string {
   h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
-}
-
-function baseName(path: string): string {
-  return path.split(/[\\/]/).pop() ?? path;
 }
 
 function splitSender(body: string): [string, string] | null {
@@ -184,15 +183,22 @@ function pickLocale(entries: Entry[], forced?: string): LocalePack {
   return best;
 }
 
-function titleFrom(fileName: string | undefined, messages: Message[]): string | null {
-  if (fileName) {
-    const name = baseName(fileName).normalize('NFC');
-    for (const pack of LOCALES) {
-      for (const re of pack.titleFromFileName) {
-        const m = re.exec(name);
-        if (m?.[1]) return m[1].trim();
-      }
+/** The chat title WhatsApp writes into the export's file name, if there is one. */
+export function titleFromFileName(path: string): string | null {
+  const name = baseName(path).normalize('NFC');
+  for (const pack of LOCALES) {
+    for (const re of pack.titleFromFileName) {
+      const m = re.exec(name);
+      if (m?.[1]) return m[1].trim();
     }
+  }
+  return null;
+}
+
+function titleFrom(fileName: string | string[] | undefined, messages: Message[]): string | null {
+  for (const name of typeof fileName === 'string' ? [fileName] : (fileName ?? [])) {
+    const title = titleFromFileName(name);
+    if (title) return title;
   }
   for (let i = messages.length - 1; i >= 0; i--) {
     const ev = messages[i]?.event;
