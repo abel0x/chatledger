@@ -4,9 +4,12 @@ const SP = '[ \\u00a0\\u202f]';
 const DATE = '(\\d{1,4})([./-])(\\d{1,2})\\2(\\d{1,4})';
 const TIME = `(\\d{1,2})[:.](\\d{2})(?:[:.](\\d{2}))?(?:${SP}?([AaPp])\\.?${SP}?[Mm]\\.?)?`;
 
+/** Between date and time: a comma, a space, or a word such as the French "à". */
+const JOIN = `,?(?:${SP}(?:à|a las|às|um|alle))?${SP}`;
+
 const PATTERNS: Record<Platform, RegExp> = {
-  android: new RegExp(`^${DATE},?${SP}${TIME}${SP}[-\\u2013]${SP}([\\s\\S]*)$`),
-  ios: new RegExp(`^\\[${DATE},?${SP}${TIME}\\]${SP}([\\s\\S]*)$`),
+  android: new RegExp(`^${DATE}${JOIN}${TIME}${SP}[-\\u2013]${SP}([\\s\\S]*)$`),
+  ios: new RegExp(`^\\[${DATE}${JOIN}${TIME}\\]${SP}([\\s\\S]*)$`),
 };
 
 /** Bidi marks WhatsApp sprinkles in front of lines and inside bodies. */

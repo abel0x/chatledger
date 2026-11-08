@@ -31,6 +31,11 @@ describe('matchHeader', () => {
     expect(h).toMatchObject({ a: 1, b: 10, c: 2025, hour: 20, minute: 30, second: 15, body: 'Ada: selam' });
   });
 
+  it('reads French headers with "à" and Spanish 12-hour time', () => {
+    expect(matchHeader('01/10/2025 à 20:30 - Ada : salut', 'android')).toMatchObject({ a: 1, b: 10, c: 2025, hour: 20, body: 'Ada : salut' });
+    expect(matchHeader('1/10/25, 8:30\u202fp.\u00a0m. - Ada: hola', 'android')).toMatchObject({ hour: 8, meridiem: 'p', body: 'Ada: hola' });
+  });
+
   it('does not take plain text for a header', () => {
     expect(matchHeader('see you at 20:30 - ok', 'android')).toBeNull();
     expect(matchHeader('[note] hello', 'ios')).toBeNull();

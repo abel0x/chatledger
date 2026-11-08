@@ -1,0 +1,60 @@
+import { rule, type LocalePack } from './types';
+
+/** "Ada a ajouté…" and "Vous avez ajouté…" */
+const HAS = '(?:a|avez)';
+const SETTINGS = `{actor} ${HAS} modifié les paramètres (?:de ce groupe|du groupe) pour autoriser`;
+
+export const fr: LocalePack = {
+  id: 'fr',
+  self: ['Vous', 'vous'],
+  listSeparator: /, | et /,
+  mediaOmitted: ['<Médias omis>', '<Média omis>', 'null'],
+  omittedByKind: [
+    [/^image (?:absente|omise)$/i, 'image'],
+    [/^vidéo (?:absente|omise)$/i, 'video'],
+    [/^audio (?:absent|omis)$/i, 'voice'],
+    [/^(?:autocollant|sticker) (?:absent|omis)$/i, 'sticker'],
+    [/^GIF (?:absent|omis|retiré)$/i, 'gif'],
+    [/^document (?:absent|omis)$/i, 'document'],
+    [/^fiche contact (?:absente|omise)$/i, 'contact'],
+  ],
+  deleted: ['Ce message a été supprimé', 'Ce message a été supprimé par un admin'],
+  deletedBySelf: ['Vous avez supprimé ce message'],
+  edited: ['<Ce message a été modifié>', '<Message modifié>'],
+  attachedAndroid: /^(.+?) \(fichier joint\)$/,
+  attachedIos: /^<(?:pièce jointe|joint)[   ]?: (.+)>$/,
+  viewOnce: /^<.*(?:vue unique|une seule fois).*>$/i,
+  pending: /^En attente de ce message\b/,
+  location: /^(?:position en direct|position|localisation)[   ]?: (.*)$/is,
+  pollHeader: 'SONDAGE :',
+  pollOption: /^OPTION[   ]?: (.*) \((\d+) votes?\)$/,
+  titleFromFileName: [
+    /^Discussion WhatsApp avec (.+?)(?: \(\d+\))?\.(?:txt|zip)$/i,
+    /^Discussion WhatsApp - (.+?)(?: \(\d+\))?\.(?:txt|zip)$/i,
+  ],
+  events: [
+    { type: 'encrypted', re: /^Les messages et (?:les )?appels sont chiffrés de bout en bout\b.*$/s },
+    { type: 'created', re: rule(`{actor} ${HAS} créé (?:le )?groupe {Q}{value}{q}`) },
+    { type: 'renamed', re: rule(`{actor} ${HAS} (?:modifié|changé) (?:le nom du groupe|le sujet)(?: de {Q}{previous}{q})? (?:en|à|pour) {Q}{value}{q}`) },
+    { type: 'joined', re: rule(`{actor} (?:a|avez) rejoint (?:ce groupe )?(?:via|avec|en utilisant|à l['’]aide d) .+`) },
+    { type: 'left', re: rule('{actor} (?:est|êtes) parti(?:e|s|es)?') },
+    { type: 'left', re: rule(`{actor} ${HAS} quitté (?:le|ce) groupe`) },
+    { type: 'iconChanged', re: rule(`{actor} ${HAS} (?:modifié|changé) l['’](?:icône|image|photo) de ce groupe`) },
+    { type: 'iconDeleted', re: rule(`{actor} ${HAS} supprimé l['’](?:icône|image|photo) de ce groupe`) },
+    { type: 'descriptionChanged', re: rule(`{actor} ${HAS} (?:modifié|changé) la description du groupe`) },
+    { type: 'onlyAdminsSend', re: rule(`${SETTINGS} (?:uniquement|seulement) les admins à envoyer des messages(?: (?:dans|à) ce groupe)?`) },
+    { type: 'allMembersSend', re: rule(`${SETTINGS} tous les (?:participants|membres) à envoyer des messages(?: (?:dans|à) ce groupe)?`) },
+    { type: 'onlyAdminsEdit', re: rule(`${SETTINGS} (?:uniquement|seulement) les admins à modifier les infos du groupe`) },
+    { type: 'allMembersEdit', re: rule(`${SETTINGS} tous les (?:participants|membres) à modifier les infos du groupe`) },
+    { type: 'added', re: rule('{actor} (?<targets>vous) a ajouté') },
+    { type: 'added', re: rule(`{actor} ${HAS} ajouté (?<targets>.+?)`) },
+    { type: 'removed', re: rule('{actor} (?<targets>vous) a retiré') },
+    { type: 'removed', re: rule(`{actor} ${HAS} retiré (?<targets>.+?)`) },
+    { type: 'nowAdmin', re: rule('Vous êtes (?:maintenant|désormais) (?:un )?admin'), selfActor: true },
+    { type: 'securityCode', re: rule('Votre code de sécurité avec {targets} a changé.*') },
+    { type: 'numberChanged', re: rule(`{actor} ${HAS} changé de numéro.*`) },
+    { type: 'pinned', re: rule(`{actor} ${HAS} épinglé un message`) },
+    { type: 'disappearingOn', re: rule(`{actor} ${HAS} activé les messages éphémères.*`) },
+    { type: 'disappearingOff', re: rule(`{actor} ${HAS} désactivé les messages éphémères.*`) },
+  ],
+};

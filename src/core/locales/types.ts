@@ -33,10 +33,12 @@ export interface LocalePack {
 }
 
 /** A display name: anything up to the end, never containing ": " or a quote. */
-const NAME = '(?:(?!: )[^"“”\\n])+?';
-const NAME_NO_COMMA = '[^"“”,:\\n]+';
-const QUOTE_OPEN = '["“]';
-const QUOTE_CLOSE = '["”]';
+/** Quote marks WhatsApp uses around group names: straight, curly, German „…“ and French « … ». */
+const QUOTES = '"“”„«»';
+const NAME = `(?:(?!: )[^${QUOTES}\\n])+?`;
+const NAME_NO_COMMA = `[^${QUOTES},:\\n]+`;
+const QUOTE_OPEN = '["“„«][ \\u00a0\\u202f]?';
+const QUOTE_CLOSE = '[ \\u00a0\\u202f]?["”“»]';
 
 /**
  * Compiles a rule pattern, expanding {actor}, {targets}, {value}, {previous}, {Q}, {q}.
@@ -46,7 +48,7 @@ export function rule(src: string, flags = ''): RegExp {
   const out = src
     .replace(/\{who\}/g, `(?<actor>${NAME_NO_COMMA})`)
     .replace(/\{(actor|targets)\}/g, (_, g: string) => `(?<${g}>${NAME})`)
-    .replace(/\{(value|previous)\}/g, (_, g: string) => `(?<${g}>[^"“”\\n]*)`)
+    .replace(/\{(value|previous)\}/g, (_, g: string) => `(?<${g}>[^${QUOTES}\\n]*?)`)
     .replace(/\{Q\}/g, QUOTE_OPEN)
     .replace(/\{q\}/g, QUOTE_CLOSE);
   return new RegExp(`^${out}\\.?$`, flags);
