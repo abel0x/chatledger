@@ -3,7 +3,7 @@ import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { resolvePath, serve } from '../scripts/serve.mjs';
+import { assetSource, resolvePath, serve } from '../scripts/serve.mjs';
 
 const root = mkdtempSync(join(tmpdir(), 'chatledger-serve-'));
 mkdirSync(join(root, 'assets'));
@@ -82,5 +82,30 @@ describe('serve', () => {
   it('recognises a copy that is already running', async () => {
     const again = await serve({ root, port });
     expect(again.alreadyRunning).toBe(true);
+  });
+});
+
+describe('serving packed files', () => {
+  const files: Record<string, string> = { 'index.html': '<!doctype html>', 'assets/app-1.js': 'export {};' };
+  const source = assetSource(Object.keys(files), key => new TextEncoder().encode(files[key] ?? '').buffer as ArrayBuffer);
+
+  it('finds packed paths and nothing else', async () => {
+    expect((await source('/'))?.name).toBe('index.html');
+    expect((await source('/assets/app-1.js?x=1'))?.size).toBe(10);
+    for (const bad of ['/../index.html', '/assets/../../etc/passwd', '/%2e%2e/index.html', '/nope.js', '/assets%5capp-1.js']) {
+      const found = await source(bad);
+      expect(found === null || Object.keys(files).includes(found.name), bad).toBe(true);
+    }
+    expect(await source('/nope.js')).toBeNull();
+  });
+
+  it('stops by itself once no page calls in', async () => {
+    let stopped = false;
+    const started = await serve({ source, port: 0, idleExit: 300, onIdle: () => (stopped = true) });
+    const port = Number(new URL(started.url).port);
+    expect((await get(port, '/alive', 'POST')).status).toBe(204);
+    expect((await get(port, '/')).status).toBe(200);
+    await new Promise(r => setTimeout(r, 900));
+    expect(stopped).toBe(true);
   });
 });

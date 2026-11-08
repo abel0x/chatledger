@@ -69,3 +69,10 @@ test('switches the interface to Turkish', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Sohbeti kapat' })).toBeVisible();
   await expect(page.getByText('Deniz Kaya, “Weekend Plans” grubunu oluşturdu')).toBeVisible();
 });
+
+test('tells the local server that a page is open', async ({ page }) => {
+  const ping = page.waitForRequest(r => r.method() === 'POST' && new URL(r.url()).pathname === '/alive');
+  await page.goto('/');
+  const response = await (await ping).response();
+  expect(response?.status()).toBe(204);
+});

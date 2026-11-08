@@ -51,27 +51,69 @@ export function resolvePath(root, rawUrl) {
   return full === base || full.startsWith(base + sep) ? full : null;
 }
 
-export function createApp(root) {
+/** Files from a folder on disk. */
+export function directorySource(root) {
+  return async rawUrl => {
+    const file = resolvePath(root, rawUrl);
+    const info = file ? await stat(file).catch(() => null) : null;
+    if (!file || !info?.isFile()) return null;
+    return { name: file, size: info.size, body: () => createReadStream(file) };
+  };
+}
+
+/** Files packed into a single executable, looked up by their path in the build. */
+export function assetSource(keys, read) {
+  const known = new Set(keys);
+  return async rawUrl => {
+    let path;
+    try {
+      path = decodeURIComponent(new URL(`http://localhost${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`).pathname);
+    } catch {
+      return null;
+    }
+    if (path.endsWith('/')) path += 'index.html';
+    // Only the packed paths exist, so nothing else can be reached however the path is written.
+    const key = path.split('/').filter(Boolean).join('/');
+    if (!known.has(key)) return null;
+    const data = Buffer.from(read(key));
+    return { name: key, size: data.length, body: () => data };
+  };
+}
+
+/**
+ * Answers the page. The page calls POST /alive now and then; `alive` hears
+ * about it, so a copy started without a window can stop once no page is open.
+ */
+export function createApp(source, { alive } = {}) {
+  const find = typeof source === 'string' ? directorySource(source) : source;
   return async (req, res) => {
+    if (req.method === 'POST' && (req.url ?? '').split('?')[0] === '/alive') {
+      alive?.();
+      res.writeHead(204, HEADERS).end();
+      return;
+    }
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.writeHead(405, { ...HEADERS, Allow: 'GET, HEAD' }).end();
       return;
     }
-    const file = resolvePath(root, req.url ?? '/');
-    const info = file ? await stat(file).catch(() => null) : null;
-    if (!file || !info?.isFile()) {
+    const file = await find(req.url ?? '/');
+    if (!file) {
       res.writeHead(404, { ...HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }).end('Not found');
       return;
     }
-    const hashed = /[\\/]assets[\\/]/.test(file);
+    const hashed = /(^|[\\/])assets[\\/]/.test(file.name);
     res.writeHead(200, {
       ...HEADERS,
-      'Content-Type': MIME[extname(file).toLowerCase()] ?? 'application/octet-stream',
-      'Content-Length': info.size,
+      'Content-Type': MIME[extname(file.name).toLowerCase()] ?? 'application/octet-stream',
+      'Content-Length': file.size,
       'Cache-Control': hashed ? 'public, max-age=31536000, immutable' : 'no-cache',
     });
     if (req.method === 'HEAD') res.end();
-    else createReadStream(file).pipe(res);
+    else {
+      const body = file.body();
+      if (Buffer.isBuffer(body)) res.end(body);
+      else body.pipe(res);
+    }
   };
 }
 
@@ -111,9 +153,21 @@ export function openBrowser(url) {
  * Starts the server. Resolves with the address once it listens, or once a
  * copy that is already running has been found.
  */
-export function serve({ root, port = DEFAULT_PORT, host = HOST }) {
+export function serve({ root, source, port = DEFAULT_PORT, host = HOST, idleExit = 0, onIdle = () => process.exit(0) }) {
+  let lastSeen = Date.now();
   return new Promise((resolveStart, reject) => {
-    const server = createServer(createApp(root));
+    const server = createServer(createApp(source ?? root, { alive: () => (lastSeen = Date.now()) }));
+    if (idleExit) {
+      // Stops a copy that has no window of its own once no page has called in for a while.
+      const timer = setInterval(() => {
+        if (Date.now() - lastSeen > idleExit) {
+          clearInterval(timer);
+          server.close(() => onIdle());
+        }
+      }, Math.min(15_000, idleExit));
+      timer.unref();
+      server.on('close', () => clearInterval(timer));
+    }
     server.once('error', async err => {
       if (err.code === 'EADDRINUSE' && (await isChatledger(port))) {
         resolveStart({ url: `http://${host}:${port}/`, server: null, alreadyRunning: true });
