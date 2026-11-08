@@ -1,7 +1,9 @@
 import type { Chat } from '../core';
 import type { SavedChat } from './library';
 import type { LoadErrorCode } from './open';
-import type { Thumbnail, WorkerRequest, WorkerResponse } from './protocol';
+import type { DocPreview, Thumbnail, WorkerRequest, WorkerResponse } from './protocol';
+
+export type { DocPreview };
 
 export interface Session {
   chat: Chat;
@@ -17,6 +19,10 @@ export interface Session {
   url(file: string): Promise<string | null>;
   /** A small copy of a picture for lists and bubbles; null when it cannot be made. */
   thumb(file: string): Promise<Thumb | null>;
+  /** The attachment itself, for code that reads its bytes. */
+  blob(file: string): Promise<Blob | null>;
+  /** Text of a Word or plain-text attachment, prepared for preview. */
+  doc(file: string): Promise<DocPreview | null>;
   close(): void;
 }
 
@@ -47,6 +53,7 @@ export function openSession(source: Source): Promise<Session> {
   const post = (req: WorkerRequest) => worker.postMessage(req);
   const pending = new Map<number, (blob: Blob | null) => void>();
   const pendingThumbs = new Map<number, (thumb: Thumbnail | null) => void>();
+  const pendingDocs = new Map<number, (doc: DocPreview | null) => void>();
   const urls = new Map<string, Promise<string | null>>();
   const thumbs = new Map<string, Promise<Thumb | null>>();
   let nextId = 1;
@@ -84,8 +91,19 @@ export function openSession(source: Source): Promise<Session> {
           pendingThumbs.get(msg.id)?.(msg.thumb);
           pendingThumbs.delete(msg.id);
           return;
+        case 'doc':
+          pendingDocs.get(msg.id)?.(msg.doc);
+          pendingDocs.delete(msg.id);
+          return;
         case 'opened': {
           const found = new Set(msg.found);
+          const blob = (file: string): Promise<Blob | null> => {
+            if (closed || !found.has(file)) return Promise.resolve(null);
+            const id = nextId++;
+            const result = new Promise<Blob | null>(done => pending.set(id, done));
+            post({ type: 'read', id, file });
+            return result;
+          };
           resolve({
             chat: msg.chat,
             missing: msg.missing.length,
@@ -96,14 +114,18 @@ export function openSession(source: Source): Promise<Session> {
               if (closed || !found.has(file)) return Promise.resolve(null);
               let url = urls.get(file);
               if (!url) {
-                const id = nextId++;
-                url = new Promise<Blob | null>(done => pending.set(id, done)).then(blob =>
-                  blob && !closed ? URL.createObjectURL(blob) : null,
-                );
+                url = blob(file).then(b => (b && !closed ? URL.createObjectURL(b) : null));
                 urls.set(file, url);
-                post({ type: 'read', id, file });
               }
               return url;
+            },
+            blob,
+            doc(file) {
+              if (closed || !found.has(file)) return Promise.resolve(null);
+              const id = nextId++;
+              const doc = new Promise<DocPreview | null>(done => pendingDocs.set(id, done));
+              post({ type: 'doc', id, file });
+              return doc;
             },
             thumb(file) {
               if (closed || !found.has(file)) return Promise.resolve(null);
@@ -125,6 +147,8 @@ export function openSession(source: Source): Promise<Session> {
               settleSaved(null);
               for (const done of pending.values()) done(null);
               for (const done of pendingThumbs.values()) done(null);
+              for (const done of pendingDocs.values()) done(null);
+              pendingDocs.clear();
               pending.clear();
               pendingThumbs.clear();
               for (const url of urls.values()) void url.then(u => u && URL.revokeObjectURL(u));

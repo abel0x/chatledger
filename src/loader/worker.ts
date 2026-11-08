@@ -1,6 +1,9 @@
+import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js/lib/zip-core-native.js';
+import { extensionOf } from '../core';
+import { parseDocumentXml } from './docx';
 import { libraryAvailable, loadSaved, saveExport } from './library';
 import { LoadError, openExport, type OpenedExport } from './open';
-import type { Thumbnail, WorkerRequest, WorkerResponse } from './protocol';
+import type { DocPreview, Thumbnail, WorkerRequest, WorkerResponse } from './protocol';
 import { limit } from './limit';
 
 let opened: OpenedExport | null = null;
@@ -58,6 +61,30 @@ async function thumbnail(file: string, size: number): Promise<Thumbnail | null> 
   }
 }
 
+const TEXT_FILES = new Set(['txt', 'vcf', 'csv', 'md', 'json', 'log']);
+const TEXT_LIMIT = 1_000_000;
+
+async function documentPreview(file: string): Promise<DocPreview | null> {
+  const blob = await opened?.read(file);
+  if (!blob) return null;
+  const ext = extensionOf(file);
+  if (ext === 'docx') {
+    const reader = new ZipReader(new BlobReader(blob));
+    try {
+      const entry = (await reader.getEntries()).find(e => e.filename === 'word/document.xml');
+      if (!entry || entry.directory) return null;
+      return { kind: 'docx', blocks: parseDocumentXml(await entry.getData(new TextWriter('utf-8'))) };
+    } finally {
+      await reader.close();
+    }
+  }
+  if (TEXT_FILES.has(ext)) {
+    const cut = blob.size > TEXT_LIMIT;
+    return { kind: 'text', text: await blob.slice(0, TEXT_LIMIT).text(), cut };
+  }
+  return null;
+}
+
 async function handle(req: WorkerRequest): Promise<void> {
   switch (req.type) {
     case 'open':
@@ -90,6 +117,16 @@ async function handle(req: WorkerRequest): Promise<void> {
         thumb = null;
       }
       send({ type: 'thumb', id: req.id, thumb });
+      return;
+    }
+    case 'doc': {
+      let doc: DocPreview | null = null;
+      try {
+        doc = await documentPreview(req.file);
+      } catch {
+        doc = null;
+      }
+      send({ type: 'doc', id: req.id, doc });
     }
   }
 }

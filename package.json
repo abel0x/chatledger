@@ -1,6 +1,6 @@
 {
   "name": "chatledger",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Open a WhatsApp chat export on your own computer and see everything that happened in it.",
   "license": "GPL-3.0-or-later",
   "author": "abel0x",
@@ -37,6 +37,7 @@
     "vitest": "5.1.0"
   },
   "dependencies": {
-    "@zip.js/zip.js": "2.24.0"
+    "@zip.js/zip.js": "2.24.0",
+    "pdfjs-dist": "6.4.299"
   }
 }
