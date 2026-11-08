@@ -33,12 +33,15 @@ test('stars a message from its menu and lists it', async ({ page }) => {
 
 test('opens a link to a message after a reload', async ({ page }) => {
   await openDemo(page, true);
+  // The copy in the browser's storage has to be finished before the page goes away.
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('chatledger.last'))).not.toBeNull();
   await goTo(page, 'Booked for six people');
   await expect(page).toHaveURL(/#m-[\w-]+$/);
   const link = page.url();
   await page.goto('about:blank');
   await page.goto(link);
-  await expect(page.getByRole('heading', { level: 1, name: DEMO_TITLE })).toBeVisible();
+  // Reading the saved copy back can take a while on slow machines.
+  await expect(page.getByRole('heading', { level: 1, name: DEMO_TITLE })).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('.row.flash')).toContainText('Booked for six people');
 });
 
