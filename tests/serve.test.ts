@@ -11,9 +11,9 @@ writeFileSync(join(root, 'index.html'), '<!doctype html><title>t</title>');
 writeFileSync(join(root, 'assets', 'app-1234.js'), 'export {};');
 writeFileSync(join(root, '..', 'chatledger-secret.txt'), 'outside');
 
-function get(port: number, path: string, method = 'GET') {
+function get(port: number, path: string, method = 'GET', host?: string) {
   return new Promise<{ status: number; headers: Record<string, string | string[] | undefined>; body: string }>((done, fail) => {
-    const req = request({ host: '127.0.0.1', port, path, method }, res => {
+    const req = request({ host: '127.0.0.1', port, path, method, headers: host ? { host } : {} }, res => {
       let body = '';
       res.setEncoding('utf8');
       res.on('data', c => (body += c));
@@ -72,6 +72,12 @@ describe('serve', () => {
       expect(res.body, path).not.toContain('outside');
     }
     expect((await get(port, '/missing.js')).status).toBe(404);
+  });
+
+  it('turns away requests made under another site’s name', async () => {
+    expect((await get(port, '/', 'GET', 'evil.example:5170')).status).toBe(421);
+    expect((await get(port, '/alive', 'POST', 'evil.example')).status).toBe(421);
+    expect((await get(port, '/', 'GET', `localhost:${port}`)).status).toBe(200);
   });
 
   it('only answers reads', async () => {

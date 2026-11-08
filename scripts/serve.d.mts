@@ -2,6 +2,7 @@ import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 export const DEFAULT_PORT: number;
 export const HOST: string;
+export function localHost(host: string | undefined): boolean;
 export function resolvePath(root: string, rawUrl: string): string | null;
 export interface ServedFile {
   name: string;

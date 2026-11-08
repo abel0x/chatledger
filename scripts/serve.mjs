@@ -84,9 +84,22 @@ export function assetSource(keys, read) {
  * Answers the page. The page calls POST /alive now and then; `alive` hears
  * about it, so a copy started without a window can stop once no page is open.
  */
+/**
+ * Only names that mean this computer. A web page that points its own domain
+ * at 127.0.0.1 (DNS rebinding) sends its domain here and is turned away.
+ */
+export function localHost(host) {
+  const name = (host ?? '').toLowerCase().replace(/:\d+$/, '');
+  return name === '127.0.0.1' || name === 'localhost' || name === '[::1]';
+}
+
 export function createApp(source, { alive } = {}) {
   const find = typeof source === 'string' ? directorySource(source) : source;
   return async (req, res) => {
+    if (!localHost(req.headers.host)) {
+      res.writeHead(421, { ...HEADERS, 'Content-Type': 'text/plain; charset=utf-8' }).end('Misdirected request');
+      return;
+    }
     if (req.method === 'POST' && (req.url ?? '').split('?')[0] === '/alive') {
       alive?.();
       res.writeHead(204, HEADERS).end();
