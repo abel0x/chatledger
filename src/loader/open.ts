@@ -1,5 +1,7 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader, configure } from '@zip.js/zip.js/lib/zip-core-native.js';
 import {
+  LIMITS,
+  type Limits,
   chatCandidates,
   extensionOf,
   FileIndex,
@@ -13,7 +15,7 @@ import {
 // This code already runs off the main thread; zip.js needs no workers of its own.
 configure({ useWebWorkers: false });
 
-export type LoadErrorCode = 'empty' | 'noChat' | 'notAChat' | 'badArchive' | 'notSaved' | 'unknown';
+export type LoadErrorCode = 'empty' | 'noChat' | 'notAChat' | 'badArchive' | 'tooLarge' | 'notSaved' | 'unknown';
 
 export class LoadError extends Error {
   constructor(
@@ -48,11 +50,14 @@ function pathOf(file: File): string {
   return file.webkitRelativePath || file.name;
 }
 
-function fileSource(file: File): Source {
+function fileSource(file: File, limits: Limits): Source {
   const path = pathOf(file);
   return {
     path,
-    text: () => file.text(),
+    text: async () => {
+      if (file.size > limits.chatTextBytes) throw new LoadError('tooLarge');
+      return file.text();
+    },
     blob: async () => (file.type ? file : file.slice(0, file.size, mimeTypeFor(path))),
   };
 }
@@ -64,13 +69,17 @@ async function looksLikeZip(file: File): Promise<boolean> {
   return head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04;
 }
 
-async function zipSources(file: File, readers: ZipReader<unknown>[]): Promise<Source[]> {
+async function zipSources(file: File, readers: ZipReader<unknown>[], limits: Limits): Promise<Source[]> {
   const reader = new ZipReader(new BlobReader(file));
   readers.push(reader);
-  let entries;
+  const entries = [];
   try {
-    entries = await reader.getEntries();
+    for await (const entry of reader.getEntriesGenerator()) {
+      if (entries.length >= limits.archiveEntries) throw new LoadError('tooLarge');
+      entries.push(entry);
+    }
   } catch (cause) {
+    if (cause instanceof LoadError) throw cause;
     throw new LoadError('badArchive', { cause });
   }
   const out: Source[] = [];
@@ -79,10 +88,23 @@ async function zipSources(file: File, readers: ZipReader<unknown>[]): Promise<So
     const path = entry.filename;
     out.push({
       path,
-      text: progress =>
-        entry.getData(new TextWriter('utf-8'), {
-          onprogress: async (done, total) => progress?.(done, total),
-        }),
+      async text(progress) {
+        // The size in the archive can lie, so the unpacked bytes are counted as they come.
+        if (entry.uncompressedSize > limits.chatTextBytes) throw new LoadError('tooLarge');
+        const stop = new AbortController();
+        try {
+          return await entry.getData(new TextWriter('utf-8'), {
+            signal: stop.signal,
+            onprogress: async (done, total) => {
+              if (done > limits.chatTextBytes) stop.abort();
+              progress?.(done, total);
+            },
+          });
+        } catch (cause) {
+          if (stop.signal.aborted) throw new LoadError('tooLarge', { cause });
+          throw cause;
+        }
+      },
       blob: () => entry.getData(new BlobWriter(mimeTypeFor(path))),
     });
   }
@@ -93,7 +115,7 @@ async function zipSources(file: File, readers: ZipReader<unknown>[]): Promise<So
  * Opens what the user picked: an exported .zip, a bare .txt, or a folder of
  * loose files. Attachments are not read until something asks for them.
  */
-export async function openExport(files: File[], onProgress?: Progress): Promise<OpenedExport> {
+export async function openExport(files: File[], onProgress?: Progress, limits: Limits = LIMITS): Promise<OpenedExport> {
   if (!files.length) throw new LoadError('empty');
   const readers: ZipReader<unknown>[] = [];
   const close = async () => {
@@ -106,9 +128,9 @@ export async function openExport(files: File[], onProgress?: Progress): Promise<
     for (const file of files) {
       if (await looksLikeZip(file)) {
         archiveNames.push(file.name);
-        sources.push(...(await zipSources(file, readers)));
+        sources.push(...(await zipSources(file, readers, limits)));
       } else {
-        sources.push(fileSource(file));
+        sources.push(fileSource(file, limits));
       }
     }
 

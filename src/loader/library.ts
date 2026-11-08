@@ -19,7 +19,10 @@ export interface SavedChat {
   last: number;
   bytes: number;
   savedAt: number;
+  /** Names in the store, which may be cleaned up. */
   files: string[];
+  /** The names the export used, which messages refer to. */
+  names?: string[];
 }
 
 export function libraryAvailable(): boolean {
@@ -51,7 +54,7 @@ export function exportId(files: File[]): string {
 export function storedNames(files: File[]): string[] {
   const used = new Set<string>();
   return files.map(f => {
-    const clean = baseName(f.name).replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').trim() || 'file';
+    const clean = baseName(f.name).replace(/[\\/:*?"<>|\u0000-\u001f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '_').trim() || 'file';
     let name = clean;
     for (let n = 2; used.has(name.toLowerCase()); n++) {
       const dot = clean.lastIndexOf('.');
@@ -133,6 +136,7 @@ export async function saveExport(files: File[], chat: Chat): Promise<SavedChat> 
     bytes: files.reduce((n, f) => n + f.size, 0),
     savedAt: Date.now(),
     files: names,
+    names: files.map(f => baseName(f.name)),
   };
   await writeFile(dir, META, new Blob([JSON.stringify(meta)], { type: 'application/json' }));
   return meta;
@@ -142,5 +146,11 @@ export async function loadSaved(id: string): Promise<File[]> {
   const dir = await (await root()).getDirectoryHandle(id);
   const meta = await readMeta(dir);
   if (!meta) throw new Error('missing');
-  return Promise.all(meta.files.map(async name => (await dir.getFileHandle(name)).getFile()));
+  return Promise.all(
+    meta.files.map(async (stored, i) => {
+      const file = await (await dir.getFileHandle(stored)).getFile();
+      const original = meta.names?.[i];
+      return original && original !== stored ? new File([file], original, { type: file.type, lastModified: file.lastModified }) : file;
+    }),
+  );
 }

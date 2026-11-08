@@ -30,6 +30,7 @@ export const fr: Dictionary = {
   'error.notAChat': 'Ce fichier ne ressemble pas à une discussion WhatsApp exportée.',
   'error.badArchive': 'Le fichier .zip n’a pas pu être lu. Il est peut-être incomplet ; essayez de le copier à nouveau.',
   'error.notSaved': 'Cette discussion enregistrée n’existe plus. Le navigateur a peut-être vidé son stockage ; rouvrez l’export.',
+  'error.tooLarge': 'Cet export est trop volumineux pour être ouvert en toute sécurité. S’il s’agit d’une vraie discussion, signalez-le.',
   'error.unknown': 'Un problème est survenu pendant la lecture du fichier.',
 
   'chat.close': 'Fermer la discussion',

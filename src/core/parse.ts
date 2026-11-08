@@ -1,5 +1,6 @@
 import { baseName, mediaHintFor } from './files';
 import { BIDI, detectDateOrder, detectPlatform, matchHeader, toSeconds, type RawHeader } from './header';
+import { LIMITS } from './limits';
 import { LOCALES, type LocalePack } from './locales';
 import type { Chat, ChatEvent, Message, ParseWarning, Party, Platform, Poll } from './model';
 
@@ -58,6 +59,7 @@ function stripBidi(s: string): string {
 }
 
 function matchEvent(text: string, pack: LocalePack): ChatEvent | null {
+  if (text.length > LIMITS.eventLineChars) return null;
   for (const r of pack.events) {
     const m = r.re.exec(text);
     if (!m) continue;

@@ -110,3 +110,22 @@ export class FileIndex<T> {
     return this.exact.size;
   }
 }
+
+/** Control characters and the invisible marks that can make "photo\u202Egnp.exe" read as "photoexe.png". */
+const HIDDEN = /[\u0000-\u001F\u007F\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
+
+/** A file name as it may be shown or saved: no hidden direction marks, no control characters. */
+export function safeFileName(name: string): string {
+  return baseName(name).replace(HIDDEN, '').trim() || 'file';
+}
+
+const RISKY = new Set([
+  'exe', 'com', 'scr', 'pif', 'bat', 'cmd', 'ps1', 'psm1', 'vbs', 'vbe', 'js', 'jse', 'wsf', 'wsh', 'hta', 'msi', 'msp',
+  'cpl', 'dll', 'reg', 'lnk', 'url', 'jar', 'apk', 'xapk', 'appimage', 'sh', 'run', 'bin', 'deb', 'rpm', 'desktop',
+  'iso', 'img', 'vhd', 'docm', 'xlsm', 'pptm', 'dotm', 'xlam', 'html', 'htm', 'xhtml', 'svg', 'mht',
+]);
+
+/** Files that can run code when opened, whatever name they hide behind. */
+export function isRiskyFile(name: string): boolean {
+  return RISKY.has(extensionOf(safeFileName(name)));
+}

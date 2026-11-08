@@ -30,6 +30,7 @@ export const es: Dictionary = {
   'error.notAChat': 'Este archivo no parece una exportación de chat de WhatsApp.',
   'error.badArchive': 'No se pudo leer el archivo .zip. Puede que esté incompleto; prueba a copiarlo otra vez.',
   'error.notSaved': 'Este chat guardado ya no está. Puede que el navegador haya borrado su almacenamiento; abre la exportación otra vez.',
+  'error.tooLarge': 'Esta exportación es demasiado grande para abrirla con seguridad. Si es un chat real, avísanos.',
   'error.unknown': 'Algo salió mal al leer el archivo.',
 
   'chat.close': 'Cerrar el chat',

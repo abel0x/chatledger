@@ -1,3 +1,4 @@
+import { LIMITS } from '../core/limits';
 import { linkify } from './linkify';
 
 export type Style = 'b' | 'i' | 's' | 'code';
@@ -28,6 +29,7 @@ function pushText(out: RichNode[], v: string): void {
 
 /** *bold*, _italic_, ~strike~ and `code`, nested where WhatsApp allows it, never across lines. */
 export function parseStyles(text: string): RichNode[] {
+  if (text.length > LIMITS.styledTextChars) return text ? [{ t: 'text', v: text }] : [];
   const out: RichNode[] = [];
   let i = 0;
   let plain = '';
@@ -37,8 +39,9 @@ export function parseStyles(text: string): RichNode[] {
     const next = text[i + 1];
     if (style && boundary(text[i - 1]) && next !== undefined && !SPACE.test(next) && next !== c) {
       let close = -1;
-      for (let j = text.indexOf(c, i + 2); j !== -1; j = text.indexOf(c, j + 1)) {
-        if (text.slice(i + 1, j).includes('\n')) break;
+      const lineEnd = text.indexOf('\n', i);
+      const stop = Math.min(lineEnd === -1 ? text.length : lineEnd, i + LIMITS.styleScanChars);
+      for (let j = text.indexOf(c, i + 2); j !== -1 && j < stop; j = text.indexOf(c, j + 1)) {
         if (!SPACE.test(text[j - 1] as string) && boundary(text[j + 1])) {
           close = j;
           break;

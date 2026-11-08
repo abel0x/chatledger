@@ -33,6 +33,7 @@ export const en = {
   'error.notAChat': 'This file does not look like a WhatsApp chat export.',
   'error.badArchive': 'The .zip file could not be read. It may be incomplete; try copying it again.',
   'error.notSaved': 'This saved chat is gone. The browser may have cleared its storage; open the export again.',
+  'error.tooLarge': 'This export is too large to open safely. If it is a real chat, please report it.',
   'error.unknown': 'Something went wrong while reading the file.',
 
   'chat.close': 'Close chat',

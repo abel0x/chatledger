@@ -30,6 +30,7 @@ export const tr: Dictionary = {
   'error.notAChat': 'Bu dosya bir WhatsApp sohbet dökümüne benzemiyor.',
   'error.badArchive': '.zip dosyası okunamadı. Eksik inmiş olabilir; yeniden kopyalamayı deneyin.',
   'error.notSaved': 'Bu kayıtlı sohbet artık yok. Tarayıcı depolamayı temizlemiş olabilir; dökümü yeniden açın.',
+  'error.tooLarge': 'Bu döküm güvenle açılamayacak kadar büyük. Gerçek bir sohbetse lütfen bildirin.',
   'error.unknown': 'Dosya okunurken bir sorun çıktı.',
 
   'chat.close': 'Sohbeti kapat',
