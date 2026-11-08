@@ -1,0 +1,89 @@
+export interface Plural {
+  one: string;
+  other: string;
+}
+
+export const en = {
+  'lang.name': 'English',
+  'lang.label': 'Language',
+
+  'welcome.title': 'Open a WhatsApp chat export',
+  'welcome.lead': 'Everything stays on this computer. Nothing is uploaded anywhere.',
+  'welcome.drop': 'Drop the exported .zip or .txt file here',
+  'welcome.or': 'or',
+  'welcome.pickFile': 'Choose a file',
+  'welcome.pickFolder': 'Choose a folder',
+  'welcome.howTo': 'How do I export a chat?',
+  'welcome.howToAndroid': 'Android: open the chat, tap ⋮ › More › Export chat, then choose Include media.',
+  'welcome.howToIos': 'iPhone: open the chat, tap its name at the top, then Export chat › Attach media.',
+  'welcome.howToSend': 'Save the file to this computer and open it here.',
+  'welcome.loading': 'Reading the chat…',
+
+  'error.empty': 'Nothing was selected.',
+  'error.noChat': 'There is no chat text file in what you picked. Export the chat again and choose the .zip or .txt file.',
+  'error.notAChat': 'This file does not look like a WhatsApp chat export.',
+  'error.badArchive': 'The .zip file could not be read. It may be incomplete; try copying it again.',
+  'error.unknown': 'Something went wrong while reading the file.',
+
+  'chat.close': 'Close chat',
+  'chat.people': { one: '{count} person', other: '{count} people' },
+  'chat.messages': { one: '{count} message', other: '{count} messages' },
+  'chat.missing': {
+    one: '{count} attachment is not part of this export.',
+    other: '{count} attachments are not part of this export.',
+  },
+  'chat.untitled': 'Chat',
+
+  'media.image': 'Photo',
+  'media.video': 'Video',
+  'media.audio': 'Audio',
+  'media.voice': 'Voice message',
+  'media.sticker': 'Sticker',
+  'media.gif': 'GIF',
+  'media.document': 'Document',
+  'media.contact': 'Contact card',
+  'media.unknown': 'Attachment',
+
+  'msg.notIncluded': '{what} not included',
+  'msg.fileMissing': 'Not in this export',
+  'msg.deleted': 'This message was deleted',
+  'msg.deletedBySelf': 'You deleted this message',
+  'msg.viewOnce': 'View-once message',
+  'msg.pending': 'Waiting for this message',
+  'msg.empty': 'Empty message',
+  'msg.edited': 'edited',
+  'msg.location': 'Location',
+  'msg.poll': 'Poll',
+  'msg.votes': { one: '{count} vote', other: '{count} votes' },
+  'msg.download': 'Save',
+
+  'party.you': 'You',
+  'party.someone': 'Someone',
+
+  'event.encrypted': 'Messages and calls are end-to-end encrypted.',
+  'event.created': '{actor} created the group “{value}”',
+  'event.renamed': '{actor} changed the group name to “{value}”',
+  'event.added': '{actor} added {targets}',
+  'event.joined': '{actor} joined using an invite link',
+  'event.left': '{actor} left',
+  'event.removed': '{actor} removed {targets}',
+  'event.iconChanged': '{actor} changed the group icon',
+  'event.iconDeleted': '{actor} deleted the group icon',
+  'event.descriptionChanged': '{actor} changed the group description',
+  'event.onlyAdminsSend': '{actor} allowed only admins to send messages',
+  'event.allMembersSend': '{actor} allowed all members to send messages',
+  'event.onlyAdminsEdit': '{actor} allowed only admins to edit the group info',
+  'event.allMembersEdit': '{actor} allowed all members to edit the group info',
+  'event.adminsOnly': 'Only admins can send messages to this group',
+  'event.nowAdmin': '{actor} became an admin',
+  'event.securityCode': 'The security code with {targets} changed',
+  'event.numberChanged': '{actor} changed their phone number',
+  'event.pinned': '{actor} pinned a message',
+  'event.disappearingOn': '{actor} turned on disappearing messages',
+  'event.disappearingOff': '{actor} turned off disappearing messages',
+} satisfies Record<string, string | Plural>;
+
+export type Key = keyof typeof en;
+
+/** Every language has exactly the keys English has, in the same shape. */
+export type Dictionary = { [K in Key]: (typeof en)[K] extends Plural ? Plural : string };
