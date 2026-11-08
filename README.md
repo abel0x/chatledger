@@ -6,9 +6,11 @@ chatledger runs on your machine and shows the chat in your browser. Your message
 
 [Türkçe](README.tr.md)
 
+![A chat with search results highlighted](docs/screenshots/search.png)
+
 ## What it does
 
-- Opens the `.zip` or `.txt` that WhatsApp exports, or a folder of loose files, from Android and iPhone.
+- Opens the `.zip` or `.txt` that WhatsApp exports, or a folder of loose files. Android exports are fully supported; iPhone exports are experimental for now (see *Known limits*).
 - Shows the chat the way you remember it, with photos, videos, stickers, voice messages, documents, polls and group events, and stays smooth on chats with hundreds of thousands of messages.
 - Finds messages fast. Capitals and accents do not matter, so `ogretmen` finds `Öğretmen`. Put an exact phrase in quotes, or filter by person, media or links.
 - Jumps to any date, or straight to the first or last message.
@@ -16,6 +18,12 @@ chatledger runs on your machine and shows the chat in your browser. Your message
 - Counts who wrote the most and when the chat is busiest. Also shows messages per month, favourite emoji, the longest silence and more.
 - Remembers chats you open, so they are still there after a restart. You can turn this off, and you can remove any saved chat.
 - Has an English and a Turkish interface. It reads exports made by phones set to either language.
+
+| Gallery | Statistics |
+| --- | --- |
+| ![Photos of a chat grouped by month](docs/screenshots/gallery.png) | ![Who wrote the most and when](docs/screenshots/stats.png) |
+
+The pictures show a made-up chat that comes with the tests.
 
 ## Getting started
 
@@ -28,7 +36,7 @@ Save the file to your computer.
 
 ### 2. Install Node.js
 
-chatledger needs [Node.js](https://nodejs.org) 20 or newer. Pick the LTS version on the download page and install it with the default options.
+chatledger needs [Node.js](https://nodejs.org) 22 or newer. Pick the LTS version on the download page and install it with the default options.
 
 ### 3. Download and start chatledger
 
@@ -38,6 +46,13 @@ Download the latest `chatledger-x.y.z.zip` from the releases page and unzip it a
 - **Linux:** run `./chatledger.sh` in a terminal, or double-click it and choose *Run*.
 
 Your browser opens at `http://127.0.0.1:5170`. Keep the small window that appears open while you use chatledger. Closing it stops the app.
+
+chatledger is tested in current versions of Firefox and of Chrome, Edge and other browsers built on Chromium.
+
+## Known limits
+
+- **iPhone exports are experimental.** chatledger follows the iPhone export format, but it has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please report it (see below).
+- Group events such as "added" or "left" from phones set to a language other than English or Turkish are shown as WhatsApp wrote them, without translation. Messages, dates and media work in every language.
 
 ## Where your chats are kept
 
@@ -59,10 +74,12 @@ npm start
 | `npm start` | Builds when needed and opens the app at `http://127.0.0.1:5170` |
 | `npm run dev` | Development server with live reload |
 | `npm test` | Runs the tests |
+| `npm run test:e2e` | Runs the browser tests in Chromium and Firefox |
+| `npm run screenshots` | Takes the README pictures from the demo chat |
 | `npm run check` | Type-checks the code |
 | `npm run release` | Builds a zip that runs without npm or the source |
 
-The code is in three layers: `src/core` reads exports and knows nothing about the screen, `src/loader` opens archives in a worker, and `src/ui` is the Svelte interface. Tests use made-up chats only. If you keep real exports in a `coldstorage/` folder, a few extra tests run against them on your machine. That folder is ignored by git.
+The code is in three layers: `src/core` reads exports and knows nothing about the screen, `src/loader` opens archives in a worker, and `src/ui` is the Svelte interface. Tests use made-up chats only; `tests/e2e/demo.ts` builds the demo export the browser tests and screenshots use. If you keep real exports in a `coldstorage/` folder, a few extra tests run against them on your machine. That folder is ignored by git.
 
 ## Reporting a problem
 
