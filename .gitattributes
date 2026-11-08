@@ -1,0 +1,10 @@
+* text=auto eol=lf
+
+# Chat exports keep the exact bytes WhatsApp wrote, line endings included.
+tests/fixtures/** -text
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.opus binary
+*.mp4 binary
