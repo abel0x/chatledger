@@ -14,8 +14,8 @@ const turkish = Intl.DateTimeFormat().resolvedOptions().locale.toLowerCase().sta
 const say = {
   oldNode: v =>
     turkish
-      ? `chatledger için Node.js 20 veya daha yenisi gerekiyor (bu bilgisayarda ${v} var). https://nodejs.org adresinden güncelleyin.`
-      : `chatledger needs Node.js 20 or newer (this computer has ${v}). Update it from https://nodejs.org.`,
+      ? `chatledger için Node.js 22 veya daha yenisi gerekiyor (bu bilgisayarda ${v} var). https://nodejs.org adresinden güncelleyin.`
+      : `chatledger needs Node.js 22 or newer (this computer has ${v}). Update it from https://nodejs.org.`,
   building: turkish ? 'Uygulama hazırlanıyor, bir kez yapılır…' : 'Preparing the app, this happens once…',
   noBuild: turkish
     ? 'Uygulama dosyaları bulunamadı. Hazır sürümü indirin ya da önce "npm install" çalıştırın.'
@@ -32,7 +32,7 @@ const say = {
 };
 
 const [major] = process.versions.node.split('.').map(Number);
-if ((major ?? 0) < 20) {
+if ((major ?? 0) < 22) {
   console.error(say.oldNode(process.versions.node));
   process.exit(1);
 }
