@@ -13,6 +13,14 @@
     calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
     down: 'M12 5v14M6 13l6 6 6-6',
     up: 'M12 19V5M6 11l6-6 6 6',
+    left: 'M15 5l-7 7 7 7',
+    right: 'M9 5l7 7-7 7',
+    image: 'M4 5h16v14H4zM4 16l5-5 4 4 2-2 5 5M15.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
+    play: 'M8 5v14l11-7z',
+    download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
+    chat: 'M4 5h16v11H9l-5 4z',
+    external: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
+    chart: 'M4 20h16M7 16v-5M12 16V6M17 16v-8',
   } as const;
   export type IconName = keyof typeof PATHS;
 </script>

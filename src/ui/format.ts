@@ -50,3 +50,12 @@ export function formatDayRange(first: number, last: number, locale: string): str
   const f = formatter(locale, { day: 'numeric', month: 'short', year: 'numeric' });
   return f.formatRange(first * 1000, last * 1000);
 }
+
+export function formatMonth(month: number, locale: string): string {
+  return formatter(locale, { month: 'long', year: 'numeric' }).format(Date.UTC(Math.floor(month / 12), month % 12, 1));
+}
+
+export function formatMonthShort(month: number, locale: string, withYear: boolean): string {
+  const options: Intl.DateTimeFormatOptions = withYear ? { month: 'short', year: 'numeric' } : { month: 'short' };
+  return formatter(locale, options).format(Date.UTC(Math.floor(month / 12), month % 12, 1));
+}

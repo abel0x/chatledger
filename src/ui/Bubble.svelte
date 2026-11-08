@@ -10,6 +10,7 @@
 
   let {
     message: m,
+    index,
     chat,
     session,
     first,
@@ -19,6 +20,7 @@
     flash = false,
   }: {
     message: Message;
+    index: number;
     chat: Chat;
     session: Session;
     first: boolean;
@@ -57,7 +59,7 @@
     {/if}
 
     {#if m.kind === 'file' && m.file}
-      <Attachment file={m.file} media={m.media} {session} />
+      <Attachment file={m.file} media={m.media} {index} {session} />
     {/if}
 
     {#if m.kind === 'poll' && m.poll}

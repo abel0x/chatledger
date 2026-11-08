@@ -1,7 +1,7 @@
 import type { Chat } from '../core';
 import type { SavedChat } from './library';
 import type { LoadErrorCode } from './open';
-import type { WorkerRequest, WorkerResponse } from './protocol';
+import type { Thumbnail, WorkerRequest, WorkerResponse } from './protocol';
 
 export interface Session {
   chat: Chat;
@@ -15,8 +15,19 @@ export interface Session {
   saved: Promise<SavedChat | null>;
   /** An object URL for the attachment, created on first use. */
   url(file: string): Promise<string | null>;
+  /** A small copy of a picture for lists and bubbles; null when it cannot be made. */
+  thumb(file: string): Promise<Thumb | null>;
   close(): void;
 }
+
+export interface Thumb {
+  url: string;
+  width: number;
+  height: number;
+}
+
+/** Longest side of thumbnails; sharp at bubble size on high-density screens. */
+const THUMB_SIZE = 720;
 
 export class SessionError extends Error {
   constructor(
@@ -35,7 +46,9 @@ export function openSession(source: Source): Promise<Session> {
   const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
   const post = (req: WorkerRequest) => worker.postMessage(req);
   const pending = new Map<number, (blob: Blob | null) => void>();
+  const pendingThumbs = new Map<number, (thumb: Thumbnail | null) => void>();
   const urls = new Map<string, Promise<string | null>>();
+  const thumbs = new Map<string, Promise<Thumb | null>>();
   let nextId = 1;
   let closed = false;
   let settleSaved: (saved: SavedChat | null) => void = () => {};
@@ -67,6 +80,10 @@ export function openSession(source: Source): Promise<Session> {
           pending.get(msg.id)?.(msg.blob);
           pending.delete(msg.id);
           return;
+        case 'thumb':
+          pendingThumbs.get(msg.id)?.(msg.thumb);
+          pendingThumbs.delete(msg.id);
+          return;
         case 'opened': {
           const found = new Set(msg.found);
           resolve({
@@ -88,15 +105,32 @@ export function openSession(source: Source): Promise<Session> {
               }
               return url;
             },
+            thumb(file) {
+              if (closed || !found.has(file)) return Promise.resolve(null);
+              let thumb = thumbs.get(file);
+              if (!thumb) {
+                const id = nextId++;
+                thumb = new Promise<Thumbnail | null>(done => pendingThumbs.set(id, done)).then(t =>
+                  t && !closed ? { url: URL.createObjectURL(t.blob), width: t.width, height: t.height } : null,
+                );
+                thumbs.set(file, thumb);
+                post({ type: 'thumb', id, file, size: THUMB_SIZE });
+              }
+              return thumb;
+            },
             close() {
               if (closed) return;
               closed = true;
               worker.terminate();
               settleSaved(null);
               for (const done of pending.values()) done(null);
+              for (const done of pendingThumbs.values()) done(null);
               pending.clear();
+              pendingThumbs.clear();
               for (const url of urls.values()) void url.then(u => u && URL.revokeObjectURL(u));
+              for (const thumb of thumbs.values()) void thumb.then(t => t && URL.revokeObjectURL(t.url));
               urls.clear();
+              thumbs.clear();
             },
           });
         }

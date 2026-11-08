@@ -3,12 +3,17 @@
   import { eventText, locale, t } from '../i18n/index.svelte';
   import type { Session } from '../loader/client';
   import Bubble from './Bubble.svelte';
+  import { provideChatActions } from './context';
   import { formatDay } from './format';
   import Icon from './Icon.svelte';
   import LangSwitch from './LangSwitch.svelte';
+  import Lightbox from './Lightbox.svelte';
+  import { visuals } from './media';
+  import MediaPanel from './MediaPanel.svelte';
   import { buildRows, estimateHeight, type Row } from './rows';
   import { SearchIndex } from './search';
   import SearchPanel from './SearchPanel.svelte';
+  import StatsView from './StatsView.svelte';
   import VirtualList from './VirtualList.svelte';
 
   let { session, onclose }: { session: Session; onclose: () => void } = $props();
@@ -20,14 +25,18 @@
   const index = $derived(new SearchIndex(chat));
   const firstDay = $derived(layout.rows[0]?.day ?? 0);
   const lastDay = $derived(layout.rows[layout.rows.length - 1]?.day ?? 0);
+  const gallery = $derived(visuals(chat, file => session.has(file)));
 
   let list = $state<ReturnType<typeof VirtualList>>();
-  let panel = $state<ReturnType<typeof SearchPanel>>();
+  let searchPanel = $state<ReturnType<typeof SearchPanel>>();
   let dateInput = $state<HTMLInputElement>();
   let firstRow = $state(0);
   let atStart = $state(true);
   let atEnd = $state(false);
-  let searching = $state(false);
+  let panel = $state<'search' | 'gallery' | null>(null);
+  let viewer = $state<number | null>(null);
+  let showStats = $state(false);
+  const searching = $derived(panel === 'search');
   let terms = $state<string[]>([]);
   let flashKey = $state<string | null>(null);
   let flashTimer: ReturnType<typeof setTimeout> | undefined;
@@ -59,10 +68,20 @@
   function pick(messageIndex: number) {
     const m = chat.messages[messageIndex];
     if (!m) return;
-    if (matchMedia('(max-width: 760px)').matches) searching = false;
+    viewer = null;
+    showStats = false;
+    if (matchMedia('(max-width: 760px)').matches) panel = null;
     list?.scrollToIndex(layout.rowOf[messageIndex] ?? 0, 'center');
     flash(m.id);
   }
+
+  provideChatActions({
+    openMedia(messageIndex) {
+      const at = gallery.findIndex(v => v.index === messageIndex);
+      if (at >= 0) viewer = at;
+    },
+    showMessage: pick,
+  });
 
   function viewChanged(first: number, start: boolean, end: boolean) {
     if (first !== firstRow) {
@@ -98,16 +117,24 @@
   }
 
   function openSearch() {
-    if (searching) panel?.focus();
-    searching = true;
+    if (searching) searchPanel?.focus();
+    panel = 'search';
+  }
+
+  function togglePanel(which: 'search' | 'gallery') {
+    if (which === 'search') openSearch();
+    else panel = panel === which ? null : which;
   }
 
   function keydown(e: KeyboardEvent) {
+    if (viewer != null) return;
     if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'f') {
       e.preventDefault();
       openSearch();
-    } else if (e.key === 'Escape' && searching) {
-      searching = false;
+    } else if (e.key === 'Escape' && panel) {
+      panel = null;
+    } else if (e.key === 'Escape' && showStats) {
+      showStats = false;
     }
   }
 
@@ -139,6 +166,7 @@
     {@const m = chat.messages[row.index] as Message}
     <Bubble
       message={m}
+      index={row.index}
       {chat}
       {session}
       first={row.first}
@@ -150,7 +178,7 @@
   {/if}
 {/snippet}
 
-<div class="chat" class:searching>
+<div class="chat" class:with-panel={panel != null}>
   <div class="main">
     <header>
       <div class="titles">
@@ -159,8 +187,28 @@
           {t('chat.people', { count: chat.people.length })} · {t('chat.messages', { count: chat.messages.length })}
         </p>
       </div>
-      <button class="icon-button" type="button" onclick={openSearch} aria-label={t('chat.search')} title={t('chat.search')} aria-pressed={searching}>
+      <button class="icon-button" type="button" onclick={() => togglePanel('search')} aria-label={t('chat.search')} title={t('chat.search')} aria-pressed={searching}>
         <Icon name="search" />
+      </button>
+      <button
+        class="icon-button"
+        type="button"
+        onclick={() => togglePanel('gallery')}
+        aria-label={t('chat.gallery')}
+        title={t('chat.gallery')}
+        aria-pressed={panel === 'gallery'}
+      >
+        <Icon name="image" />
+      </button>
+      <button
+        class="icon-button"
+        type="button"
+        onclick={() => (showStats = !showStats)}
+        aria-label={showStats ? t('chat.backToChat') : t('chat.stats')}
+        title={showStats ? t('chat.backToChat') : t('chat.stats')}
+        aria-pressed={showStats}
+      >
+        <Icon name={showStats ? 'chat' : 'chart'} />
       </button>
       <button class="icon-button" type="button" onclick={openDatePicker} aria-label={t('chat.jumpToDate')} title={t('chat.jumpToDate')}>
         <Icon name="calendar" />
@@ -228,13 +276,22 @@
           </button>
         {/if}
       </div>
+      {#if showStats}
+        <div class="overlay"><StatsView {chat} /></div>
+      {/if}
     </div>
   </div>
 
-  {#if searching}
-    <SearchPanel bind:this={panel} {chat} {index} onpick={pick} onclose={() => (searching = false)} onterms={next => (terms = next)} />
+  {#if panel === 'search'}
+    <SearchPanel bind:this={searchPanel} {chat} {index} onpick={pick} onclose={() => (panel = null)} onterms={next => (terms = next)} />
+  {:else if panel === 'gallery'}
+    <MediaPanel {chat} {session} items={gallery} onopen={at => (viewer = at)} onshow={pick} onclose={() => (panel = null)} />
   {/if}
 </div>
+
+{#if viewer != null}
+  <Lightbox items={gallery} start={viewer} {chat} {session} onclose={() => (viewer = null)} onshow={pick} />
+{/if}
 
 <style>
   .chat {
@@ -246,16 +303,16 @@
     height: 100%;
   }
 
-  .chat.searching {
+  .chat.with-panel {
     grid-template-columns: minmax(0, 1fr) min(400px, 40vw);
   }
 
   @media (max-width: 760px) {
-    .chat.searching {
+    .chat.with-panel {
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .chat.searching > :global(.panel) {
+    .chat.with-panel > :global(.panel) {
       position: absolute;
       inset: 0;
       z-index: 5;
@@ -312,6 +369,13 @@
     position: relative;
     flex: 1;
     min-height: 0;
+  }
+
+  /* Laid over the list, which stays as it was so the reading position survives. */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
   }
 
   .day-label {

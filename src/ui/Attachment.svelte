@@ -2,10 +2,18 @@
   import { mimeTypeFor, type MediaHint } from '../core';
   import { t } from '../i18n/index.svelte';
   import type { Session } from '../loader/client';
+  import { useChatActions } from './context';
   import Icon from './Icon.svelte';
   import { visible } from './visible';
 
-  let { file, media = 'unknown', session }: { file: string; media?: MediaHint; session: Session } = $props();
+  let {
+    file,
+    media = 'unknown',
+    index,
+    session,
+  }: { file: string; media?: MediaHint; index: number; session: Session } = $props();
+
+  const actions = useChatActions();
 
   let url = $state<string | null>(null);
   let broken = $state(false);
@@ -21,7 +29,12 @@
   });
 
   function load() {
-    void session.url(file).then(u => (url = u));
+    if (shown === 'image' && media !== 'sticker') {
+      // Bubbles show a downscaled copy; the viewer opens the original.
+      void session.thumb(file).then(async th => (url = th?.url ?? (await session.url(file))));
+    } else {
+      void session.url(file).then(u => (url = u));
+    }
   }
 </script>
 
@@ -32,13 +45,21 @@
     <small>{t('msg.fileMissing')}</small>
   </div>
 {:else if shown === 'image'}
-  <div class="frame" class:sticker={media === 'sticker'} use:visible={load}>
-    {#if url}
-      <a href={url} target="_blank" rel="noopener noreferrer">
-        <img src={url} alt={t(`media.${media}`)} onerror={() => (broken = true)} />
-      </a>
-    {/if}
-  </div>
+  {#if media === 'sticker'}
+    <div class="frame sticker" use:visible={load}>
+      {#if url}<img src={url} alt={t('media.sticker')} onerror={() => (broken = true)} />{/if}
+    </div>
+  {:else}
+    <button
+      class="frame"
+      type="button"
+      use:visible={load}
+      onclick={() => actions?.openMedia(index)}
+      aria-label={t('msg.view', { what: t(`media.${media}`) })}
+    >
+      {#if url}<img src={url} alt="" onerror={() => (broken = true)} />{/if}
+    </button>
+  {/if}
 {:else if shown === 'video'}
   <div class="frame video" use:visible={load}>
     {#if url}
@@ -62,6 +83,8 @@
 
 <style>
   .frame {
+    padding: 0;
+    border: 0;
     display: grid;
     place-items: center;
     width: min(330px, 100%);
@@ -72,9 +95,8 @@
     background: color-mix(in srgb, var(--text) 6%, transparent);
   }
 
-  .frame a {
-    display: block;
-    line-height: 0;
+  button.frame {
+    cursor: zoom-in;
   }
 
   .frame img,
@@ -83,6 +105,11 @@
     max-width: 100%;
     max-height: 420px;
     object-fit: contain;
+  }
+
+  button.frame img {
+    width: 100%;
+    object-fit: cover;
   }
 
   .sticker {
