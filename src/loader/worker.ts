@@ -1,5 +1,6 @@
 import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js/lib/zip-core-native.js';
-import { chatStats, extensionOf } from '../core';
+import { chatStats, extensionOf, LIMITS } from '../core';
+import { HEADER_BYTES, imageSize } from './imagesize';
 import { parseDocumentXml } from './docx';
 import { libraryAvailable, loadSaved, saveExport } from './library';
 import { LoadError, openExport, type OpenedExport } from './open';
@@ -52,7 +53,11 @@ async function encode(canvas: OffscreenCanvas): Promise<Blob> {
 
 async function thumbnail(file: string, size: number): Promise<Thumbnail | null> {
   const blob = await opened?.read(file);
-  if (!blob || typeof createImageBitmap !== 'function' || typeof OffscreenCanvas === 'undefined') return null;
+  if (!blob) return null;
+  // Check the size the file claims before any decoder sees it.
+  const claimed = imageSize(new Uint8Array(await blob.slice(0, HEADER_BYTES).arrayBuffer()));
+  if (claimed && claimed.width * claimed.height > LIMITS.imagePixels) return { tooLarge: true, ...claimed };
+  if (typeof createImageBitmap !== 'function' || typeof OffscreenCanvas === 'undefined') return null;
   const bitmap = await createImageBitmap(blob);
   const { width, height } = bitmap;
   try {
@@ -79,8 +84,15 @@ async function documentPreview(file: string): Promise<DocPreview | null> {
     const reader = new ZipReader(new BlobReader(blob));
     try {
       const entry = (await reader.getEntries()).find(e => e.filename === 'word/document.xml');
-      if (!entry || entry.directory) return null;
-      return { kind: 'docx', blocks: parseDocumentXml(await entry.getData(new TextWriter('utf-8'))) };
+      if (!entry || entry.directory || entry.uncompressedSize > LIMITS.docxXmlBytes) return null;
+      const stop = new AbortController();
+      const xml = await entry.getData(new TextWriter('utf-8'), {
+        signal: stop.signal,
+        onprogress: async done => {
+          if (done > LIMITS.docxXmlBytes) stop.abort();
+        },
+      });
+      return { kind: 'docx', blocks: parseDocumentXml(xml) };
     } finally {
       await reader.close();
     }

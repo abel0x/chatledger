@@ -125,6 +125,9 @@ export const en = {
   'media.unknown': 'Attachment',
 
   'msg.notIncluded': '{what} not included',
+  'file.tooLarge': 'Too large to preview safely',
+  'file.risky': 'Files like this can run programs. Only open it if you trust where it came from.',
+  'file.riskyConfirm': '{name} can run programs on your computer. Save it anyway?',
   'msg.fileMissing': 'Not in this export',
   'msg.deleted': 'This message was deleted',
   'msg.deletedBySelf': 'You deleted this message',

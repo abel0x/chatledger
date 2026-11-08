@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Chat, Message } from '../core';
+  import { LIMITS, type Chat, type Message } from '../core';
   import { eventText, locale, t } from '../i18n/index.svelte';
   import { dayOf, formatClock, formatDay } from './format';
   import Icon from './Icon.svelte';
@@ -41,7 +41,7 @@
     const file = e.currentTarget.files?.[0];
     e.currentTarget.value = '';
     if (!file) return;
-    const ids = importStars(await file.text(), chat);
+    const ids = file.size > LIMITS.starsFileBytes ? null : importStars(await file.text(), chat);
     if (ids == null) ontoast(t('starred.importBad'));
     else {
       const added = stars.addAll(ids);

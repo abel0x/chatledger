@@ -122,6 +122,9 @@ export const de: Dictionary = {
   'media.unknown': 'Anhang',
 
   'msg.notIncluded': '{what} nicht enthalten',
+  'file.tooLarge': 'Zu groß für eine sichere Vorschau',
+  'file.risky': 'Solche Dateien können Programme ausführen. Öffne sie nur, wenn du der Quelle vertraust.',
+  'file.riskyConfirm': '{name} kann Programme auf deinem Computer ausführen. Trotzdem speichern?',
   'msg.fileMissing': 'Nicht in diesem Export',
   'msg.deleted': 'Diese Nachricht wurde gelöscht',
   'msg.deletedBySelf': 'Du hast diese Nachricht gelöscht',

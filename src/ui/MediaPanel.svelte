@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { Chat } from '../core';
+  import { safeFileName, type Chat } from '../core';
   import { locale, t } from '../i18n/index.svelte';
   import type { Session } from '../loader/client';
   import { dayOf, formatClock, formatDay, formatMonth } from './format';
   import Icon from './Icon.svelte';
   import { attachments, links, monthOf, type Visual } from './media';
   import StickerTile from './StickerTile.svelte';
+  import { saveFile } from './save';
   import Tile from './Tile.svelte';
 
   interface Props {
@@ -63,11 +64,7 @@
 
   async function save(file: string) {
     const url = await session.url(file);
-    if (!url) return;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = file;
-    a.click();
+    if (url) saveFile(url, file);
   }
 
   function hostOf(href: string): string {
@@ -136,7 +133,7 @@
           <li>
             <Icon name="file" />
             <div class="main">
-              <span class="name">{f.file}</span>
+              <span class="name">{safeFileName(f.file)}</span>
               <span class="meta">{who(f.index)} · {when(f.index)}</span>
             </div>
             <button class="icon-button" type="button" onclick={() => save(f.file)} aria-label={t('msg.download')} title={t('msg.download')}>

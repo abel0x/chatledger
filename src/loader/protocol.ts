@@ -25,9 +25,12 @@ export type WorkerResponse =
 
 export type DocPreview = { kind: 'docx'; blocks: DocBlock[] } | { kind: 'text'; text: string; cut: boolean };
 
-export interface Thumbnail {
-  blob: Blob;
-  /** Size of the original picture. */
-  width: number;
-  height: number;
-}
+export type Thumbnail =
+  | {
+      blob: Blob;
+      /** Size of the original picture. */
+      width: number;
+      height: number;
+    }
+  /** A picture whose header claims more pixels than is safe to decode. */
+  | { tooLarge: true; width: number; height: number };

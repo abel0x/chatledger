@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { extensionOf } from '../core';
+  import { extensionOf, safeFileName } from '../core';
   import { t } from '../i18n/index.svelte';
   import type { DocPreview, Session } from '../loader/client';
   import Icon from './Icon.svelte';
@@ -67,11 +67,11 @@
 <dialog bind:this={dialog} aria-label={t('doc.label')} onclose={onclose}>
   <header>
     <div class="title">
-      <strong>{file}</strong>
+      <strong>{safeFileName(file)}</strong>
       {#if pageCount}<span>{t('doc.pages', { count: pageCount })}</span>{/if}
     </div>
     {#if saveUrl}
-      <a class="icon-button" href={saveUrl} download={file} aria-label={t('msg.download')} title={t('msg.download')}>
+      <a class="icon-button" href={saveUrl} download={safeFileName(file)} aria-label={t('msg.download')} title={t('msg.download')}>
         <Icon name="download" />
       </a>
     {/if}

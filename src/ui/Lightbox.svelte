@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { Chat } from '../core';
+  import { safeFileName, type Chat } from '../core';
   import { locale, t } from '../i18n/index.svelte';
   import type { Session } from '../loader/client';
   import { formatFull } from './format';
@@ -31,17 +31,25 @@
   const message = $derived(item ? chat.messages[item.index] : undefined);
   const sender = $derived(message?.sender != null ? chat.people[message.sender] : null);
 
+  let tooLarge = $state(false);
+
   $effect(() => {
     const current = item;
     url = null;
+    tooLarge = false;
     if (!current) return;
     let live = true;
-    void session.thumb(current.file).then(th => {
-      if (live && !url && th && current.kind === 'image') url = th.url;
-    });
-    void session.url(current.file).then(u => {
-      if (live && u) url = u;
-    });
+    void (async () => {
+      if (current.kind === 'image') {
+        // A picture claiming too many pixels is never decoded; it can still be saved.
+        const th = await session.thumb(current.file);
+        if (!live) return;
+        if (th?.tooLarge) tooLarge = true;
+        else if (th?.url) url = th.url;
+      }
+      const full = await session.url(current.file);
+      if (live && full) url = full;
+    })();
     // Have the neighbours ready before they are asked for.
     for (const near of [items[pos - 1], items[pos + 1]]) if (near) void session.url(near.file);
     return () => {
@@ -95,7 +103,7 @@
         <Icon name="chat" />
       </button>
       {#if url}
-        <a class="tool" href={url} download={item.file} title={t('msg.download')} aria-label={t('msg.download')}>
+        <a class="tool" href={url} download={safeFileName(item.file)} title={t('msg.download')} aria-label={t('msg.download')}>
           <Icon name="download" />
         </a>
       {/if}
@@ -107,7 +115,9 @@
 
   <div class="stage" onpointerdown={pointerdown} onpointerup={pointerup} role="presentation">
     <div class="box">
-      {#if url && item}
+      {#if tooLarge}
+        <p class="big">{t('file.tooLarge')}</p>
+      {:else if url && item}
         {#if item.kind === 'image'}
           <img src={url} alt={message?.text ?? t('media.image')} draggable="false" />
         {:else}
@@ -245,6 +255,10 @@
     text-align: center;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+  }
+
+  .big {
+    color: #aebac1;
   }
 
   .spinner {

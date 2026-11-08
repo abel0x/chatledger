@@ -122,6 +122,9 @@ export const pt: Dictionary = {
   'media.unknown': 'Anexo',
 
   'msg.notIncluded': '{what} não incluído',
+  'file.tooLarge': 'Grande demais para pré-visualizar com segurança',
+  'file.risky': 'Arquivos assim podem executar programas. Abra-o somente se confiar na origem.',
+  'file.riskyConfirm': '{name} pode executar programas no seu computador. Salvar mesmo assim?',
   'msg.fileMissing': 'Não está nesta exportação',
   'msg.deleted': 'Mensagem apagada',
   'msg.deletedBySelf': 'Você apagou esta mensagem',

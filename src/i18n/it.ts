@@ -122,6 +122,9 @@ export const it: Dictionary = {
   'media.unknown': 'Allegato',
 
   'msg.notIncluded': '{what} non incluso',
+  'file.tooLarge': 'Troppo grande per un’anteprima sicura',
+  'file.risky': 'File come questo possono eseguire programmi. Aprilo solo se ti fidi della provenienza.',
+  'file.riskyConfirm': '{name} può eseguire programmi sul tuo computer. Salvarlo comunque?',
   'msg.fileMissing': 'Non presente in questa esportazione',
   'msg.deleted': 'Questo messaggio è stato eliminato',
   'msg.deletedBySelf': 'Hai eliminato questo messaggio',

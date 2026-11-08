@@ -7,7 +7,16 @@
   let src = $state<string | null>(null);
 </script>
 
-<button class="sticker" type="button" use:visible={() => void session.url(file).then(u => (src = u))} {onclick} title={t('gallery.showInChat')}>
+<button
+  class="sticker"
+  type="button"
+  use:visible={() =>
+    void session.thumb(file).then(async th => {
+      if (!th?.tooLarge) src = await session.url(file);
+    })}
+  {onclick}
+  title={t('gallery.showInChat')}
+>
   {#if src}<img {src} alt={t('media.sticker')} loading="lazy" decoding="async" />{/if}
 </button>
 

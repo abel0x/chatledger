@@ -122,6 +122,9 @@ export const fr: Dictionary = {
   'media.unknown': 'Pièce jointe',
 
   'msg.notIncluded': '{what} non inclus',
+  'file.tooLarge': 'Trop volumineux pour un aperçu sûr',
+  'file.risky': 'Ce type de fichier peut lancer des programmes. Ne l’ouvrez que si vous faites confiance à sa provenance.',
+  'file.riskyConfirm': '{name} peut lancer des programmes sur votre ordinateur. L’enregistrer quand même ?',
   'msg.fileMissing': 'Absent de cet export',
   'msg.deleted': 'Ce message a été supprimé',
   'msg.deletedBySelf': 'Vous avez supprimé ce message',

@@ -122,6 +122,9 @@ export const tr: Dictionary = {
   'media.unknown': 'Ek',
 
   'msg.notIncluded': '{what} dahil edilmedi',
+  'file.tooLarge': 'Güvenle önizlenemeyecek kadar büyük',
+  'file.risky': 'Bu tür dosyalar program çalıştırabilir. Yalnızca nereden geldiğine güveniyorsanız açın.',
+  'file.riskyConfirm': '{name} bilgisayarınızda program çalıştırabilir. Yine de kaydedilsin mi?',
   'msg.fileMissing': 'Bu dökümde yok',
   'msg.deleted': 'Bu mesaj silindi',
   'msg.deletedBySelf': 'Bu mesajı sildiniz',

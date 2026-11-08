@@ -8,10 +8,14 @@
   let { visual, session, onclick }: { visual: Visual; session: Session; onclick: () => void } = $props();
 
   let src = $state<string | null>(null);
+  let tooLarge = $state(false);
 
   function load() {
     if (visual.kind === 'image') {
-      void session.thumb(visual.file).then(async th => (src = th?.url ?? (await session.url(visual.file))));
+      void session.thumb(visual.file).then(async th => {
+        if (th?.tooLarge) tooLarge = true;
+        else src = th?.url || (await session.url(visual.file));
+      });
     } else {
       void session.url(visual.file).then(u => (src = u));
     }
@@ -25,6 +29,9 @@
     {:else}
       <video src={`${src}#t=0.5`} preload="metadata" muted playsinline tabindex="-1"></video>
     {/if}
+  {/if}
+  {#if tooLarge}
+    <span class="big" title={t('file.tooLarge')}><Icon name="image" size={24} /></span>
   {/if}
   {#if visual.kind === 'video'}
     <span class="play"><Icon name="play" size={18} /></span>
@@ -51,6 +58,14 @@
     height: 100%;
     object-fit: cover;
     pointer-events: none;
+  }
+
+  .big {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
   }
 
   .play {

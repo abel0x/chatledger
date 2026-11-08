@@ -29,9 +29,11 @@ export interface Session {
 }
 
 export interface Thumb {
+  /** Empty when the picture is too large to show; it is then never decoded. */
   url: string;
   width: number;
   height: number;
+  tooLarge?: true;
 }
 
 /** Longest side of thumbnails; sharp at bubble size on high-density screens. */
@@ -155,7 +157,11 @@ export function openSession(source: Source, onProgress?: (phase: Phase, fraction
               if (!thumb) {
                 const id = nextId++;
                 thumb = new Promise<Thumbnail | null>(done => pendingThumbs.set(id, done)).then(t =>
-                  t && !closed ? { url: URL.createObjectURL(t.blob), width: t.width, height: t.height } : null,
+                  !t || closed
+                    ? null
+                    : 'tooLarge' in t
+                      ? { url: '', width: t.width, height: t.height, tooLarge: true as const }
+                      : { url: URL.createObjectURL(t.blob), width: t.width, height: t.height },
                 );
                 thumbs.set(file, thumb);
                 post({ type: 'thumb', id, file, size: THUMB_SIZE });
@@ -176,7 +182,7 @@ export function openSession(source: Source, onProgress?: (phase: Phase, fraction
               pending.clear();
               pendingThumbs.clear();
               for (const url of urls.values()) void url.then(u => u && URL.revokeObjectURL(u));
-              for (const thumb of thumbs.values()) void thumb.then(t => t && URL.revokeObjectURL(t.url));
+              for (const thumb of thumbs.values()) void thumb.then(t => t?.url && URL.revokeObjectURL(t.url));
               urls.clear();
               thumbs.clear();
             },

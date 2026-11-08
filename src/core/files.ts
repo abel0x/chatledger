@@ -87,7 +87,12 @@ export function mimeTypeFor(name: string): string {
  * so only the normalised base name is compared.
  */
 export function fileKey(name: string): string {
-  return baseName(name).normalize('NFC').toLowerCase();
+  return plainName(name).toLowerCase();
+}
+
+/** The name without hidden marks, which the chat text and the archive do not always agree on. */
+function plainName(name: string): string {
+  return baseName(name).normalize('NFC').replace(HIDDEN, '');
 }
 
 /** Finds files by the name a message gives them. */
@@ -96,14 +101,14 @@ export class FileIndex<T> {
   private loose = new Map<string, T>();
 
   add(name: string, value: T): void {
-    const exact = baseName(name).normalize('NFC');
+    const exact = plainName(name);
     if (!this.exact.has(exact)) this.exact.set(exact, value);
     const loose = fileKey(name);
     if (!this.loose.has(loose)) this.loose.set(loose, value);
   }
 
   get(name: string): T | undefined {
-    return this.exact.get(baseName(name).normalize('NFC')) ?? this.loose.get(fileKey(name));
+    return this.exact.get(plainName(name)) ?? this.loose.get(fileKey(name));
   }
 
   get size(): number {

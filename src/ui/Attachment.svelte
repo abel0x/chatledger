@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { extensionOf, mimeTypeFor, type MediaHint } from '../core';
+  import { extensionOf, isRiskyFile, mimeTypeFor, safeFileName, type MediaHint } from '../core';
   import { t } from '../i18n/index.svelte';
   import type { Session } from '../loader/client';
   import { useChatActions } from './context';
   import Icon from './Icon.svelte';
+  import { confirmRisky } from './save';
   import { visible } from './visible';
   import VoicePlayer from './VoicePlayer.svelte';
 
@@ -20,23 +21,33 @@
 
   let url = $state<string | null>(null);
   let broken = $state(false);
+  let tooLarge = $state(false);
+
+  const name = $derived(safeFileName(file));
+  const risky = $derived(isRiskyFile(file));
 
   const available = $derived(session.has(file));
   const mime = $derived(mimeTypeFor(file));
   const shown = $derived.by(() => {
-    if (broken) return 'file';
+    if (broken || tooLarge) return 'file';
     if (mime.startsWith('image/')) return 'image';
     if (mime.startsWith('video/')) return 'video';
     if (mime.startsWith('audio/')) return 'audio';
     return 'file';
   });
 
-  function load() {
-    if (shown === 'image' && media !== 'sticker') {
-      // Bubbles show a downscaled copy; the viewer opens the original.
-      void session.thumb(file).then(async th => (url = th?.url ?? (await session.url(file))));
+  async function load() {
+    if (shown === 'image') {
+      // The worker reads the size the picture claims before anything decodes it.
+      const th = await session.thumb(file);
+      if (th?.tooLarge) {
+        tooLarge = true;
+        return;
+      }
+      // Bubbles show a downscaled copy; stickers stay whole so they keep moving.
+      url = (media !== 'sticker' && th?.url) || (await session.url(file));
     } else {
-      void session.url(file).then(u => (url = u));
+      url = await session.url(file);
     }
   }
 </script>
@@ -44,7 +55,7 @@
 {#if !available}
   <div class="file missing">
     <Icon name="file" />
-    <span class="name">{file}</span>
+    <span class="name">{name}</span>
     <small>{t('msg.fileMissing')}</small>
   </div>
 {:else if shown === 'image'}
@@ -81,13 +92,17 @@
     {/if}
   </div>
 {:else}
-  <div class="file" use:visible={load}>
-    <Icon name="file" />
-    <span class="name">{file}</span>
-    {#if PREVIEW.has(extensionOf(file))}
-      <button class="open" type="button" onclick={() => actions?.openDocument(index)}>{t('menu.open')}</button>
-    {/if}
-    {#if url}<a href={url} download={file}>{t('msg.download')}</a>{/if}
+  <div class="file-card">
+    <div class="file" use:visible={load}>
+      <Icon name={risky ? 'blocked' : 'file'} />
+      <span class="name">{name}</span>
+      {#if PREVIEW.has(extensionOf(name)) && !tooLarge}
+        <button class="open" type="button" onclick={() => actions?.openDocument(index)}>{t('menu.open')}</button>
+      {/if}
+      {#if url}<a href={url} download={name} onclick={e => confirmRisky(e, name)}>{t('msg.download')}</a>{/if}
+    </div>
+    {#if tooLarge}<p class="warn">{t('file.tooLarge')}</p>{/if}
+    {#if risky}<p class="warn risky">{t('file.risky')}</p>{/if}
   </div>
 {/if}
 
@@ -164,6 +179,17 @@
     color: var(--link);
     text-decoration: underline;
     cursor: pointer;
+  }
+
+  .warn {
+    max-width: 330px;
+    margin: 0 0 4px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .warn.risky {
+    color: var(--danger);
   }
 
   .missing {
