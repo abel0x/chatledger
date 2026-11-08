@@ -7,6 +7,8 @@ import { landscape, png } from './png';
  */
 export const DEMO_TITLE = 'Weekend Hikers';
 export const DEMO_FILE = `WhatsApp Chat with ${DEMO_TITLE}.zip`;
+/** A program whose name uses a hidden right-to-left mark to pass for a PDF. */
+export const SPOOFED = 'invoice\u202Efdp.exe';
 
 const PEOPLE = ['Ada Yılmaz', 'Mert Aydın', 'Elif Şahin', 'Can Öztürk', 'Deniz Kaya', 'Selin Arslan'];
 const SELF = 'Ada Yılmaz';
@@ -89,6 +91,7 @@ export async function buildDemo(): Promise<Demo> {
   lines.push(line((time += 60), 'PTT-20251101-WA0100.wav (file attached)', 'Mert Aydın'));
   lines.push(line((time += 60), 'STK-20251101-WA0101.png (file attached)', 'Selin Arslan'));
   lines.push(line((time += 60), 'Packing list.docx (file attached)', 'Ada Yılmaz'));
+  lines.push(line((time += 60), `${SPOOFED} (file attached)`, 'Deniz Kaya'));
   lines.push(line((time += 3600), 'POLL:\nWhere should we go next?\nOPTION: Mountain hut (4 votes)\nOPTION: Lake loop (2 votes)\nOPTION: Coast path (1 vote)', 'Elif Şahin'));
   lines.push(line((time += 120), 'Trip plan.pdf (file attached)', 'Mert Aydın'));
   lines.push(line((time += 300), 'Route notes are here: https://example.org/trails/north-ridge', 'Can Öztürk'));
@@ -103,6 +106,7 @@ export async function buildDemo(): Promise<Demo> {
   await zip.add('PTT-20251101-WA0100.wav', new Uint8ArrayReader(tone()));
   await zip.add('STK-20251101-WA0101.png', new Uint8ArrayReader(sticker()));
   await zip.add('Packing list.docx', new Uint8ArrayReader(await docx()));
+  await zip.add(SPOOFED, new TextReader('MZ not a real program'));
   return { name: DEMO_FILE, buffer: Buffer.from(await zip.close()), images };
 }
 

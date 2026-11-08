@@ -119,3 +119,21 @@ test('steps through search results with Enter', async ({ page }) => {
   await expect(page.locator('.count')).toContainText(/^1 of \d+/);
   await expect(page.locator('.row.flash mark').first()).toBeVisible();
 });
+
+test('unmasks disguised programs and asks before saving them', async ({ page }) => {
+  await openDemo(page);
+  const card = await goTo(page, 'invoicefdp.exe');
+  await expect(card.locator('.name')).toHaveText('invoicefdp.exe');
+  await expect(card).toContainText('Files like this can run programs');
+  let asked = '';
+  page.once('dialog', dialog => {
+    asked = dialog.message();
+    void dialog.dismiss();
+  });
+  let downloaded = false;
+  page.on('download', () => (downloaded = true));
+  await card.getByRole('link', { name: 'Save' }).click();
+  await expect.poll(() => asked).toContain('can run programs on your computer');
+  await page.waitForTimeout(300);
+  expect(downloaded).toBe(false);
+});
