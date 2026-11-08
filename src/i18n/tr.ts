@@ -14,6 +14,7 @@ export const tr: Dictionary = {
   'welcome.howToAndroid': 'Android: sohbeti açın, ⋮ › Diğer › Sohbeti dışa aktar’a dokunun ve Medyayı dahil et’i seçin.',
   'welcome.howToIos': 'iPhone: sohbeti açın, üstteki ada dokunun, ardından Sohbeti Dışa Aktar › Medyayı Ekle’yi seçin.',
   'welcome.howToSend': 'Dosyayı bu bilgisayara kaydedip burada açın.',
+  'welcome.howToMerge': 'Aynı sohbetin birden fazla dökümü mü var? Hepsini birlikte seçin, tek bir sohbette birleşsinler.',
   'welcome.loading': 'Sohbet okunuyor…',
   'progress.unpack': 'Döküm açılıyor…',
   'progress.parse': 'Mesajlar okunuyor…',
@@ -31,6 +32,7 @@ export const tr: Dictionary = {
   'error.badArchive': '.zip dosyası okunamadı. Eksik inmiş olabilir; yeniden kopyalamayı deneyin.',
   'error.notSaved': 'Bu kayıtlı sohbet artık yok. Tarayıcı depolamayı temizlemiş olabilir; dökümü yeniden açın.',
   'error.tooLarge': 'Bu döküm güvenle açılamayacak kadar büyük. Gerçek bir sohbetse lütfen bildirin.',
+  'error.differentChats': 'Bu dökümler farklı sohbetlere ait. Bunları tek tek açın.',
   'error.unknown': 'Dosya okunurken bir sorun çıktı.',
 
   'chat.close': 'Sohbeti kapat',
@@ -194,6 +196,9 @@ export const tr: Dictionary = {
   'info.left': { one: '{count} kişi ayrıldı', other: '{count} kişi ayrıldı' },
   'info.onThisDay': 'Geçmişte bugün',
   'info.yearsAgo': { one: '{count} yıl önce', other: '{count} yıl önce' },
+  'info.addExport': 'Bu sohbetin başka bir dökümünü ekle',
+  'info.addExportHint': 'Aynı sohbetin daha eski ya da daha yeni bir dökümünü seçin; ikisinde de olan mesajlar bir kez tutulur.',
+  'info.adding': 'Ekleniyor…',
   'info.random': 'Rastgele bir mesaj göster',
   'info.searchPerson': '{name} adlı kişinin mesajlarında ara',
 

@@ -139,6 +139,7 @@
         <li>{t('welcome.howToAndroid')}</li>
         <li>{t('welcome.howToIos')}</li>
         <li>{t('welcome.howToSend')}</li>
+        <li>{t('welcome.howToMerge')}</li>
       </ul>
     </details>
   </section>

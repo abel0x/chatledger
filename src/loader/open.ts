@@ -4,7 +4,9 @@ import {
   type Limits,
   chatCandidates,
   extensionOf,
+  DifferentChatsError,
   FileIndex,
+  mergeChats,
   isZipName,
   mimeTypeFor,
   NotAChatError,
@@ -15,7 +17,7 @@ import {
 // This code already runs off the main thread; zip.js needs no workers of its own.
 configure({ useWebWorkers: false });
 
-export type LoadErrorCode = 'empty' | 'noChat' | 'notAChat' | 'badArchive' | 'tooLarge' | 'notSaved' | 'unknown';
+export type LoadErrorCode = 'empty' | 'noChat' | 'notAChat' | 'badArchive' | 'tooLarge' | 'differentChats' | 'notSaved' | 'unknown';
 
 export class LoadError extends Error {
   constructor(
@@ -123,40 +125,53 @@ export async function openExport(files: File[], onProgress?: Progress, limits: L
   };
 
   try {
-    const sources: Source[] = [];
-    const archiveNames: string[] = [];
+    // Each archive is one export; loose files picked together make up another.
+    const groups: { sources: Source[]; archive: string | null }[] = [];
+    const loose: Source[] = [];
     for (const file of files) {
-      if (await looksLikeZip(file)) {
-        archiveNames.push(file.name);
-        sources.push(...(await zipSources(file, readers, limits)));
-      } else {
-        sources.push(fileSource(file, limits));
+      if (await looksLikeZip(file)) groups.push({ sources: await zipSources(file, readers, limits), archive: file.name });
+      else loose.push(fileSource(file, limits));
+    }
+    if (loose.length) groups.push({ sources: loose, archive: null });
+
+    const archiveNames = groups.flatMap(g => (g.archive ? [g.archive] : []));
+    const chats: Chat[] = [];
+    const chatSources = new Set<Source>();
+    let anyCandidate = false;
+    for (const group of groups) {
+      const byPath = new Map(group.sources.map(src => [src.path, src]));
+      for (const path of chatCandidates(group.sources.map(src => src.path))) {
+        anyCandidate = true;
+        const source = byPath.get(path) as Source;
+        const text = await source.text((done, total) => onProgress?.('unpack', done, total));
+        try {
+          chats.push(
+            parseChat(text, {
+              fileName: group.archive ? [path, group.archive] : [path, ...archiveNames],
+              onProgress: (done, total) => onProgress?.('parse', done, total),
+            }),
+          );
+          chatSources.add(source);
+          break;
+        } catch (err) {
+          if (!(err instanceof NotAChatError)) throw err;
+        }
       }
     }
+    if (!anyCandidate) throw new LoadError('noChat');
+    if (!chats.length) throw new LoadError('notAChat');
 
-    const byPath = new Map(sources.map(s => [s.path, s]));
-    const candidates = chatCandidates(sources.map(s => s.path));
-    if (!candidates.length) throw new LoadError('noChat');
-
-    let chat: Chat | null = null;
-    let chatPath = '';
-    for (const path of candidates) {
-      const text = await (byPath.get(path) as Source).text((done, total) => onProgress?.('unpack', done, total));
-      try {
-        chat = parseChat(text, {
-          fileName: [path, ...archiveNames],
-          onProgress: (done, total) => onProgress?.('parse', done, total),
-        });
-        chatPath = path;
-        break;
-      } catch (err) {
-        if (!(err instanceof NotAChatError)) throw err;
-      }
+    let chat: Chat;
+    try {
+      chat = mergeChats(chats);
+    } catch (cause) {
+      if (cause instanceof DifferentChatsError) throw new LoadError('differentChats', { cause });
+      throw cause;
     }
-    if (!chat) throw new LoadError('notAChat');
 
+    // Attachments may come from any of the exports.
     const index = new FileIndex<Source>();
-    for (const s of sources) if (s.path !== chatPath) index.add(s.path, s);
+    for (const group of groups) for (const src of group.sources) if (!chatSources.has(src)) index.add(src.path, src);
 
     const found = new Set<string>();
     const missing = new Set<string>();

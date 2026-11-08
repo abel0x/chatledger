@@ -139,3 +139,26 @@ describe.skipIf(!archives.length)('real archives', () => {
     await opened.close();
   });
 });
+
+describe('several exports of one chat', () => {
+  it('are joined into one timeline with attachments from all of them', async () => {
+    const first = await zip('WhatsApp Chat with Hiking Club.zip', {
+      'WhatsApp Chat with Hiking Club.txt': '01/10/2025, 20:00 - Ada: First\n01/10/2025, 20:17 - Elif: <Media omitted>\n',
+    });
+    const second = await zip('WhatsApp Chat with Hiking Club (1).zip', {
+      'WhatsApp Chat with Hiking Club.txt':
+        '01/10/2025, 20:17 - Elif: IMG-20251001-WA0001.jpg (file attached)\n02/10/2025, 09:00 - Ada: Later\n',
+      'IMG-20251001-WA0001.jpg': jpeg(),
+    });
+    const opened = await openExport([first, second]);
+    expect(opened.chat.messages.map(m => m.text ?? m.file)).toEqual(['First', 'IMG-20251001-WA0001.jpg', 'Later']);
+    expect(opened.missing).toEqual([]);
+    expect(opened.chat.title).toBe('Hiking Club');
+  });
+
+  it('are refused when they are different chats', async () => {
+    const a = await zip('WhatsApp Chat with A.zip', { 'WhatsApp Chat with A.txt': '01/10/2025, 20:00 - Ada: hi\n' });
+    const b = await zip('WhatsApp Chat with B.zip', { 'WhatsApp Chat with B.txt': '05/05/2024, 10:00 - Zoe: hey\n' });
+    expect(await failure(openExport([a, b]))).toBe('differentChats');
+  });
+});

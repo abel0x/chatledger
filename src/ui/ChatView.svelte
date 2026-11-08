@@ -3,6 +3,7 @@
   import type { Message } from '../core';
   import { eventText, locale, t } from '../i18n/index.svelte';
   import type { Session } from '../loader/client';
+  import type { LoadErrorCode } from '../loader/open';
   import Bubble from './Bubble.svelte';
   import { provideChatActions } from './context';
   import DocViewer from './DocViewer.svelte';
@@ -27,7 +28,11 @@
   import Toast from './Toast.svelte';
   import VirtualList from './VirtualList.svelte';
 
-  let { session, onclose }: { session: Session; onclose: () => void } = $props();
+  let {
+    session,
+    onclose,
+    onaddexport,
+  }: { session: Session; onclose: () => void; onaddexport?: (files: File[]) => Promise<LoadErrorCode | null> } = $props();
 
   type Panel = 'search' | 'gallery' | 'starred' | 'info';
 
@@ -451,6 +456,12 @@
   {:else if panel === 'info'}
     <InfoPanel
       {chat}
+      onadd={onaddexport
+        ? async files => {
+            const failed = await onaddexport(files);
+            if (failed) say(t(`error.${failed}`));
+          }
+        : undefined}
       onpick={pick}
       onperson={person => {
         searchPerson = person;

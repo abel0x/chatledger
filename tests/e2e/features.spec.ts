@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { TextReader, Uint8ArrayWriter, ZipWriter } from '@zip.js/zip.js/lib/zip-core-native.js';
 import { DEMO_TITLE } from './demo';
 import { goTo, openDemo } from './helpers';
 
@@ -136,4 +137,24 @@ test('unmasks disguised programs and asks before saving them', async ({ page }) 
   await expect.poll(() => asked).toContain('can run programs on your computer');
   await page.waitForTimeout(300);
   expect(downloaded).toBe(false);
+});
+
+test('adds an older export of the same chat to the timeline', async ({ page }) => {
+  await openDemo(page);
+  const count = () => page.getByRole('heading', { level: 1 }).locator('xpath=following-sibling::p').textContent();
+  const before = await count();
+  const writer = new ZipWriter(new Uint8ArrayWriter(), { useWebWorkers: false });
+  await writer.add(
+    `WhatsApp Chat with ${DEMO_TITLE}.txt`,
+    new TextReader('04/04/2025, 18:00 - Deniz Kaya: Shall we start a hiking group?\n05/04/2025, 18:02 - Deniz Kaya created group "Weekend Plans"\n'),
+  );
+  await page.keyboard.press('i');
+  await page.getByLabel('Add another export of this chat').setInputFiles({
+    name: `WhatsApp Chat with ${DEMO_TITLE} (old).zip`,
+    mimeType: 'application/zip',
+    buffer: Buffer.from(await writer.close()),
+  });
+  await expect.poll(count).not.toBe(before);
+  await page.keyboard.press('Home');
+  await expect(page.getByText('Shall we start a hiking group?')).toBeVisible();
 });

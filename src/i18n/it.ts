@@ -14,6 +14,7 @@ export const it: Dictionary = {
   'welcome.howToAndroid': 'Android: apri la chat, tocca ⋮ › Altro › Esporta chat e scegli Includi file multimediali.',
   'welcome.howToIos': 'iPhone: apri la chat, tocca il suo nome in alto, poi Esporta chat › Allega media.',
   'welcome.howToSend': 'Salva il file su questo computer e aprilo qui.',
+  'welcome.howToMerge': 'Hai più esportazioni della stessa chat? Sceglile tutte insieme e verranno unite.',
   'welcome.loading': 'Lettura della chat…',
   'progress.unpack': 'Estrazione dell’esportazione…',
   'progress.parse': 'Lettura dei messaggi…',
@@ -31,6 +32,7 @@ export const it: Dictionary = {
   'error.badArchive': 'Non è stato possibile leggere il file .zip. Potrebbe essere incompleto; prova a copiarlo di nuovo.',
   'error.notSaved': 'Questa chat salvata non c’è più. Forse il browser ha svuotato la memoria; riapri l’esportazione.',
   'error.tooLarge': 'Questa esportazione è troppo grande per essere aperta in sicurezza. Se è una chat vera, segnalacelo.',
+  'error.differentChats': 'Queste esportazioni appartengono a chat diverse. Aprile una alla volta.',
   'error.unknown': 'Qualcosa è andato storto durante la lettura del file.',
 
   'chat.close': 'Chiudi la chat',
@@ -194,6 +196,9 @@ export const it: Dictionary = {
   'info.left': { one: '{count} è uscito', other: '{count} sono usciti' },
   'info.onThisDay': 'In questo giorno',
   'info.yearsAgo': { one: '{count} anno fa', other: '{count} anni fa' },
+  'info.addExport': 'Aggiungi un’altra esportazione di questa chat',
+  'info.addExportHint': 'Scegli un’esportazione più vecchia o più recente della stessa chat; i messaggi presenti in entrambe restano una volta sola.',
+  'info.adding': 'Aggiunta…',
   'info.random': 'Mostra un messaggio a caso',
   'info.searchPerson': 'Cerca i messaggi di {name}',
 

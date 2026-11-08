@@ -7,12 +7,28 @@
 
   interface Props {
     chat: Chat;
+    onadd?: (files: File[]) => Promise<void>;
     onpick: (messageIndex: number) => void;
     onperson: (person: number) => void;
     onclose: () => void;
   }
 
-  let { chat, onpick, onperson, onclose }: Props = $props();
+  let { chat, onadd, onpick, onperson, onclose }: Props = $props();
+
+  let adding = $state(false);
+  let picker = $state<HTMLInputElement>();
+
+  async function picked(e: Event & { currentTarget: HTMLInputElement }) {
+    const files = [...(e.currentTarget.files ?? [])];
+    e.currentTarget.value = '';
+    if (!files.length || !onadd) return;
+    adding = true;
+    try {
+      await onadd(files);
+    } finally {
+      adding = false;
+    }
+  }
 
   const info = $derived(groupInfo(chat));
   const past = $derived(onThisDay(chat, new Date()));
@@ -62,6 +78,26 @@
         {t('info.random')}
       </button>
     </section>
+
+    {#if onadd}
+      <section>
+        <button class="button secondary random" type="button" disabled={adding} onclick={() => picker?.click()}>
+          <Icon name="upload" size={16} />
+          {adding ? t('info.adding') : t('info.addExport')}
+        </button>
+        <p class="sub">{t('info.addExportHint')}</p>
+        <input
+          class="visually-hidden"
+          type="file"
+          accept=".zip,.txt,application/zip,text/plain"
+          multiple
+          bind:this={picker}
+          onchange={picked}
+          tabindex="-1"
+          aria-label={t('info.addExport')}
+        />
+      </section>
+    {/if}
 
     {#if past.length}
       <section>

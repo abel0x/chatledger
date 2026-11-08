@@ -17,6 +17,7 @@ export const en = {
   'welcome.howToAndroid': 'Android: open the chat, tap ⋮ › More › Export chat, then choose Include media.',
   'welcome.howToIos': 'iPhone: open the chat, tap its name at the top, then Export chat › Attach media.',
   'welcome.howToSend': 'Save the file to this computer and open it here.',
+  'welcome.howToMerge': 'Have several exports of the same chat? Pick them all at once and they are joined into one.',
   'welcome.loading': 'Reading the chat…',
   'progress.unpack': 'Unpacking the export…',
   'progress.parse': 'Reading the messages…',
@@ -34,6 +35,7 @@ export const en = {
   'error.badArchive': 'The .zip file could not be read. It may be incomplete; try copying it again.',
   'error.notSaved': 'This saved chat is gone. The browser may have cleared its storage; open the export again.',
   'error.tooLarge': 'This export is too large to open safely. If it is a real chat, please report it.',
+  'error.differentChats': 'These exports come from different chats. Open them one at a time.',
   'error.unknown': 'Something went wrong while reading the file.',
 
   'chat.close': 'Close chat',
@@ -197,6 +199,9 @@ export const en = {
   'info.left': { one: '{count} has left', other: '{count} have left' },
   'info.onThisDay': 'On this day',
   'info.yearsAgo': { one: '{count} year ago', other: '{count} years ago' },
+  'info.addExport': 'Add another export of this chat',
+  'info.addExportHint': 'Pick an older or newer export of the same chat; messages that appear in both are kept once.',
+  'info.adding': 'Adding…',
   'info.random': 'Show a random message',
   'info.searchPerson': 'Search the messages of {name}',
 

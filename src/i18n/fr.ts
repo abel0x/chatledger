@@ -14,6 +14,7 @@ export const fr: Dictionary = {
   'welcome.howToAndroid': 'Android : ouvrez la discussion, touchez ⋮ › Plus › Exporter la discussion, puis choisissez Inclure les médias.',
   'welcome.howToIos': 'iPhone : ouvrez la discussion, touchez son nom en haut, puis Exporter la discussion › Joindre les médias.',
   'welcome.howToSend': 'Enregistrez le fichier sur cet ordinateur et ouvrez-le ici.',
+  'welcome.howToMerge': 'Plusieurs exports de la même discussion ? Choisissez-les tous ensemble, ils seront réunis.',
   'welcome.loading': 'Lecture de la discussion…',
   'progress.unpack': 'Décompression de l’export…',
   'progress.parse': 'Lecture des messages…',
@@ -31,6 +32,7 @@ export const fr: Dictionary = {
   'error.badArchive': 'Le fichier .zip n’a pas pu être lu. Il est peut-être incomplet ; essayez de le copier à nouveau.',
   'error.notSaved': 'Cette discussion enregistrée n’existe plus. Le navigateur a peut-être vidé son stockage ; rouvrez l’export.',
   'error.tooLarge': 'Cet export est trop volumineux pour être ouvert en toute sécurité. S’il s’agit d’une vraie discussion, signalez-le.',
+  'error.differentChats': 'Ces exports proviennent de discussions différentes. Ouvrez-les une par une.',
   'error.unknown': 'Un problème est survenu pendant la lecture du fichier.',
 
   'chat.close': 'Fermer la discussion',
@@ -194,6 +196,9 @@ export const fr: Dictionary = {
   'info.left': { one: '{count} est parti', other: '{count} sont partis' },
   'info.onThisDay': 'Ce jour-là',
   'info.yearsAgo': { one: 'il y a {count} an', other: 'il y a {count} ans' },
+  'info.addExport': 'Ajouter un autre export de cette discussion',
+  'info.addExportHint': 'Choisissez un export plus ancien ou plus récent de la même discussion ; les messages présents dans les deux ne sont gardés qu’une fois.',
+  'info.adding': 'Ajout…',
   'info.random': 'Afficher un message au hasard',
   'info.searchPerson': 'Rechercher les messages de {name}',
 

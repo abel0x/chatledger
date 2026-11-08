@@ -14,6 +14,7 @@ export const pt: Dictionary = {
   'welcome.howToAndroid': 'Android: abra a conversa, toque em ⋮ › Mais › Exportar conversa e escolha Incluir mídia.',
   'welcome.howToIos': 'iPhone: abra a conversa, toque no nome dela no topo e depois em Exportar conversa › Anexar mídia.',
   'welcome.howToSend': 'Salve o arquivo neste computador e abra-o aqui.',
+  'welcome.howToMerge': 'Tem várias exportações da mesma conversa? Escolha todas de uma vez e elas serão unidas.',
   'welcome.loading': 'Lendo a conversa…',
   'progress.unpack': 'Descompactando a exportação…',
   'progress.parse': 'Lendo as mensagens…',
@@ -31,6 +32,7 @@ export const pt: Dictionary = {
   'error.badArchive': 'Não foi possível ler o arquivo .zip. Ele pode estar incompleto; tente copiá-lo de novo.',
   'error.notSaved': 'Esta conversa salva não existe mais. O navegador pode ter apagado o armazenamento; abra a exportação de novo.',
   'error.tooLarge': 'Esta exportação é grande demais para ser aberta com segurança. Se for uma conversa real, avise-nos.',
+  'error.differentChats': 'Estas exportações são de conversas diferentes. Abra uma de cada vez.',
   'error.unknown': 'Algo deu errado ao ler o arquivo.',
 
   'chat.close': 'Fechar a conversa',
@@ -194,6 +196,9 @@ export const pt: Dictionary = {
   'info.left': { one: '{count} saiu', other: '{count} saíram' },
   'info.onThisDay': 'Neste dia',
   'info.yearsAgo': { one: 'há {count} ano', other: 'há {count} anos' },
+  'info.addExport': 'Adicionar outra exportação desta conversa',
+  'info.addExportHint': 'Escolha uma exportação mais antiga ou mais recente da mesma conversa; mensagens que aparecem nas duas ficam uma vez só.',
+  'info.adding': 'Adicionando…',
   'info.random': 'Mostrar uma mensagem aleatória',
   'info.searchPerson': 'Pesquisar as mensagens de {name}',
 
