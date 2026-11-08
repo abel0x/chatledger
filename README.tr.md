@@ -21,7 +21,8 @@ chatledger sizin bilgisayarınızda çalışır ve sohbeti tarayıcınızda gös
 - Sohbetteki bütün fotoğraf ve videoları, dosyaları ve bağlantıları tek yerde toplar; fotoğraflar tam ekran açılır.
 - En çok kimin yazdığını ve sohbetin en hareketli olduğu saatleri sayar. Aylara göre mesajları, sevilen emojileri, en uzun sessizliği ve daha fazlasını gösterir.
 - Açtığınız sohbetleri hatırlar, yeniden başlattığınızda da yerinde olurlar. Bunu kapatabilir, kayıtlı herhangi bir sohbeti kaldırabilirsiniz.
-- Arayüzü İngilizce ve Türkçedir; açık ve koyu tema, üç yazı boyutu ve klavye kısayolları vardır (`?` tuşuna basın). İki dilde ayarlanmış telefonların dökümlerini de okur.
+- Arayüzü İngilizce, Almanca, İspanyolca, Fransızca, İtalyanca, Portekizce ve Türkçedir; bu dillerden herhangi birine ayarlı telefonların dökümlerini okur. Grup olayları, telefonun dili ne olursa olsun sizin okuduğunuz dilde yazılır.
+- Açık ve koyu tema, üç yazı boyutu ve klavye kısayolları vardır (`?` tuşuna basın).
 
 | Galeri | İstatistikler |
 | --- | --- |
@@ -56,7 +57,8 @@ chatledger, Firefox'un ve Chrome, Edge gibi Chromium tabanlı tarayıcıların g
 ## Bilinen sınırlar
 
 - **iPhone dökümleri deneyseldir.** chatledger iPhone'un dışa aktarma biçimine göre yazıldı, ancak henüz pek çok gerçek iPhone dökümüyle denenmedi. Biri açılmazsa ya da yanlış görünürse lütfen bildirin (aşağıya bakın).
-- İngilizce ve Türkçe dışındaki dillerde ayarlanmış telefonlardan gelen "ekledi", "ayrıldı" gibi grup olayları çevrilmeden, WhatsApp'ın yazdığı gibi gösterilir. Mesajlar, tarihler ve medya her dilde çalışır.
+- Almanca, İspanyolca, Fransızca, İtalyanca veya Portekizce ayarlı telefonlardan gelen dökümler, WhatsApp'ın bu dillerdeki ifadelerine göre okunur ancak henüz pek çok gerçek dökümle denenmedi. Bir grup olayı sizin diliniz yerine telefonun dilinde görünürse ya da bir ek tanınmazsa lütfen o satırı (adları değiştirerek) bildirin.
+- Başka dillere ayarlı telefonlardan gelen grup olayları çevrilmeden, WhatsApp'ın yazdığı gibi gösterilir. Mesajlar, tarihler ve medya her dilde çalışır.
 
 ## Sohbetleriniz nerede saklanır
 

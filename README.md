@@ -21,7 +21,8 @@ chatledger runs on your machine and shows the chat in your browser. Your message
 - Collects every photo and video, file and link of the chat in one place, with a full-screen viewer.
 - Counts who wrote the most and when the chat is busiest. Also shows messages per month, favourite emoji, the longest silence and more.
 - Remembers chats you open, so they are still there after a restart. You can turn this off, and you can remove any saved chat.
-- Has an English and a Turkish interface, a light and a dark theme, three text sizes and keyboard shortcuts (press `?`). It reads exports made by phones set to either language.
+- Speaks English, German, Spanish, French, Italian, Portuguese and Turkish, and reads exports from phones set to any of them. Group events are written in the language you read in, whatever language the phone used.
+- Has a light and a dark theme, three text sizes and keyboard shortcuts (press `?`).
 
 | Gallery | Statistics |
 | --- | --- |
@@ -56,7 +57,8 @@ chatledger is tested in current versions of Firefox and of Chrome, Edge and othe
 ## Known limits
 
 - **iPhone exports are experimental.** chatledger follows the iPhone export format, but it has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please report it (see below).
-- Group events such as "added" or "left" from phones set to a language other than English or Turkish are shown as WhatsApp wrote them, without translation. Messages, dates and media work in every language.
+- Exports from phones set to German, Spanish, French, Italian or Portuguese follow WhatsApp's wording in those languages but have not yet been checked against many real exports. If a group event shows up in the phone's language instead of yours, or an attachment is not recognised, please report the line (with the names changed).
+- Group events from phones set to any other language are shown as WhatsApp wrote them, without translation. Messages, dates and media work in every language.
 
 ## Where your chats are kept
 

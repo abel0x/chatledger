@@ -2,6 +2,17 @@
 
 All notable changes to chatledger are listed here. Versions follow [semantic versioning](https://semver.org).
 
+## [0.3.0] - 2026-11-08
+
+### Added
+
+- Five new languages: German, Spanish, French, Italian and Portuguese, both for the interface and for reading exports from phones set to them. The browser's language is picked up on first start.
+- French exports with dates written as "01/10/2025 à 20:30" and group names in « guillemets » or German „Anführungszeichen“ are read correctly.
+
+### Known limits
+
+- The wording WhatsApp uses in the five new languages has not yet been checked against many real exports. Messages, dates and media do not depend on it; unrecognised group events are shown as written.
+
 ## [0.2.0] - 2026-11-08
 
 Everything the first prototype of chatledger could do is back, and more.
@@ -54,5 +65,6 @@ The first release.
 - **iPhone support is experimental.** It follows the iPhone export format but has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please open an issue.
 - Group events from phones in other languages are shown as WhatsApp wrote them, without translation.
 
+[0.3.0]: https://github.com/abel0x/chatledger/releases/tag/v0.3.0
 [0.2.0]: https://github.com/abel0x/chatledger/releases/tag/v0.2.0
 [0.1.0]: https://github.com/abel0x/chatledger/releases/tag/v0.1.0
