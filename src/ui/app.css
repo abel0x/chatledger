@@ -1,0 +1,160 @@
+:root {
+  color-scheme: light dark;
+  --bg: #efeae2;
+  --panel: #f0f2f5;
+  --panel-border: #d1d7db;
+  --text: #111b21;
+  --muted: #667781;
+  --bubble-in: #ffffff;
+  --bubble-out: #d9fdd3;
+  --pill: #ffffffe6;
+  --accent: #008069;
+  --accent-text: #ffffff;
+  --link: #027eb5;
+  --danger: #b3261e;
+  --shadow: 0 1px 0.5px #0b141a21;
+  --radius: 8px;
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+
+  --c0: #c0392b;
+  --c1: #1f7a8c;
+  --c2: #8e44ad;
+  --c3: #b5651d;
+  --c4: #2e7d32;
+  --c5: #ad1457;
+  --c6: #3949ab;
+  --c7: #00796b;
+  --c8: #6d4c41;
+  --c9: #d84315;
+  --c10: #5e35b1;
+  --c11: #0277bd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b141a;
+    --panel: #202c33;
+    --panel-border: #2f3b43;
+    --text: #e9edef;
+    --muted: #8696a0;
+    --bubble-in: #202c33;
+    --bubble-out: #005c4b;
+    --pill: #182229;
+    --accent: #00a884;
+    --accent-text: #111b21;
+    --link: #53bdeb;
+    --danger: #f2b8b5;
+    --shadow: 0 1px 0.5px #0000004d;
+
+    --c0: #ff8a80;
+    --c1: #80deea;
+    --c2: #ce93d8;
+    --c3: #ffcc80;
+    --c4: #a5d6a7;
+    --c5: #f48fb1;
+    --c6: #9fa8da;
+    --c7: #80cbc4;
+    --c8: #bcaaa4;
+    --c9: #ffab91;
+    --c10: #b39ddb;
+    --c11: #81d4fa;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.4 var(--font), var(--emoji);
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  height: 100%;
+}
+
+a {
+  color: var(--link);
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button.secondary {
+  background: transparent;
+  border-color: var(--panel-border);
+  color: var(--text);
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.c0 { color: var(--c0); }
+.c1 { color: var(--c1); }
+.c2 { color: var(--c2); }
+.c3 { color: var(--c3); }
+.c4 { color: var(--c4); }
+.c5 { color: var(--c5); }
+.c6 { color: var(--c6); }
+.c7 { color: var(--c7); }
+.c8 { color: var(--c8); }
+.c9 { color: var(--c9); }
+.c10 { color: var(--c10); }
+.c11 { color: var(--c11); }
