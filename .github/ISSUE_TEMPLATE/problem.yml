@@ -1,0 +1,56 @@
+name: Something does not work
+description: An export that will not open, a message shown wrongly, or anything else that is broken.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Please do not attach your chat or its media.** Issues are public. If a few lines help explain the problem, copy them and replace every name, number and word of the message with made-up ones first, keeping the dates, punctuation and layout exactly as they are.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, and what did you see instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: phone
+    attributes:
+      label: Exported from
+      options:
+        - Android
+        - iPhone
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: phone-language
+    attributes:
+      label: Language of the phone that made the export
+      placeholder: English, Türkçe, Deutsch…
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Computer
+      options:
+        - Windows
+        - Linux
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Firefox 157, Chrome 156…
+  - type: input
+    id: version
+    attributes:
+      label: chatledger version
+      placeholder: 0.1.0
+  - type: textarea
+    id: lines
+    attributes:
+      label: Example lines, with everything personal changed
+      render: text

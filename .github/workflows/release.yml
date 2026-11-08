@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Write release notes
+        run: node scripts/notes.mjs "$GITHUB_REF_NAME" > release-notes.md
+      - run: npm run release
+      - name: Checksums
+        working-directory: release
+        run: sha256sum *.zip > SHA256SUMS.txt
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "$GITHUB_REF_NAME" release/*.zip release/SHA256SUMS.txt
+          --title "chatledger ${GITHUB_REF_NAME#v}" --notes-file release-notes.md --verify-tag

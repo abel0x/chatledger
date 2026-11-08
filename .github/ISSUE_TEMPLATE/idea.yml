@@ -1,0 +1,13 @@
+name: Idea
+description: Something chatledger could do better or could do at all.
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like chatledger to do?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What would it help you with?
