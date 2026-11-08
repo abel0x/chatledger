@@ -1,18 +1,12 @@
-import { expect, test, type Page } from '@playwright/test';
-import { buildDemo, DEMO_TITLE, type Demo } from './demo';
+import { expect, test } from '@playwright/test';
+import { DEMO_TITLE, type Demo } from './demo';
+import { demo as loadDemo, openDemo } from './helpers';
 
 let demo: Demo;
 
 test.beforeAll(async () => {
-  demo = await buildDemo();
+  demo = await loadDemo();
 });
-
-async function openDemo(page: Page, remember = false) {
-  await page.goto('/');
-  if (!remember) await page.getByLabel('Remember chats I open on this computer').uncheck();
-  await page.locator('input[type=file][accept]').setInputFiles({ name: demo.name, mimeType: 'application/zip', buffer: demo.buffer });
-  await expect(page.getByRole('heading', { level: 1, name: DEMO_TITLE })).toBeVisible();
-}
 
 test('opens an export and shows its messages', async ({ page }) => {
   await openDemo(page);
@@ -70,6 +64,7 @@ test('keeps a chat after a reload and forgets it when removed', async ({ page })
 
 test('switches the interface to Turkish', async ({ page }) => {
   await openDemo(page);
+  await page.getByRole('button', { name: 'Settings' }).click();
   await page.getByLabel('Language').selectOption('tr');
   await expect(page.getByRole('button', { name: 'Sohbeti kapat' })).toBeVisible();
   await expect(page.getByText('Deniz Kaya, “Weekend Plans” grubunu oluşturdu')).toBeVisible();

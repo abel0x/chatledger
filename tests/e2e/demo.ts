@@ -1,5 +1,5 @@
 import { TextReader, Uint8ArrayReader, Uint8ArrayWriter, ZipWriter } from '@zip.js/zip.js/lib/zip-core-native.js';
-import { landscape } from './png';
+import { landscape, png } from './png';
 
 /**
  * A made-up group chat with made-up people, used for browser tests and for
@@ -83,7 +83,13 @@ export async function buildDemo(): Promise<Demo> {
   }
 
   time += 3600;
-  lines.push(line(time, 'POLL:\nWhere should we go next?\nOPTION: Mountain hut (4 votes)\nOPTION: Lake loop (2 votes)\nOPTION: Coast path (1 vote)', 'Elif Şahin'));
+  lines.push(line(time, '*Plan for Saturday*: meet at _8:00_ ~or 9~ at the station, bring `water`', 'Deniz Kaya'));
+  lines.push(line((time += 60), '@\u2068Mert Aydın\u2069 can you bring the map?', 'Elif Şahin'));
+  lines.push(line((time += 60), '🥾⛰️', 'Can Öztürk'));
+  lines.push(line((time += 60), 'PTT-20251101-WA0100.wav (file attached)', 'Mert Aydın'));
+  lines.push(line((time += 60), 'STK-20251101-WA0101.png (file attached)', 'Selin Arslan'));
+  lines.push(line((time += 60), 'Packing list.docx (file attached)', 'Ada Yılmaz'));
+  lines.push(line((time += 3600), 'POLL:\nWhere should we go next?\nOPTION: Mountain hut (4 votes)\nOPTION: Lake loop (2 votes)\nOPTION: Coast path (1 vote)', 'Elif Şahin'));
   lines.push(line((time += 120), 'Trip plan.pdf (file attached)', 'Mert Aydın'));
   lines.push(line((time += 300), 'Route notes are here: https://example.org/trails/north-ridge', 'Can Öztürk'));
   lines.push(line((time += 600), 'Deniz Kaya changed the group name from "Weekend Plans" to "Weekend Hikers"'));
@@ -94,13 +100,68 @@ export async function buildDemo(): Promise<Demo> {
   await zip.add(`WhatsApp Chat with ${DEMO_TITLE}.txt`, new TextReader(`${lines.join('\n')}\n`));
   for (const [i, file] of images.entries()) await zip.add(file, new Uint8ArrayReader(landscape(i)));
   await zip.add('Trip plan.pdf', new TextReader(MINIMAL_PDF));
+  await zip.add('PTT-20251101-WA0100.wav', new Uint8ArrayReader(tone()));
+  await zip.add('STK-20251101-WA0101.png', new Uint8ArrayReader(sticker()));
+  await zip.add('Packing list.docx', new Uint8ArrayReader(await docx()));
   return { name: DEMO_FILE, buffer: Buffer.from(await zip.close()), images };
 }
 
 const MINIMAL_PDF = `%PDF-1.4
 1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
-3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 100]>>endobj
+3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 120]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj
+4 0 obj<</Length 52>>stream
+BT /F1 24 Tf 30 60 Td (Trip plan: north ridge) Tj ET
+endstream
+endobj
+5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj
 trailer<</Root 1 0 R>>
 %%EOF
 `;
+
+/** A second and a half of a soft tone, as a WAV file every browser plays. */
+function tone(): Uint8Array {
+  const rate = 8000;
+  const samples = Math.round(rate * 1.5);
+  const out = Buffer.alloc(44 + samples * 2);
+  out.write('RIFF', 0, 'ascii');
+  out.writeUInt32LE(36 + samples * 2, 4);
+  out.write('WAVEfmt ', 8, 'ascii');
+  out.writeUInt32LE(16, 16);
+  out.writeUInt16LE(1, 20);
+  out.writeUInt16LE(1, 22);
+  out.writeUInt32LE(rate, 24);
+  out.writeUInt32LE(rate * 2, 28);
+  out.writeUInt16LE(2, 32);
+  out.writeUInt16LE(16, 34);
+  out.write('data', 36, 'ascii');
+  out.writeUInt32LE(samples * 2, 40);
+  for (let i = 0; i < samples; i++) out.writeInt16LE(Math.round(Math.sin((i / rate) * 2 * Math.PI * 440) * 6000), 44 + i * 2);
+  return out;
+}
+
+/** A round sticker face. */
+function sticker(): Uint8Array {
+  return png(160, 160, (x, y) => {
+    const d = Math.hypot(x - 80, y - 80);
+    if (d > 70) return [255, 255, 255];
+    if (Math.hypot(x - 55, y - 62) < 9 || Math.hypot(x - 105, y - 62) < 9) return [40, 40, 40];
+    if (d > 35 && d < 45 && y > 85) return [40, 40, 40];
+    return [255, 205, 60];
+  });
+}
+
+/** The smallest Word document that Word and chatledger both open. */
+async function docx(): Promise<Uint8Array> {
+  const w = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  const files: Record<string, string> = {
+    '[Content_Types].xml':
+      '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
+    '_rels/.rels':
+      '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="r1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
+    'word/document.xml': `<?xml version="1.0" encoding="UTF-8"?><w:document ${w}><w:body><w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Packing list</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val="0"/></w:numPr></w:pPr><w:r><w:t>Water, two litres</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val="0"/></w:numPr></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Rain jacket</w:t></w:r></w:p></w:body></w:document>`,
+  };
+  const zip = new ZipWriter(new Uint8ArrayWriter(), { useWebWorkers: false });
+  for (const [path, text] of Object.entries(files)) await zip.add(path, new TextReader(text));
+  return zip.close();
+}
