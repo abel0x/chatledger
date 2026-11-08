@@ -3,6 +3,7 @@ import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { configure, Uint8ArrayReader, Uint8ArrayWriter, ZipWriter } from '@zip.js/zip.js/lib/zip-core-native.js';
 import { build } from 'vite';
+import { collectPackages, noticeFor } from './licenses.mjs';
 
 /**
  * Builds the app and packs what someone needs to run it, without npm or the
@@ -24,7 +25,14 @@ async function filesIn(dir) {
   return out;
 }
 
-await build({ root, logLevel: 'warn' });
+const packages = new Map();
+await build({
+  root,
+  logLevel: 'warn',
+  plugins: [collectPackages(packages, root)],
+  worker: { plugins: () => [collectPackages(packages, root)] },
+});
+const notice = noticeFor(packages);
 
 const files = [
   ...(await filesIn(join(root, 'dist'))),
@@ -35,6 +43,8 @@ const files = [
   join(root, 'LICENSE'),
   join(root, 'README.md'),
   join(root, 'README.tr.md'),
+  join(root, 'CHANGELOG.md'),
+  ...(await filesIn(join(root, 'docs', 'screenshots'))),
 ];
 
 const zip = new ZipWriter(new Uint8ArrayWriter(), { useWebWorkers: false });
@@ -42,7 +52,8 @@ for (const file of files) {
   const path = `${name}/${relative(root, file).split(sep).join('/')}`;
   await zip.add(path, new Uint8ArrayReader(await readFile(file)), { executable: file.endsWith('.sh') });
 }
+await zip.add(`${name}/THIRD_PARTY_LICENSES.txt`, new Uint8ArrayReader(new TextEncoder().encode(notice)));
 const out = join(root, 'release', `${name}.zip`);
 await mkdir(dirname(out), { recursive: true });
 await writeFile(out, await zip.close());
-console.log(`${relative(root, out)} (${files.length} files)`);
+console.log(`${relative(root, out)} (${files.length + 1} files; bundled packages: ${[...packages.keys()].sort().join(', ')})`);
