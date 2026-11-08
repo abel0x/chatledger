@@ -12,6 +12,7 @@
   --accent-text: #ffffff;
   --link: #027eb5;
   --danger: #b3261e;
+  --mark: #ffd54f;
   --shadow: 0 1px 0.5px #0b141a21;
   --radius: 8px;
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
@@ -45,6 +46,7 @@
     --accent-text: #111b21;
     --link: #53bdeb;
     --danger: #f2b8b5;
+    --mark: #8a6d00;
     --shadow: 0 1px 0.5px #0000004d;
 
     --c0: #ff8a80;

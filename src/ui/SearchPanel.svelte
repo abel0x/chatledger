@@ -1,0 +1,254 @@
+<script lang="ts">
+  import type { Chat, Message } from '../core';
+  import { eventText, locale, t } from '../i18n/index.svelte';
+  import { formatDay, formatClock, dayOf } from './format';
+  import Icon from './Icon.svelte';
+  import { highlight, parseQuery, searchableText, snippet, type KindFilter, type SearchIndex } from './search';
+
+  interface Props {
+    chat: Chat;
+    index: SearchIndex;
+    onpick: (messageIndex: number) => void;
+    onclose: () => void;
+    onterms: (terms: string[]) => void;
+  }
+
+  let { chat, index, onpick, onclose, onterms }: Props = $props();
+
+  const LIMIT = 300;
+
+  let query = $state('');
+  let applied = $state('');
+  let sender = $state<number | null>(null);
+  let kind = $state<KindFilter>('all');
+  let input = $state<HTMLInputElement>();
+
+  // Typing stays smooth on very long chats: the search runs once typing pauses.
+  $effect(() => {
+    const next = query;
+    const timer = setTimeout(() => (applied = next), 150);
+    return () => clearTimeout(timer);
+  });
+
+  const terms = $derived(parseQuery(applied));
+  const result = $derived(index.search(applied, { sender, kind, limit: LIMIT }));
+  const active = $derived(terms.length > 0 || sender != null || kind !== 'all');
+  const people = $derived(chat.people.map((name, i) => ({ name, i })).sort((a, b) => a.name.localeCompare(b.name)));
+
+  $effect(() => onterms(terms));
+
+  $effect(() => {
+    input?.focus();
+  });
+
+  function summary(m: Message): string {
+    if (m.event) return eventText(m.event, chat.self);
+    const text = searchableText(m);
+    if (text) return snippet(text, terms);
+    if (m.kind === 'omitted') return t('msg.notIncluded', { what: t(`media.${m.media ?? 'unknown'}`) });
+    if (m.kind === 'deleted') return t('msg.deleted');
+    return '';
+  }
+
+  export function focus() {
+    input?.focus();
+    input?.select();
+  }
+</script>
+
+<aside class="panel" aria-label={t('search.label')}>
+  <div class="head">
+    <label class="field">
+      <Icon name="search" size={18} />
+      <span class="visually-hidden">{t('search.label')}</span>
+      <input
+        bind:this={input}
+        bind:value={query}
+        type="search"
+        placeholder={t('search.placeholder')}
+        autocomplete="off"
+        spellcheck="false"
+        onkeydown={e => {
+          if (e.key === 'Escape') onclose();
+          if (e.key === 'Enter' && result.hits[0] !== undefined) onpick(result.hits[0]);
+        }}
+      />
+    </label>
+    <button class="icon-button" type="button" onclick={onclose} aria-label={t('search.close')} title={t('search.close')}>
+      <Icon name="close" />
+    </button>
+  </div>
+
+  <div class="filters">
+    <label>
+      <span class="visually-hidden">{t('search.sender')}</span>
+      <select bind:value={sender}>
+        <option value={null}>{t('search.everyone')}</option>
+        {#each people as p (p.i)}
+          <option value={p.i}>{p.name}</option>
+        {/each}
+      </select>
+    </label>
+    <label>
+      <span class="visually-hidden">{t('search.kind')}</span>
+      <select bind:value={kind}>
+        <option value="all">{t('search.kindAll')}</option>
+        <option value="media">{t('search.kindMedia')}</option>
+        <option value="links">{t('search.kindLinks')}</option>
+      </select>
+    </label>
+  </div>
+
+  {#if !active}
+    <p class="hint">{t('search.hint')}</p>
+  {:else}
+    <p class="count" role="status">
+      {#if result.total === 0}
+        {t('search.none')}
+      {:else}
+        {t('search.results', { count: result.total })}
+        {#if result.total > result.hits.length}· {t('search.showing', { count: result.hits.length })}{/if}
+      {/if}
+    </p>
+    <ol class="results">
+      {#each result.hits as i (i)}
+        {@const m = chat.messages[i] as Message}
+        <li>
+          <button type="button" onclick={() => onpick(i)}>
+            <span class="meta">
+              {#if m.sender != null}<span class={`who c${m.sender % 12}`}>{chat.people[m.sender]}</span>{/if}
+              <time>{formatDay(dayOf(m.time), locale())} {formatClock(m.time, locale())}</time>
+            </span>
+            <span class="text">{#each highlight(summary(m), terms) as part, k (k)}{#if part.hit}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}</span>
+          </button>
+        </li>
+      {/each}
+    </ol>
+  {/if}
+</aside>
+
+<style>
+  .panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    background: var(--panel);
+    border-inline-start: 1px solid var(--panel-border);
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 10px 6px 14px;
+  }
+
+  .field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--muted);
+  }
+
+  .field:focus-within {
+    outline: 2px solid var(--accent);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+  }
+
+  .filters {
+    display: flex;
+    gap: 8px;
+    padding: 0 14px 10px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+
+  .filters label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  select {
+    width: 100%;
+    min-height: 34px;
+    padding: 4px 6px;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    background: var(--panel);
+  }
+
+  .hint,
+  .count {
+    margin: 0;
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .results {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .results button {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    padding: 10px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--panel-border);
+    background: transparent;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .results button:hover {
+    background: color-mix(in srgb, var(--text) 5%, transparent);
+  }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+
+  .who {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .meta time {
+    flex: none;
+    color: var(--muted);
+  }
+
+  .text {
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+  }
+
+  mark {
+    border-radius: 2px;
+    background: var(--mark);
+    color: inherit;
+  }
+</style>

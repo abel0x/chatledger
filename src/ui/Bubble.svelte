@@ -6,6 +6,7 @@
   import { formatClock, formatFull } from './format';
   import Icon from './Icon.svelte';
   import { linkify } from './linkify';
+  import { highlight } from './search';
 
   let {
     message: m,
@@ -14,7 +15,18 @@
     first,
     mine,
     showName,
-  }: { message: Message; chat: Chat; session: Session; first: boolean; mine: boolean; showName: boolean } = $props();
+    terms = [],
+    flash = false,
+  }: {
+    message: Message;
+    chat: Chat;
+    session: Session;
+    first: boolean;
+    mine: boolean;
+    showName: boolean;
+    terms?: string[];
+    flash?: boolean;
+  } = $props();
 
   const note = $derived.by(() => {
     switch (m.kind) {
@@ -36,7 +48,9 @@
   const total = $derived(m.poll ? m.poll.options.reduce((n, o) => n + o.votes, 0) : 0);
 </script>
 
-<div class="row" class:mine class:first id={`m-${m.id}`}>
+{#snippet marked(text: string)}{#each highlight(text, terms) as part, k (k)}{#if part.hit}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}{/snippet}
+
+<div class="row" class:mine class:first class:flash id={`m-${m.id}`}>
   <div class="bubble">
     {#if showName && m.sender != null}
       <div class={`sender c${m.sender % 12}`}>{chat.people[m.sender]}</div>
@@ -71,7 +85,7 @@
           {note}
         </span>
       {:else if m.text}
-        <span class="text">{#each linkify(m.text) as p, i (i)}{#if p.href}<a href={p.href} target="_blank" rel="noopener noreferrer">{p.text}</a>{:else}{p.text}{/if}{/each}</span>
+        <span class="text">{#each linkify(m.text) as p, i (i)}{#if p.href}<a href={p.href} target="_blank" rel="noopener noreferrer">{@render marked(p.text)}</a>{:else}{@render marked(p.text)}{/if}{/each}</span>
       {/if}
       <span class="meta">
         {#if m.edited}<span>{t('msg.edited')}</span>{/if}
@@ -90,7 +104,34 @@
   }
 
   .row.first {
-    margin-top: 8px;
+    padding-top: 9px;
+  }
+
+  .flash .bubble {
+    animation: flash 2s ease-out;
+  }
+
+  @keyframes flash {
+    0%,
+    40% {
+      box-shadow: 0 0 0 3px var(--accent);
+    }
+    100% {
+      box-shadow: var(--shadow);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flash .bubble {
+      animation: none;
+      box-shadow: 0 0 0 3px var(--accent);
+    }
+  }
+
+  mark {
+    border-radius: 2px;
+    background: var(--mark);
+    color: inherit;
   }
 
   .row.mine {

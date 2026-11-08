@@ -9,6 +9,10 @@
     clock: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2',
     poll: 'M5 20V10M12 20V4M19 20v-7',
     lock: 'M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3',
+    search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',
+    calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+    down: 'M12 5v14M6 13l6 6 6-6',
+    up: 'M12 19V5M6 11l6-6 6 6',
   } as const;
   export type IconName = keyof typeof PATHS;
 </script>
