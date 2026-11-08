@@ -13,7 +13,7 @@ import {
 // This code already runs off the main thread; zip.js needs no workers of its own.
 configure({ useWebWorkers: false });
 
-export type LoadErrorCode = 'empty' | 'noChat' | 'notAChat' | 'badArchive' | 'unknown';
+export type LoadErrorCode = 'empty' | 'noChat' | 'notAChat' | 'badArchive' | 'notSaved' | 'unknown';
 
 export class LoadError extends Error {
   constructor(

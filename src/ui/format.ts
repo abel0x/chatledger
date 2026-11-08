@@ -29,3 +29,24 @@ export function formatClock(time: number, locale: string): string {
 export function formatFull(time: number, locale: string): string {
   return formatter(locale, { dateStyle: 'full', timeStyle: 'medium' }).format(time * 1000);
 }
+
+export function formatBytes(bytes: number, locale: string): string {
+  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1000 && unit < units.length - 1) {
+    value /= 1000;
+    unit++;
+  }
+  return new Intl.NumberFormat(locale, {
+    style: 'unit',
+    unit: units[unit],
+    unitDisplay: 'short',
+    maximumFractionDigits: value < 10 && unit > 0 ? 1 : 0,
+  }).format(value);
+}
+
+export function formatDayRange(first: number, last: number, locale: string): string {
+  const f = formatter(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+  return f.formatRange(first * 1000, last * 1000);
+}

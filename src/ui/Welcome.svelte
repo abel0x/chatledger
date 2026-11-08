@@ -1,17 +1,28 @@
 <script lang="ts">
-  import { t } from '../i18n/index.svelte';
+  import { locale, t } from '../i18n/index.svelte';
+  import type { SavedChat } from '../loader/library';
   import type { LoadErrorCode } from '../loader/open';
   import { filesFromDrop } from './drop';
+  import { formatBytes, formatDayRange } from './format';
   import Icon from './Icon.svelte';
   import LangSwitch from './LangSwitch.svelte';
 
-  let {
-    busy,
-    error,
-    onopen,
-  }: { busy: boolean; error: LoadErrorCode | null; onopen: (files: File[]) => void } = $props();
+  interface Props {
+    busy: boolean;
+    error: LoadErrorCode | null;
+    library: SavedChat[];
+    remember: boolean;
+    canRemember: boolean;
+    onopen: (files: File[]) => void;
+    onopensaved: (id: string) => void;
+    onremove: (id: string) => void;
+    onremember: (value: boolean) => void;
+  }
+
+  let { busy, error, library, remember, canRemember, onopen, onopensaved, onremove, onremember }: Props = $props();
 
   let dragging = $state(false);
+  let confirming = $state<string | null>(null);
   let depth = 0;
 
   function picked(e: Event & { currentTarget: HTMLInputElement }) {
@@ -79,6 +90,40 @@
 
     {#if error}
       <p class="error" role="alert">{t(`error.${error}`)}</p>
+    {/if}
+
+    {#if canRemember}
+      <label class="remember">
+        <input type="checkbox" checked={remember} onchange={e => onremember(e.currentTarget.checked)} />
+        {t('welcome.remember')}
+      </label>
+    {/if}
+
+    {#if library.length}
+      <section class="saved" aria-labelledby="saved-title">
+        <h2 id="saved-title">{t('welcome.saved')}</h2>
+        <p class="note">{t('welcome.savedNote')}</p>
+        <ul>
+          {#each library as c (c.id)}
+            <li>
+              <button class="open" type="button" disabled={busy} onclick={() => onopensaved(c.id)}>
+                <span class="name">{c.title ?? t('chat.untitled')}</span>
+                <span class="info">
+                  {t('chat.messages', { count: c.messages })} · {formatDayRange(c.first, c.last, locale())} · {formatBytes(c.bytes, locale())}
+                </span>
+              </button>
+              {#if confirming === c.id}
+                <button class="button danger" type="button" onclick={() => { confirming = null; onremove(c.id); }}>
+                  {t('welcome.removeConfirm')}
+                </button>
+                <button class="button secondary" type="button" onclick={() => (confirming = null)}>{t('welcome.cancel')}</button>
+              {:else}
+                <button class="button secondary" type="button" onclick={() => (confirming = c.id)}>{t('welcome.remove')}</button>
+              {/if}
+            </li>
+          {/each}
+        </ul>
+      </section>
     {/if}
 
     <details>
@@ -170,6 +215,95 @@
   .error {
     margin: 16px 0 0;
     color: var(--danger);
+  }
+
+  .remember {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .remember input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+  }
+
+  .saved {
+    margin-top: 24px;
+    text-align: start;
+  }
+
+  .saved h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .saved .note {
+    margin: 2px 0 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .saved ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .saved li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+  }
+
+  .saved .open {
+    flex: 1 1 220px;
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .saved .open:hover {
+    background: color-mix(in srgb, var(--text) 6%, transparent);
+  }
+
+  .saved .name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .saved .info {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .saved .button {
+    min-height: 36px;
+    padding: 6px 14px;
+    font-size: 0.88rem;
+  }
+
+  .danger {
+    background: var(--danger);
+    color: var(--bg);
   }
 
   details {

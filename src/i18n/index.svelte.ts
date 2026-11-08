@@ -1,22 +1,18 @@
 import type { ChatEvent } from '../core';
+import { readSetting, writeSetting } from '../ui/settings';
 import type { Key } from './en';
 import { describeEvent, formatLocale, LANGS, translate, type Lang, type Params } from './translate';
 
 export { LANGS, type Lang };
 
-const STORAGE_KEY = 'chatledger.lang';
 
 function browserLanguages(): readonly string[] {
   return typeof navigator === 'undefined' ? [] : navigator.languages;
 }
 
 function initialLang(): Lang {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && (LANGS as readonly string[]).includes(saved)) return saved as Lang;
-  } catch {
-    // Storage can be blocked; the browser language decides then.
-  }
+  const saved = readSetting('lang');
+  if (saved && (LANGS as readonly string[]).includes(saved)) return saved as Lang;
   for (const l of browserLanguages()) {
     const base = l.toLowerCase().split('-')[0];
     if ((LANGS as readonly string[]).includes(base ?? '')) return base as Lang;
@@ -37,11 +33,7 @@ export function locale(): string {
 export function setLang(next: Lang): void {
   state.lang = next;
   document.documentElement.lang = next;
-  try {
-    localStorage.setItem(STORAGE_KEY, next);
-  } catch {
-    // Not remembered, still applied.
-  }
+  writeSetting('lang', next);
 }
 
 export function t(key: Key, params?: Params): string {
