@@ -98,6 +98,8 @@ The code is in three layers: `src/core` reads exports and knows nothing about th
 
 ## Reporting a problem
 
+For security problems, follow [SECURITY.md](SECURITY.md) instead and report them privately.
+
 If an export does not open or something looks wrong, please open an issue and describe it. Include your phone's language and whether it is Android or iPhone. Do not attach your chat. If a line is read wrongly, change the names and text in it before sharing.
 
 ## Not affiliated with WhatsApp

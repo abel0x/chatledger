@@ -98,6 +98,8 @@ Kod üç katmandan oluşur. `src/core` dökümleri okur ve ekrandan habersizdir.
 
 ## Sorun bildirme
 
+Güvenlik sorunlarını herkese açık bir issue yerine [SECURITY.md](SECURITY.md) dosyasındaki yolla gizlice bildirin.
+
 Bir döküm açılmıyorsa ya da bir şey yanlış görünüyorsa lütfen bir issue açıp anlatın. Telefonunuzun dilini ve Android mi iPhone mu olduğunu da yazın. Sohbetinizi eklemeyin. Yanlış okunan bir satır varsa, paylaşmadan önce içindeki adları ve metni değiştirin.
 
 ## WhatsApp ile bağlantısı yoktur

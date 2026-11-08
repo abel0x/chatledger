@@ -2,6 +2,22 @@
 
 All notable changes to chatledger are listed here. Versions follow [semantic versioning](https://semver.org).
 
+## [0.5.0] - 2026-11-08
+
+### Security
+
+- Limits on the unpacked chat text, the number of files in an archive and the body of Word documents, checked while unpacking rather than trusted from the archive.
+- Pictures are measured from their headers before decoding; ones claiming too many pixels are shown as files and never decoded.
+- File names lose hidden direction marks, so programs cannot pose as documents, and saving a file that can run code asks first.
+- Group-event patterns and text formatting only look at bounded stretches of text, so crafted messages cannot stall the app.
+- The local server turns away requests made under another host name, which blocks DNS rebinding.
+- Imported star files have a size limit.
+- A security policy describes how to report problems privately.
+
+### Fixed
+
+- Attachments whose names carry hidden direction marks are found even when the chat text writes the name without them.
+
 ## [0.4.0] - 2026-11-08
 
 ### Added
@@ -77,6 +93,7 @@ The first release.
 - **iPhone support is experimental.** It follows the iPhone export format but has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please open an issue.
 - Group events from phones in other languages are shown as WhatsApp wrote them, without translation.
 
+[0.5.0]: https://github.com/abel0x/chatledger/releases/tag/v0.5.0
 [0.4.0]: https://github.com/abel0x/chatledger/releases/tag/v0.4.0
 [0.3.0]: https://github.com/abel0x/chatledger/releases/tag/v0.3.0
 [0.2.0]: https://github.com/abel0x/chatledger/releases/tag/v0.2.0

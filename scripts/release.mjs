@@ -46,6 +46,7 @@ const files = [
   join(root, 'README.md'),
   join(root, 'README.tr.md'),
   join(root, 'CHANGELOG.md'),
+  join(root, 'SECURITY.md'),
   ...(await filesIn(join(root, 'docs', 'screenshots'))),
 ];
 

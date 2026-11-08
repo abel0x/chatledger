@@ -65,7 +65,7 @@ export async function buildSingle({ root, version, notice }) {
   const fullNotice = `${notice}\n${'='.repeat(72)}\nNode.js ${process.version} (built into the program)\n${'='.repeat(72)}\n\n${nodeLicense()}`;
   const zip = new ZipWriter(new Uint8ArrayWriter(), { useWebWorkers: false });
   await zip.add(`${name}/${relative(work, program)}`, new Uint8ArrayReader(readFileSync(program)), { executable: true });
-  for (const doc of ['README.md', 'README.tr.md', 'CHANGELOG.md', 'LICENSE']) {
+  for (const doc of ['README.md', 'README.tr.md', 'CHANGELOG.md', 'SECURITY.md', 'LICENSE']) {
     await zip.add(`${name}/${doc}`, new Uint8ArrayReader(readFileSync(join(root, doc))));
   }
   await zip.add(`${name}/THIRD_PARTY_LICENSES.txt`, new Uint8ArrayReader(new TextEncoder().encode(fullNotice)));
