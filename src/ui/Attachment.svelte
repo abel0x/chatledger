@@ -1,10 +1,13 @@
 <script lang="ts">
-  import { mimeTypeFor, type MediaHint } from '../core';
+  import { extensionOf, mimeTypeFor, type MediaHint } from '../core';
   import { t } from '../i18n/index.svelte';
   import type { Session } from '../loader/client';
   import { useChatActions } from './context';
   import Icon from './Icon.svelte';
   import { visible } from './visible';
+  import VoicePlayer from './VoicePlayer.svelte';
+
+  const PREVIEW = new Set(['pdf', 'docx', 'txt', 'vcf', 'csv', 'md', 'json', 'log']);
 
   let {
     file,
@@ -64,19 +67,26 @@
   <div class="frame video" use:visible={load}>
     {#if url}
       <!-- svelte-ignore a11y_media_has_caption -->
-      <video src={url} controls preload="metadata" loop={media === 'gif'} onerror={() => (broken = true)}></video>
+      {#if media === 'gif'}
+        <video src={url} autoplay muted loop playsinline onerror={() => (broken = true)}></video>
+      {:else}
+        <video src={url} controls preload="metadata" onerror={() => (broken = true)}></video>
+      {/if}
     {/if}
   </div>
 {:else if shown === 'audio'}
   <div class="audio" use:visible={load}>
     {#if url}
-      <audio src={url} controls preload="metadata" onerror={() => (broken = true)}></audio>
+      <VoicePlayer src={url} voice={media === 'voice'} onerror={() => (broken = true)} />
     {/if}
   </div>
 {:else}
   <div class="file" use:visible={load}>
     <Icon name="file" />
     <span class="name">{file}</span>
+    {#if PREVIEW.has(extensionOf(file))}
+      <button class="open" type="button" onclick={() => actions?.openDocument(index)}>{t('menu.open')}</button>
+    {/if}
     {#if url}<a href={url} download={file}>{t('msg.download')}</a>{/if}
   </div>
 {/if}
@@ -129,9 +139,6 @@
     margin: 2px 0;
   }
 
-  .audio audio {
-    width: min(300px, 100%);
-  }
 
   .file {
     display: flex;
@@ -148,6 +155,15 @@
     flex: 1;
     min-width: 0;
     overflow-wrap: anywhere;
+  }
+
+  .open {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--link);
+    text-decoration: underline;
+    cursor: pointer;
   }
 
   .missing {

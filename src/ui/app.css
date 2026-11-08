@@ -41,7 +41,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #0b141a;
     --panel: #202c33;
     --panel-border: #2f3b43;
@@ -80,6 +80,57 @@
   }
 }
 
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0b141a;
+  --panel: #202c33;
+  --panel-border: #2f3b43;
+  --text: #e9edef;
+  --muted: #8696a0;
+  --bubble-in: #202c33;
+  --bubble-out: #005c4b;
+  --pill: #182229;
+  --accent: #00a884;
+  --accent-text: #111b21;
+  --link: #53bdeb;
+  --danger: #f2b8b5;
+  --mark: #8a6d00;
+  --viz-bar: #3987e5;
+  --heat-0: #2a3942;
+  --heat-1: #184f95;
+  --heat-2: #256abf;
+  --heat-3: #3987e5;
+  --heat-4: #6da7ec;
+  --heat-5: #9ec5f4;
+  --grid: #2f3b43;
+  --shadow: 0 1px 0.5px #0000004d;
+
+  --c0: #ff8a80;
+  --c1: #80deea;
+  --c2: #ce93d8;
+  --c3: #ffcc80;
+  --c4: #a5d6a7;
+  --c5: #f48fb1;
+  --c6: #9fa8da;
+  --c7: #80cbc4;
+  --c8: #bcaaa4;
+  --c9: #ffab91;
+  --c10: #b39ddb;
+  --c11: #81d4fa;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-size='small'] {
+  font-size: 14px;
+}
+
+:root[data-size='large'] {
+  font-size: 18px;
+}
+
 *,
 *::before,
 *::after {
@@ -95,7 +146,7 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  font: 15px/1.4 var(--font), var(--emoji);
+  font: 0.9375rem/1.4 var(--font), var(--emoji);
   -webkit-font-smoothing: antialiased;
 }
 

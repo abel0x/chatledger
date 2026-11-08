@@ -4,7 +4,7 @@
   import { formatDay, formatDayRange, formatMonth, formatMonthShort } from './format';
   import { readSetting, writeSetting } from './settings';
 
-  let { chat }: { chat: Chat } = $props();
+  let { chat, onshow }: { chat: Chat; onshow?: (messageIndex: number) => void } = $props();
 
   const stats = $derived(chatStats(chat));
   const TOP = 10;
@@ -65,6 +65,8 @@
   }
 
   const nightOwl = $derived(stats.people.reduce<(typeof stats.people)[number] | null>((best, p) => (p.night > (best?.night ?? 0) ? p : best), null));
+  const stickerFan = $derived(stats.people.reduce<(typeof stats.people)[number] | null>((best, p) => (p.stickers > (best?.stickers ?? 0) ? p : best), null));
+  const longestBy = $derived(stats.longest ? chat.messages[stats.longest.index]?.sender : null);
   const mediaKing = $derived(stats.people.reduce<(typeof stats.people)[number] | null>((best, p) => (p.media > (best?.media ?? 0) ? p : best), null));
 
   function setTables(value: boolean) {
@@ -281,6 +283,29 @@
               <span class="sub">{t('stats.nightOwlValue', { count: nightOwl.night })}</span>
             </div>
           {/if}
+          {#if stats.activeDays}
+            <div class="tile">
+              <span class="label">{t('stats.average')}</span>
+              <span class="value small">{new Intl.NumberFormat(locale(), { maximumFractionDigits: 1 }).format(stats.messages / stats.activeDays)}</span>
+            </div>
+          {/if}
+          {#if stats.longest}
+            <div class="tile">
+              <span class="label">{t('stats.longest')}</span>
+              <span class="value small">{longestBy != null ? chat.people[longestBy] : ''}</span>
+              <span class="sub">
+                {t('stats.characters', { count: stats.longest.length })}
+                {#if onshow}· <button class="more inline" type="button" onclick={() => onshow?.(stats.longest?.index ?? 0)}>{t('stats.show')}</button>{/if}
+              </span>
+            </div>
+          {/if}
+          {#if stickerFan}
+            <div class="tile">
+              <span class="label">{t('stats.stickers')}</span>
+              <span class="value small">{chat.people[stickerFan.person]}</span>
+              <span class="sub">{num(stickerFan.stickers)}</span>
+            </div>
+          {/if}
           {#if mediaKing}
             <div class="tile">
               <span class="label">{t('stats.mostMedia')}</span>
@@ -434,6 +459,11 @@
     color: var(--muted);
     font-size: 0.82rem;
     font-variant-numeric: tabular-nums;
+  }
+
+  .more.inline {
+    margin: 0;
+    padding: 0;
   }
 
   .more {

@@ -5,6 +5,7 @@
   import { dayOf, formatClock, formatDay, formatMonth } from './format';
   import Icon from './Icon.svelte';
   import { attachments, links, monthOf, type Visual } from './media';
+  import StickerTile from './StickerTile.svelte';
   import Tile from './Tile.svelte';
 
   interface Props {
@@ -18,10 +19,13 @@
 
   let { chat, session, items, onopen, onshow, onclose }: Props = $props();
 
-  type Tab = 'media' | 'files' | 'links';
+  type Tab = 'media' | 'stickers' | 'files' | 'links';
   let tab = $state<Tab>('media');
 
   const files = $derived(attachments(chat, file => session.has(file)));
+  const stickers = $derived(
+    chat.messages.flatMap((m, index) => (m.media === 'sticker' && m.file && session.has(m.file) ? [{ index, file: m.file }] : [])).reverse(),
+  );
   const urls = $derived(links(chat));
 
   /** Newest month first, like a phone's gallery. */
@@ -42,6 +46,7 @@
 
   const tabs = $derived<{ id: Tab; label: string; count: number }[]>([
     { id: 'media', label: t('gallery.media'), count: items.length },
+    { id: 'stickers', label: t('gallery.stickers'), count: stickers.length },
     { id: 'files', label: t('gallery.files'), count: files.length },
     { id: 'links', label: t('gallery.links'), count: urls.length },
   ]);
@@ -117,6 +122,14 @@
       {:else}
         <p class="empty">{t('gallery.empty')}</p>
       {/each}
+    {:else if tab === 'stickers'}
+      <div class="grid stickers">
+        {#each stickers as s (s.index)}
+          <StickerTile file={s.file} {session} onclick={() => onshow(s.index)} />
+        {:else}
+          <p class="empty">{t('gallery.empty')}</p>
+        {/each}
+      </div>
     {:else if tab === 'files'}
       <ul class="rows">
         {#each files.toReversed() as f (f.index)}
@@ -224,6 +237,10 @@
     grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
     gap: 4px;
     padding: 0 12px;
+  }
+
+  .stickers {
+    padding-top: 12px;
   }
 
   .rows {

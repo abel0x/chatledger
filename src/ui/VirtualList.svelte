@@ -18,6 +18,9 @@
 
   let { count, estimate, key, item, label, overscan = 1200, onview }: Props = $props();
 
+  /** Empty room under the last row, so floating buttons never cover it. */
+  const END_SPACE = 88;
+
   // Built once: the list is remounted for another chat, never resized.
   const heights = untrack(() => new HeightIndex(Array.from({ length: count }, (_, i) => estimate(i))));
 
@@ -42,7 +45,7 @@
   function targetFor(index: number, align: Align): number {
     const offset = heights.offsetOf(index);
     if (align === 'center') return offset - (viewport - heights.get(index)) / 2;
-    if (align === 'end') return offset + heights.get(index) - viewport + 16;
+    if (align === 'end') return offset + heights.get(index) - viewport + END_SPACE;
     return offset - 8;
   }
 
@@ -114,7 +117,7 @@
     void version;
     if (!onview) return;
     const first = heights.indexAt(top + 1);
-    onview(first, top <= 4, top + viewport >= heights.total - 4);
+    onview(first, top <= 4, top + viewport >= heights.total + END_SPACE - 8);
   });
 </script>
 
@@ -149,6 +152,12 @@
     overflow-anchor: none;
     overscroll-behavior: contain;
     outline-offset: -2px;
+  }
+
+  .vl::after {
+    content: '';
+    display: block;
+    height: 88px;
   }
 
   .vl-space {
