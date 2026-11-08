@@ -227,3 +227,22 @@ input {
 .c9 { color: var(--c9); }
 .c10 { color: var(--c10); }
 .c11 { color: var(--c11); }
+
+/* The print page lives directly in <body>; on paper it is the only thing shown. */
+@media screen {
+  .print-root {
+    display: none;
+  }
+}
+
+@media print {
+  body > :not(.print-root) {
+    display: none !important;
+  }
+
+  html,
+  body {
+    height: auto;
+    background: #fff;
+  }
+}

@@ -158,3 +158,26 @@ test('adds an older export of the same chat to the timeline', async ({ page }) =
   await page.keyboard.press('Home');
   await expect(page.getByText('Shall we start a hiking group?')).toBeVisible();
 });
+
+test('prints a date range with Ctrl+P', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { printed?: string };
+    window.print = () => {
+      w.printed = document.querySelector('.print-root')?.textContent ?? '';
+      dispatchEvent(new Event('afterprint'));
+    };
+  });
+  await openDemo(page);
+  await page.keyboard.press('Control+p');
+  const dialog = page.getByRole('dialog', { name: 'Print or save as PDF' });
+  await dialog.getByLabel('Messages between two dates').check();
+  const from = dialog.getByLabel('From');
+  await from.fill((await from.getAttribute('max')) ?? '');
+  await expect(dialog.getByRole('status')).toContainText('messages');
+  await dialog.getByRole('button', { name: 'Print' }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { printed?: string }).printed ?? '')).toContain('See you all on Saturday');
+  const printed = await page.evaluate(() => (window as unknown as { printed?: string }).printed ?? '');
+  expect(printed).toContain(DEMO_TITLE);
+  expect(printed).not.toContain('Who is in for Saturday');
+  await expect(page.locator('.print-root')).toHaveCount(0);
+});

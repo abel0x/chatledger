@@ -15,6 +15,8 @@
   import { visuals } from './media';
   import MediaPanel from './MediaPanel.svelte';
   import Menu, { type MenuItem } from './Menu.svelte';
+  import PrintDialog from './PrintDialog.svelte';
+  import PrintView from './PrintView.svelte';
   import { plainText } from './richtext';
   import { buildRows, estimateHeight, type Row } from './rows';
   import { SearchIndex } from './search';
@@ -73,6 +75,8 @@
   let showStats = $state(false);
   let showKeys = $state(false);
   let settingsOpen = $state(false);
+  let printOpen = $state(false);
+  let printJob = $state.raw<{ indices: number[]; pictures: boolean } | null>(null);
   let narrow = $state(false);
   let terms = $state<string[]>([]);
   let flashKey = $state<string | null>(null);
@@ -207,16 +211,28 @@
     return items;
   });
 
-  const extra = $derived.by((): Shortcut[] =>
-    narrow
-      ? [
+  function startPrint(indices: number[], pictures: boolean) {
+    say(t('print.preparing'));
+    printJob = { indices, pictures };
+  }
+
+  function printReady() {
+    // The page goes away once the print dialog closes, whatever was chosen there.
+    addEventListener('afterprint', () => (printJob = null), { once: true });
+    print();
+  }
+
+  const extra = $derived.by((): Shortcut[] => [
+    { label: t('print.title'), icon: 'printer', run: () => (printOpen = true) },
+    ...(narrow
+      ? ([
           { label: t('chat.starred'), icon: 'star', run: () => toggle('starred') },
           { label: t('chat.info'), icon: 'info', run: () => toggle('info') },
           { label: t('chat.stats'), icon: 'chart', run: () => (showStats = !showStats) },
           { label: t('chat.jumpToDate'), icon: 'calendar', run: openDatePicker },
-        ]
-      : [],
-  );
+        ] satisfies Shortcut[])
+      : []),
+  ]);
 
   provideChatActions({
     openMedia(messageIndex) {
@@ -243,7 +259,13 @@
   }
 
   function keydown(e: KeyboardEvent) {
-    if (viewer != null || docIndex != null || showKeys) return;
+    if (viewer != null || docIndex != null || showKeys || printOpen) return;
+    // Printing the screen would print only the slice of messages on it.
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+      printOpen = true;
+      return;
+    }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'f') {
       e.preventDefault();
       toggle('search');
@@ -483,6 +505,12 @@
 {/if}
 {#if showKeys}
   <KeysDialog onclose={() => (showKeys = false)} />
+{/if}
+{#if printOpen}
+  <PrintDialog {chat} starred={stars.ids} onprint={startPrint} onclose={() => (printOpen = false)} />
+{/if}
+{#if printJob}
+  <PrintView {chat} {session} indices={printJob.indices} pictures={printJob.pictures} onready={printReady} />
 {/if}
 <Toast message={toast} />
 

@@ -31,6 +31,7 @@
     keyboard: 'M3 7h18v10H3zM7 11h.01M11 11h.01M15 11h.01M8 14h8',
     pause: 'M8 5v14M16 5v14',
     dots: 'M12 5v.01M12 12v.01M12 19v.01',
+    printer: 'M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z',
     users: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20a6 6 0 0 1 12 0M16 11a3 3 0 1 0 0-6M17 14a6 6 0 0 1 4 6',
   } as const;
   export type IconName = keyof typeof PATHS;
