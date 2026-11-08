@@ -1,7 +1,8 @@
 export type Part = { text: string; href?: undefined } | { text: string; href: string };
 
 const URL_RE = /\b(?:https?:\/\/|www\.)[^\s<>"]+/gi;
-const TRAILING = /[.,;:!?'")\]}>…]+$/;
+// Punctuation, and WhatsApp's style marks when a link sits inside *bold* or _italic_.
+const TRAILING = /[.,;:!?'")\]}>…*_~]+$/;
 
 /** Splits message text into plain runs and web links; nothing else is ever turned into markup. */
 export function linkify(text: string): Part[] {
