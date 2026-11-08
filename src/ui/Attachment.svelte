@@ -3,6 +3,7 @@
   import { t } from '../i18n/index.svelte';
   import type { Session } from '../loader/client';
   import { useChatActions } from './context';
+  import ContactCard from './ContactCard.svelte';
   import Icon from './Icon.svelte';
   import { confirmRisky } from './save';
   import { visible } from './visible';
@@ -88,11 +89,12 @@
 {:else if shown === 'audio'}
   <div class="audio" use:visible={load}>
     {#if url}
-      <VoicePlayer src={url} voice={media === 'voice'} onerror={() => (broken = true)} />
+      <VoicePlayer src={url} voice={media === 'voice'} load={() => session.blob(file)} onerror={() => (broken = true)} />
     {/if}
   </div>
 {:else}
   <div class="file-card">
+    {#if extensionOf(name) === 'vcf' && !tooLarge}<ContactCard {file} {session} />{/if}
     <div class="file" use:visible={load}>
       <Icon name={risky ? 'blocked' : 'file'} />
       <span class="name">{name}</span>
