@@ -16,7 +16,9 @@ chatledger sizin bilgisayarınızda çalışır ve sohbeti tarayıcınızda gös
 - Biçimlendirmeyi WhatsApp'taki gibi gösterir: *kalın*, _italik_, ~üstü çizili~, `kod`, @bahsetmeler ve büyük emojiler.
 - İstediğiniz tarihe, ilk ya da son mesaja veya sohbetin yanındaki zaman çizelgesi boyunca götürür. Kaldığınız yerden açılır ve her mesajın kendi bağlantısı vardır.
 - Mesajları yıldızlamanızı, kopyalamanızı ve yıldızlarınızı dışa ya da içe aktarmanızı sağlar.
-- Sesli mesajları 1×, 1,5× ya da 2× hızda oynatır, PDF ve Word belgelerini önizler.
+- Aynı sohbetin birden fazla dökümünü tek bir zaman çizelgesinde birleştirir. WhatsApp yalnızca en son mesajları dışa aktardığı için uzun sohbetler çoğu zaman parça parça gelir; birden fazla dökümde olan mesajlar en dolu hâliyle bir kez tutulur.
+- Sohbetin tamamını, bir tarih aralığını ya da yıldızlı mesajları yazdırır veya PDF olarak kaydeder.
+- Sesli mesajları dalga görüntüsüyle 1×, 1,5× ya da 2× hızda oynatır, paylaşılan kişi kartlarını gösterir, PDF ve Word belgelerini önizler.
 - Grubun geçmişini gösterir: kimin kurduğunu, adının nasıl değiştiğini, kimlerin hâlâ grupta olduğunu ve geçmiş yıllarda bugün neler konuşulduğunu.
 - Sohbetteki bütün fotoğraf ve videoları, dosyaları ve bağlantıları tek yerde toplar; fotoğraflar tam ekran açılır.
 - En çok kimin yazdığını ve sohbetin en hareketli olduğu saatleri sayar. Aylara göre mesajları, sevilen emojileri, en uzun sessizliği ve daha fazlasını gösterir.
@@ -73,7 +75,7 @@ chatledger, Firefox'un ve Chrome, Edge gibi Chromium tabanlı tarayıcıların g
 
 Hatırlama açıkken açtığınız döküm, tarayıcınızın chatledger adresine ait özel depolama alanına kopyalanır. Bu kopya yalnızca bu bilgisayarda, bu tarayıcıda kalır. Bir sohbeti kayıtlı listeden **Kaldır** ile silebilirsiniz. Tarayıcıda `127.0.0.1:5170` için site verilerini temizlemek hepsini siler.
 
-Bilgisayarı başkalarıyla paylaşıyorsanız başlangıç ekranındaki **Açtığım sohbetleri bu bilgisayarda hatırla** seçeneğini kapatın.
+Bilgisayarı başkalarıyla paylaşıyorsanız başlangıç ekranındaki **Açtığım sohbetleri bu bilgisayarda hatırla** seçeneğini kapatın ya da **Kayıtlı sohbetleri parolayla koru**'yu seçin. Kayıtlı sohbetler o zaman adlarıyla birlikte şifrelenir ve parola olmadan kimse okuyamaz. Parolayı iyi saklayın: kaybolursa kayıtlı sohbetler açılamaz, yalnızca kaldırılabilir.
 
 ## Kaynak koddan çalıştırma
 

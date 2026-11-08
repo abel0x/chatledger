@@ -2,6 +2,17 @@
 
 All notable changes to chatledger are listed here. Versions follow [semantic versioning](https://semver.org).
 
+## [0.6.0] - 2026-11-08
+
+### Added
+
+- Several exports of the same chat are joined into one timeline: pick them together, or add one to an open chat from Group info. Messages found in more than one keep their fullest form, such as the photo instead of "media omitted"; exports of different chats are refused.
+- Print a whole chat, a date range or the starred messages, with or without pictures, or save them as a PDF. Ctrl+P opens it.
+- An optional password for saved chats. They are encrypted on the computer, names included; without the password they can only be removed.
+- Shared contact cards show their names, numbers and e-mail addresses.
+- Voice messages show their waveform.
+- Releases can be started by hand, for when GitHub skips tags pushed in a batch, and dependency updates are proposed weekly.
+
 ## [0.5.0] - 2026-11-08
 
 ### Security
@@ -93,6 +104,7 @@ The first release.
 - **iPhone support is experimental.** It follows the iPhone export format but has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please open an issue.
 - Group events from phones in other languages are shown as WhatsApp wrote them, without translation.
 
+[0.6.0]: https://github.com/abel0x/chatledger/releases/tag/v0.6.0
 [0.5.0]: https://github.com/abel0x/chatledger/releases/tag/v0.5.0
 [0.4.0]: https://github.com/abel0x/chatledger/releases/tag/v0.4.0
 [0.3.0]: https://github.com/abel0x/chatledger/releases/tag/v0.3.0

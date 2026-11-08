@@ -16,7 +16,9 @@ chatledger runs on your machine and shows the chat in your browser. Your message
 - Shows formatting the way WhatsApp does: *bold*, _italic_, ~strikethrough~, `code`, @mentions and large emoji.
 - Jumps to any date, to the first or last message, or along a timeline beside the chat. It opens where you stopped reading, and every message has a link of its own.
 - Lets you star messages, copy them, and export or import your stars.
-- Plays voice messages at 1×, 1.5× or 2× speed and previews PDF and Word documents.
+- Joins several exports of the same chat into one timeline. WhatsApp only exports the most recent messages, so long chats often come in pieces; messages that appear in more than one are kept once, in their fullest form.
+- Prints a whole chat, a date range or the starred messages, or saves them as a PDF.
+- Plays voice messages at 1×, 1.5× or 2× speed with their waveform, shows shared contact cards, and previews PDF and Word documents.
 - Shows the group's history: who created it, how its name changed, who is still in it, and what was said on this day in earlier years.
 - Collects every photo and video, file and link of the chat in one place, with a full-screen viewer.
 - Counts who wrote the most and when the chat is busiest. Also shows messages per month, favourite emoji, the longest silence and more.
@@ -73,7 +75,7 @@ chatledger is tested in current versions of Firefox and of Chrome, Edge and othe
 
 When remembering is on, an opened export is copied into your browser's private storage for the chatledger address. It stays on this computer, in this browser. To remove a chat, use **Remove** in the saved list. Clearing the browser's site data for `127.0.0.1:5170` removes all of them.
 
-Turn off **Remember chats I open on this computer** on the start screen if you share the computer with others.
+Turn off **Remember chats I open on this computer** on the start screen if you share the computer with others, or choose **Protect saved chats with a password**. Saved chats are then encrypted, names included, and nobody can read them without the password. Keep it safe: if it is lost, the saved chats can only be removed, never opened.
 
 ## Running from source
 
