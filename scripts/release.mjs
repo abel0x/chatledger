@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { configure, Uint8ArrayReader, Uint8ArrayWriter, ZipWriter } from '@zip.js/zip.js/lib/zip-core-native.js';
 import { build } from 'vite';
 import { collectPackages, noticeFor } from './licenses.mjs';
+import { buildSingle } from './single.mjs';
 
 /**
  * Builds the app and packs what someone needs to run it, without npm or the
@@ -37,6 +38,7 @@ const notice = noticeFor(packages);
 const files = [
   ...(await filesIn(join(root, 'dist'))),
   join(root, 'scripts', 'start.mjs'),
+  join(root, 'scripts', 'launch.mjs'),
   join(root, 'scripts', 'serve.mjs'),
   join(root, 'chatledger.cmd'),
   join(root, 'chatledger.sh'),
@@ -57,3 +59,9 @@ const out = join(root, 'release', `${name}.zip`);
 await mkdir(dirname(out), { recursive: true });
 await writeFile(out, await zip.close());
 console.log(`${relative(root, out)} (${files.length + 1} files; bundled packages: ${[...packages.keys()].sort().join(', ')})`);
+
+// The same app as one program that needs no Node.js, for the platform this runs on.
+if (!process.argv.includes('--no-single')) {
+  const single = await buildSingle({ root, version, notice });
+  console.log(relative(root, single));
+}

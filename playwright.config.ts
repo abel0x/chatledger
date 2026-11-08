@@ -24,8 +24,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // The same entry point the launchers use, so the tests cover it too.
-    command: `node scripts/start.mjs --no-open --port=${PORT}`,
+    // The same entry point the launchers use, or a built single executable when CHATLEDGER_BINARY names one.
+    command: process.env.CHATLEDGER_BINARY
+      ? `"${process.env.CHATLEDGER_BINARY}" --no-open --port=${PORT}`
+      : `node scripts/start.mjs --no-open --port=${PORT}`,
     url: `http://127.0.0.1:${PORT}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
