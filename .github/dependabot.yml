@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # New releases get two weeks to settle before they are proposed.
+    cooldown:
+      default-days: 14
+    groups:
+      development:
+        dependency-type: development
+      runtime:
+        dependency-type: production
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
