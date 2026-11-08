@@ -3,19 +3,51 @@ name: Release
 on:
   push:
     tags: ['v*']
+  # GitHub starts no workflow when more than three tags are pushed at once; this runs one by hand.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to release, e.g. v0.5.0
+        required: true
 
 permissions:
   contents: read
 
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      systems: ${{ steps.kind.outputs.systems }}
+      single: ${{ steps.kind.outputs.single }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+      # Versions before 0.4.0 have no single program, so they only build on Linux.
+      - id: kind
+        run: |
+          if [ -f scripts/single.mjs ]; then
+            echo 'systems=["ubuntu-latest","windows-latest"]' >> "$GITHUB_OUTPUT"
+            echo 'single=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'systems=["ubuntu-latest"]' >> "$GITHUB_OUTPUT"
+            echo 'single=false' >> "$GITHUB_OUTPUT"
+          fi
+
   build:
     name: Build on ${{ matrix.os }}
+    needs: prepare
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: ${{ fromJSON(needs.prepare.outputs.systems) }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26
@@ -23,8 +55,10 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run release
-      - run: npx playwright install --with-deps chromium firefox
+      - if: needs.prepare.outputs.single == 'true'
+        run: npx playwright install --with-deps chromium firefox
       - name: Browser tests against the single executable
+        if: needs.prepare.outputs.single == 'true'
         run: npm run test:e2e
         env:
           CHATLEDGER_BINARY: ${{ runner.os == 'Windows' && format('{0}\build\sea\chatledger.exe', github.workspace) || format('{0}/build/sea/chatledger', github.workspace) }}
@@ -43,6 +77,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26
@@ -51,13 +88,16 @@ jobs:
           path: release
           merge-multiple: true
       - name: Write release notes
-        run: node scripts/notes.mjs "$GITHUB_REF_NAME" > release-notes.md
+        run: node scripts/notes.mjs "$TAG" > release-notes.md
       - name: Checksums
         working-directory: release
         run: sha256sum *.zip > SHA256SUMS.txt
+      # Only the highest version is marked latest, whatever order releases finish in.
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release create "$GITHUB_REF_NAME" release/*.zip release/SHA256SUMS.txt
-          --title "chatledger ${GITHUB_REF_NAME#v}" --notes-file release-notes.md --verify-tag
+        run: |
+          top=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+          latest=$([ "$TAG" = "$top" ] && echo true || echo false)
+          gh release create "$TAG" release/*.zip release/SHA256SUMS.txt \
+            --title "chatledger ${TAG#v}" --notes-file release-notes.md --verify-tag --latest="$latest"
