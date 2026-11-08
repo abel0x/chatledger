@@ -39,18 +39,27 @@ Görsellerdeki sohbet, testlerle birlikte gelen uydurma bir sohbettir.
 
 Dosyayı bilgisayarınıza kaydedin.
 
-### 2. Node.js kurun
+### 2. chatledger'ı indirin
 
-chatledger için [Node.js](https://nodejs.org) 22 veya daha yenisi gerekir. İndirme sayfasında LTS sürümünü seçin ve varsayılan ayarlarla kurun.
+Sürümler sayfasından bilgisayarınıza uygun dosyayı seçin. Hiçbir şey kurmanız gerekmez.
 
-### 3. chatledger'ı indirip başlatın
+- **Windows:** `chatledger-x.y.z-windows-x64.zip`
+- **Linux:** `chatledger-x.y.z-linux-x64.zip`
 
-Sürümler sayfasından en son `chatledger-x.y.z.zip` dosyasını indirin ve istediğiniz bir yere çıkarın.
+Dosyayı istediğiniz bir yere çıkarın.
 
-- **Windows:** `chatledger.cmd` dosyasına çift tıklayın.
-- **Linux:** bir terminalde `./chatledger.sh` komutunu çalıştırın ya da dosyaya çift tıklayıp *Çalıştır*'ı seçin.
+### 3. Başlatın
 
-Tarayıcınız `http://127.0.0.1:5170` adresinde açılır. chatledger'ı kullandığınız sürece açılan küçük pencereyi açık tutun. Pencereyi kapatınca uygulama durur.
+Windows'ta `chatledger.exe`, Linux'ta `chatledger` dosyasına çift tıklayın. Tarayıcınız `http://127.0.0.1:5170` adresinde açılır.
+
+- Program ücretli bir sertifikayla imzalanmadığı için Windows bilgisayarınızı koruduğunu söyleyebilir. **Ek bilgi › Yine de çalıştır**'ı seçin.
+- Linux'ta çift tıklayınca dosya bir metin düzenleyicide açılırsa, sağ tıklayıp *Çalıştır*'ı seçin ya da bir terminalde `./chatledger` komutunu çalıştırın.
+
+chatledger, sekmelerinden biri açık olduğu sürece arka planda çalışır; son sekmeyi kapattıktan birkaç dakika sonra kendiliğinden durur.
+
+#### Node.js zaten kuruluysa
+
+[Node.js](https://nodejs.org) 22 veya daha yenisi kuruluysa, çok daha küçük olan `chatledger-x.y.z.zip` her sistemde çalışır. Dosyayı çıkarın, ardından Windows'ta `chatledger.cmd` dosyasına çift tıklayın ya da Linux'ta `./chatledger.sh` komutunu çalıştırın. chatledger'ı kullandığınız sürece açılan pencereyi açık tutun; pencereyi kapatınca uygulama durur.
 
 chatledger, Firefox'un ve Chrome, Edge gibi Chromium tabanlı tarayıcıların güncel sürümlerinde test edilmektedir.
 
@@ -83,7 +92,7 @@ npm start
 | `npm run test:e2e` | Tarayıcı testlerini Chromium ve Firefox'ta çalıştırır |
 | `npm run screenshots` | README görsellerini demo sohbetten çeker |
 | `npm run check` | Kodun tiplerini denetler |
-| `npm run release` | npm veya kaynak kod olmadan çalışan bir zip hazırlar |
+| `npm run release` | Node.js ile çalışan zip'i ve bu sistem için tek dosyalık programı hazırlar (Node.js 26 gerekir) |
 
 Kod üç katmandan oluşur. `src/core` dökümleri okur ve ekrandan habersizdir. `src/loader` arşivleri bir worker içinde açar. `src/ui` ise Svelte arayüzüdür. Testler yalnızca uydurma sohbetler kullanır; tarayıcı testlerinin ve ekran görüntülerinin kullandığı demo dökümü `tests/e2e/demo.ts` üretir. Gerçek dökümleri bir `coldstorage/` klasöründe tutarsanız, birkaç ek test sizin bilgisayarınızda onlarla da çalışır. Bu klasör git tarafından yok sayılır.
 

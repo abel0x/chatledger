@@ -2,6 +2,18 @@
 
 All notable changes to chatledger are listed here. Versions follow [semantic versioning](https://semver.org).
 
+## [0.4.0] - 2026-11-08
+
+### Added
+
+- A single program for Windows and for Linux that needs nothing installed, not even Node.js. It carries the app inside itself and stops by itself a few minutes after its last browser tab is closed.
+- A progress bar while a large export is unpacked and read.
+
+### Changed
+
+- Statistics are worked out off the main thread, so the page stays responsive on very long chats.
+- The zip for systems with Node.js now needs only Node.js; the launch code is shared with the single program.
+
 ## [0.3.0] - 2026-11-08
 
 ### Added
@@ -65,6 +77,7 @@ The first release.
 - **iPhone support is experimental.** It follows the iPhone export format but has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please open an issue.
 - Group events from phones in other languages are shown as WhatsApp wrote them, without translation.
 
+[0.4.0]: https://github.com/abel0x/chatledger/releases/tag/v0.4.0
 [0.3.0]: https://github.com/abel0x/chatledger/releases/tag/v0.3.0
 [0.2.0]: https://github.com/abel0x/chatledger/releases/tag/v0.2.0
 [0.1.0]: https://github.com/abel0x/chatledger/releases/tag/v0.1.0

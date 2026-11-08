@@ -39,18 +39,27 @@ The pictures show a made-up chat that comes with the tests.
 
 Save the file to your computer.
 
-### 2. Install Node.js
+### 2. Download chatledger
 
-chatledger needs [Node.js](https://nodejs.org) 22 or newer. Pick the LTS version on the download page and install it with the default options.
+Pick the file for your computer on the releases page. Nothing needs to be installed.
 
-### 3. Download and start chatledger
+- **Windows:** `chatledger-x.y.z-windows-x64.zip`
+- **Linux:** `chatledger-x.y.z-linux-x64.zip`
 
-Download the latest `chatledger-x.y.z.zip` from the releases page and unzip it anywhere.
+Unzip it anywhere you like.
 
-- **Windows:** double-click `chatledger.cmd`.
-- **Linux:** run `./chatledger.sh` in a terminal, or double-click it and choose *Run*.
+### 3. Start it
 
-Your browser opens at `http://127.0.0.1:5170`. Keep the small window that appears open while you use chatledger. Closing it stops the app.
+Double-click `chatledger.exe` on Windows, or `chatledger` on Linux. Your browser opens at `http://127.0.0.1:5170`.
+
+- Windows may say it protected your computer, because the program is not signed with a paid certificate. Choose **More info › Run anyway**.
+- On Linux, if double-clicking opens the file in a text editor, right-click it and choose *Run*, or run `./chatledger` in a terminal.
+
+chatledger runs in the background while one of its tabs is open and stops by itself a few minutes after you close the last one.
+
+#### If you already have Node.js
+
+With [Node.js](https://nodejs.org) 22 or newer, the much smaller `chatledger-x.y.z.zip` works on any system. Unzip it, then double-click `chatledger.cmd` on Windows or run `./chatledger.sh` on Linux. Keep the window that appears open while you use chatledger; closing it stops the app.
 
 chatledger is tested in current versions of Firefox and of Chrome, Edge and other browsers built on Chromium.
 
@@ -83,7 +92,7 @@ npm start
 | `npm run test:e2e` | Runs the browser tests in Chromium and Firefox |
 | `npm run screenshots` | Takes the README pictures from the demo chat |
 | `npm run check` | Type-checks the code |
-| `npm run release` | Builds a zip that runs without npm or the source |
+| `npm run release` | Builds the zip that runs with Node.js, and the single program for this system (needs Node.js 26) |
 
 The code is in three layers: `src/core` reads exports and knows nothing about the screen, `src/loader` opens archives in a worker, and `src/ui` is the Svelte interface. Tests use made-up chats only; `tests/e2e/demo.ts` builds the demo export the browser tests and screenshots use. If you keep real exports in a `coldstorage/` folder, a few extra tests run against them on your machine. That folder is ignored by git.
 
