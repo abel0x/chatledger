@@ -51,6 +51,10 @@ describe('chatStats', () => {
     expect(stats.longestSilence).toEqual({ from: chat.messages[5]!.time, to: chat.messages[6]!.time });
   });
 
+  it('finds the longest message in characters people see', () => {
+    expect(stats.longest).toEqual({ index: 2, length: 23 });
+  });
+
   it('counts whole emoji, skin tones and flags included, with and without variation selectors', () => {
     expect(stats.emojis).toEqual([
       { emoji: '👍🏽', count: 2 },

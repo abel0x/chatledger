@@ -5,6 +5,7 @@ export interface PersonStats {
   messages: number;
   words: number;
   media: number;
+  stickers: number;
   /** Messages sent between midnight and 5 a.m. */
   night: number;
 }
@@ -26,6 +27,8 @@ export interface ChatStats {
   longestStreak: { start: number; days: number } | null;
   longestSilence: { from: number; to: number } | null;
   emojis: { emoji: string; count: number }[];
+  /** The longest text message, measured in characters as people see them. */
+  longest: { index: number; length: number } | null;
   media: number;
   links: number;
   deleted: number;
@@ -58,7 +61,8 @@ function monthOf(time: number): number {
 }
 
 export function chatStats(chat: Chat, topEmojis = 24): ChatStats {
-  const people = chat.people.map((_, person): PersonStats => ({ person, messages: 0, words: 0, media: 0, night: 0 }));
+  const people = chat.people.map((_, person): PersonStats => ({ person, messages: 0, words: 0, media: 0, stickers: 0, night: 0 }));
+  let longest: ChatStats['longest'] = null;
   const heat = new Array<number>(7 * 24).fill(0);
   const perDay = new Map<number, number>();
   const perMonth = new Map<number, number>();
@@ -74,7 +78,7 @@ export function chatStats(chat: Chat, topEmojis = 24): ChatStats {
   let prevTime: number | null = null;
   let longestSilence: ChatStats['longestSilence'] = null;
 
-  for (const m of chat.messages) {
+  for (const [index, m] of chat.messages.entries()) {
     if (m.sender == null) continue;
     messages++;
     first = Math.min(first, m.time);
@@ -97,12 +101,17 @@ export function chatStats(chat: Chat, topEmojis = 24): ChatStats {
       p.messages++;
       if (hour < 5) p.night++;
       if (m.kind === 'file' || m.kind === 'omitted') p.media++;
+      if (m.media === 'sticker') p.stickers++;
       if (m.text && m.kind === 'text') p.words += m.text.split(/\s+/).filter(Boolean).length;
     }
     if (m.kind === 'file' || m.kind === 'omitted') media++;
     if (m.kind === 'deleted') deleted++;
     if (m.kind === 'poll') polls++;
     if (m.edited) edited++;
+    if (m.text && m.kind === 'text') {
+      const length = segmenter ? Array.from(segmenter.segment(m.text)).length : m.text.length;
+      if (!longest || length > longest.length) longest = { index, length };
+    }
     if (m.text) {
       if (LINK.test(m.text)) links++;
       countEmojis(m.text, emojis);
@@ -142,6 +151,7 @@ export function chatStats(chat: Chat, topEmojis = 24): ChatStats {
     longestStreak,
     longestSilence,
     emojis: [...emojis.values()].sort((a, b) => b.count - a.count).slice(0, topEmojis),
+    longest,
     media,
     links,
     deleted,

@@ -50,11 +50,14 @@ export type KindFilter = 'all' | 'media' | 'links';
 export interface SearchOptions {
   sender: number | null;
   kind: KindFilter;
+  /** First and last day to include, as days since 1970; either may be left open. */
+  from?: number | null;
+  to?: number | null;
   limit?: number;
 }
 
 export interface SearchResult {
-  /** Message indices, oldest first. */
+  /** Message indices, oldest first; with a limit, the newest ones are kept. */
   hits: number[];
   /** Matches found in total, which may be more than were kept. */
   total: number;
@@ -107,7 +110,9 @@ export class SearchIndex {
 
   search(query: string, options: SearchOptions): SearchResult {
     const terms = parseQuery(query);
-    const filtered = options.sender != null || options.kind !== 'all';
+    const from = options.from ?? null;
+    const to = options.to ?? null;
+    const filtered = options.sender != null || options.kind !== 'all' || from != null || to != null;
     if (!terms.length && !filtered) return { hits: [], total: 0 };
     const texts = this.texts();
     const limit = options.limit ?? Infinity;
@@ -115,14 +120,16 @@ export class SearchIndex {
     let total = 0;
     this.chat.messages.forEach((m, i) => {
       if (options.sender != null && m.sender !== options.sender) return;
+      const day = Math.floor(m.time / 86400);
+      if ((from != null && day < from) || (to != null && day > to)) return;
       if (options.kind === 'media' && m.kind !== 'file' && m.kind !== 'omitted') return;
       if (options.kind === 'links' && !(m.text && LINK.test(m.text))) return;
       const text = texts[i] ?? '';
       for (const t of terms) if (!text.includes(t)) return;
       total++;
-      if (hits.length < limit) hits.push(i);
+      hits.push(i);
     });
-    return { hits, total };
+    return { hits: hits.length > limit ? hits.slice(-limit) : hits, total };
   }
 }
 

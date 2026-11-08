@@ -45,10 +45,18 @@ describe('SearchIndex', () => {
     expect(index.search('', all).total).toBe(0);
   });
 
+  it('keeps to a date range', () => {
+    const day = (d: number, mo: number) => Date.UTC(2025, mo - 1, d) / 86400000;
+    expect(index.search('', { sender: null, kind: 'all', from: day(13, 10) }).total).toBe(11);
+    expect(index.search('', { sender: null, kind: 'all', to: day(1, 10) }).total).toBe(10);
+    expect(index.search('', { sender: null, kind: 'all', from: day(2, 10), to: day(2, 10) }).total).toBe(3);
+  });
+
   it('stops collecting at the limit but still counts', () => {
     const r = index.search('', { sender: null, kind: 'media', limit: 1 });
     expect(r.hits).toHaveLength(1);
     expect(r.total).toBe(3);
+    expect(chat.messages[r.hits[0]!]?.kind).toBe('omitted');
   });
 });
 
