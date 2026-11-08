@@ -1,5 +1,5 @@
 import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js/lib/zip-core-native.js';
-import { extensionOf } from '../core';
+import { chatStats, extensionOf } from '../core';
 import { parseDocumentXml } from './docx';
 import { libraryAvailable, loadSaved, saveExport } from './library';
 import { LoadError, openExport, type OpenedExport } from './open';
@@ -19,7 +19,14 @@ function message(err: unknown): string | undefined {
 async function open(files: File[], savedId: string | null, save: boolean): Promise<void> {
   try {
     await opened?.close();
-    opened = await openExport(files);
+    let last = -1;
+    opened = await openExport(files, (phase, done, total) => {
+      // A message per whole percent is plenty, even for very long chats.
+      const percent = total ? Math.floor((done / total) * 100) : 0;
+      if (percent === last) return;
+      last = percent;
+      send({ type: 'progress', phase, done, total });
+    });
   } catch (err) {
     const code = err instanceof LoadError ? err.code : 'unknown';
     send({ type: 'failed', code, detail: message(err instanceof LoadError ? err.cause : err) });
@@ -117,6 +124,10 @@ async function handle(req: WorkerRequest): Promise<void> {
         thumb = null;
       }
       send({ type: 'thumb', id: req.id, thumb });
+      return;
+    }
+    case 'stats': {
+      send({ type: 'stats', id: req.id, stats: opened ? chatStats(opened.chat) : null });
       return;
     }
     case 'doc': {

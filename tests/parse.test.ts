@@ -73,6 +73,15 @@ describe('Android, English phone', () => {
     expect(new Set(chat.messages.map(m => m.id)).size).toBe(chat.messages.length);
   });
 
+  it('reports progress while reading', () => {
+    const lines = Array.from({ length: 5000 }, (_, i) => `01/10/2025, 20:${String(i % 60).padStart(2, '0')} - Ada: message ${i}`);
+    const seen: [number, number][] = [];
+    parseChat(lines.join('\n'), { onProgress: (done, total) => seen.push([done, total]) });
+    expect(seen[0]).toEqual([0, 5000]);
+    expect(seen.length).toBeGreaterThan(1);
+    expect(seen.every(([done, total]) => total === 5000 && done < 5000)).toBe(true);
+  });
+
   it('reads Windows line endings the same way', () => {
     const crlf = parseChat('\uFEFF' + fixture('android-en.txt').replace(/\n/g, '\r\n'));
     expect(crlf.messages.map(m => [m.id, m.kind, m.text])).toEqual(chat.messages.map(m => [m.id, m.kind, m.text]));

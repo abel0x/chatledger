@@ -15,6 +15,8 @@ export const it: Dictionary = {
   'welcome.howToIos': 'iPhone: apri la chat, tocca il suo nome in alto, poi Esporta chat › Allega media.',
   'welcome.howToSend': 'Salva il file su questo computer e aprilo qui.',
   'welcome.loading': 'Lettura della chat…',
+  'progress.unpack': 'Estrazione dell’esportazione…',
+  'progress.parse': 'Lettura dei messaggi…',
   'welcome.remember': 'Ricorda le chat che apro su questo computer',
   'welcome.saved': 'Chat salvate',
   'welcome.savedNote': 'Restano solo in questo browser, su questo computer.',
@@ -79,6 +81,7 @@ export const it: Dictionary = {
   'stats.colMonth': 'Mese',
   'stats.colCount': 'Numero',
   'stats.none': 'Non ci sono messaggi da contare.',
+  'stats.loading': 'Conteggio…',
 
   'gallery.media': 'Media',
   'gallery.files': 'File',

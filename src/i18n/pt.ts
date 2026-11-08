@@ -15,6 +15,8 @@ export const pt: Dictionary = {
   'welcome.howToIos': 'iPhone: abra a conversa, toque no nome dela no topo e depois em Exportar conversa › Anexar mídia.',
   'welcome.howToSend': 'Salve o arquivo neste computador e abra-o aqui.',
   'welcome.loading': 'Lendo a conversa…',
+  'progress.unpack': 'Descompactando a exportação…',
+  'progress.parse': 'Lendo as mensagens…',
   'welcome.remember': 'Lembrar as conversas que eu abrir neste computador',
   'welcome.saved': 'Conversas salvas',
   'welcome.savedNote': 'Ficam guardadas somente neste navegador, neste computador.',
@@ -79,6 +81,7 @@ export const pt: Dictionary = {
   'stats.colMonth': 'Mês',
   'stats.colCount': 'Quantidade',
   'stats.none': 'Não há mensagens para contar.',
+  'stats.loading': 'Contando…',
 
   'gallery.media': 'Mídia',
   'gallery.files': 'Arquivos',

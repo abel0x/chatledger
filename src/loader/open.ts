@@ -25,9 +25,12 @@ export class LoadError extends Error {
   }
 }
 
+export type Phase = 'unpack' | 'parse';
+export type Progress = (phase: Phase, done: number, total: number) => void;
+
 interface Source {
   path: string;
-  text(): Promise<string>;
+  text(progress?: (done: number, total: number) => void): Promise<string>;
   blob(): Promise<Blob>;
 }
 
@@ -76,7 +79,10 @@ async function zipSources(file: File, readers: ZipReader<unknown>[]): Promise<So
     const path = entry.filename;
     out.push({
       path,
-      text: () => entry.getData(new TextWriter('utf-8')),
+      text: progress =>
+        entry.getData(new TextWriter('utf-8'), {
+          onprogress: async (done, total) => progress?.(done, total),
+        }),
       blob: () => entry.getData(new BlobWriter(mimeTypeFor(path))),
     });
   }
@@ -87,7 +93,7 @@ async function zipSources(file: File, readers: ZipReader<unknown>[]): Promise<So
  * Opens what the user picked: an exported .zip, a bare .txt, or a folder of
  * loose files. Attachments are not read until something asks for them.
  */
-export async function openExport(files: File[]): Promise<OpenedExport> {
+export async function openExport(files: File[], onProgress?: Progress): Promise<OpenedExport> {
   if (!files.length) throw new LoadError('empty');
   const readers: ZipReader<unknown>[] = [];
   const close = async () => {
@@ -113,9 +119,12 @@ export async function openExport(files: File[]): Promise<OpenedExport> {
     let chat: Chat | null = null;
     let chatPath = '';
     for (const path of candidates) {
-      const text = await (byPath.get(path) as Source).text();
+      const text = await (byPath.get(path) as Source).text((done, total) => onProgress?.('unpack', done, total));
       try {
-        chat = parseChat(text, { fileName: [path, ...archiveNames] });
+        chat = parseChat(text, {
+          fileName: [path, ...archiveNames],
+          onProgress: (done, total) => onProgress?.('parse', done, total),
+        });
         chatPath = path;
         break;
       } catch (err) {

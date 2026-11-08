@@ -15,6 +15,8 @@ export const fr: Dictionary = {
   'welcome.howToIos': 'iPhone : ouvrez la discussion, touchez son nom en haut, puis Exporter la discussion › Joindre les médias.',
   'welcome.howToSend': 'Enregistrez le fichier sur cet ordinateur et ouvrez-le ici.',
   'welcome.loading': 'Lecture de la discussion…',
+  'progress.unpack': 'Décompression de l’export…',
+  'progress.parse': 'Lecture des messages…',
   'welcome.remember': 'Se souvenir des discussions ouvertes sur cet ordinateur',
   'welcome.saved': 'Discussions enregistrées',
   'welcome.savedNote': 'Elles restent uniquement dans ce navigateur, sur cet ordinateur.',
@@ -79,6 +81,7 @@ export const fr: Dictionary = {
   'stats.colMonth': 'Mois',
   'stats.colCount': 'Nombre',
   'stats.none': 'Il n’y a aucun message à compter.',
+  'stats.loading': 'Comptage…',
 
   'gallery.media': 'Médias',
   'gallery.files': 'Fichiers',

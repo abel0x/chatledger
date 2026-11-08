@@ -425,7 +425,7 @@
         </div>
 
         {#if showStats}
-          <div class="overlay"><StatsView {chat} onshow={pick} /></div>
+          <div class="overlay"><StatsView {chat} load={() => session.stats()} onshow={pick} /></div>
         {/if}
       </div>
       {#if activeDays.length > 1 && !showStats}

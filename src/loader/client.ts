@@ -1,6 +1,6 @@
-import type { Chat } from '../core';
+import type { Chat, ChatStats } from '../core';
 import type { SavedChat } from './library';
-import type { LoadErrorCode } from './open';
+import type { LoadErrorCode, Phase } from './open';
 import type { DocPreview, Thumbnail, WorkerRequest, WorkerResponse } from './protocol';
 
 export type { DocPreview };
@@ -23,6 +23,8 @@ export interface Session {
   blob(file: string): Promise<Blob | null>;
   /** Text of a Word or plain-text attachment, prepared for preview. */
   doc(file: string): Promise<DocPreview | null>;
+  /** Statistics, worked out in the worker so the page does not stall on long chats. */
+  stats(): Promise<ChatStats | null>;
   close(): void;
 }
 
@@ -48,12 +50,16 @@ export class SessionError extends Error {
 export type Source = { files: File[]; save: boolean } | { savedId: string };
 
 /** Opens an export in a worker so the page stays responsive while it is read. */
-export function openSession(source: Source): Promise<Session> {
+export type { Phase };
+
+export function openSession(source: Source, onProgress?: (phase: Phase, fraction: number) => void): Promise<Session> {
   const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
   const post = (req: WorkerRequest) => worker.postMessage(req);
   const pending = new Map<number, (blob: Blob | null) => void>();
   const pendingThumbs = new Map<number, (thumb: Thumbnail | null) => void>();
   const pendingDocs = new Map<number, (doc: DocPreview | null) => void>();
+  const pendingStats = new Map<number, (stats: ChatStats | null) => void>();
+  let statsCache: Promise<ChatStats | null> | null = null;
   const urls = new Map<string, Promise<string | null>>();
   const thumbs = new Map<string, Promise<Thumb | null>>();
   let nextId = 1;
@@ -82,6 +88,13 @@ export function openSession(source: Source): Promise<Session> {
           return;
         case 'saveFailed':
           settleSaved(null);
+          return;
+        case 'progress':
+          onProgress?.(msg.phase, msg.total ? msg.done / msg.total : 0);
+          return;
+        case 'stats':
+          pendingStats.get(msg.id)?.(msg.stats);
+          pendingStats.delete(msg.id);
           return;
         case 'read':
           pending.get(msg.id)?.(msg.blob);
@@ -120,6 +133,15 @@ export function openSession(source: Source): Promise<Session> {
               return url;
             },
             blob,
+            stats() {
+              if (closed) return Promise.resolve(null);
+              if (!statsCache) {
+                const id = nextId++;
+                statsCache = new Promise<ChatStats | null>(done => pendingStats.set(id, done));
+                post({ type: 'stats', id });
+              }
+              return statsCache;
+            },
             doc(file) {
               if (closed || !found.has(file)) return Promise.resolve(null);
               const id = nextId++;
@@ -148,6 +170,8 @@ export function openSession(source: Source): Promise<Session> {
               for (const done of pending.values()) done(null);
               for (const done of pendingThumbs.values()) done(null);
               for (const done of pendingDocs.values()) done(null);
+              for (const done of pendingStats.values()) done(null);
+              pendingStats.clear();
               pendingDocs.clear();
               pending.clear();
               pendingThumbs.clear();

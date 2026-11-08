@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { openSession, SessionError, type Session, type Source } from '../loader/client';
+  import { openSession, SessionError, type Phase, type Session, type Source } from '../loader/client';
   import { libraryAvailable, listSaved, removeSaved, type SavedChat } from '../loader/library';
   import type { LoadErrorCode } from '../loader/open';
   import ChatView from './ChatView.svelte';
@@ -10,6 +10,7 @@
   // A chat can hold hundreds of thousands of messages; it is never edited, so it stays unproxied.
   let session = $state.raw<Session | null>(null);
   let busy = $state(false);
+  let progress = $state<{ phase: Phase; fraction: number } | null>(null);
   let error = $state<LoadErrorCode | null>(null);
   let library = $state.raw<SavedChat[]>([]);
   let remember = $state(readSetting('remember') !== 'no');
@@ -23,8 +24,9 @@
     if (busy) return;
     busy = true;
     error = null;
+    progress = null;
     try {
-      const next = await openSession(source);
+      const next = await openSession(source, (phase, fraction) => (progress = { phase, fraction }));
       session = next;
       if (next.savedId) writeSetting('last', next.savedId);
       void next.saved.then(saved => {
@@ -38,6 +40,7 @@
       if ('savedId' in source) writeSetting('last', null);
     } finally {
       busy = false;
+      progress = null;
     }
   }
 
@@ -72,6 +75,7 @@
 {:else}
   <Welcome
     {busy}
+    {progress}
     {error}
     {library}
     {remember}

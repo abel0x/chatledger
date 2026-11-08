@@ -15,6 +15,8 @@ export const tr: Dictionary = {
   'welcome.howToIos': 'iPhone: sohbeti açın, üstteki ada dokunun, ardından Sohbeti Dışa Aktar › Medyayı Ekle’yi seçin.',
   'welcome.howToSend': 'Dosyayı bu bilgisayara kaydedip burada açın.',
   'welcome.loading': 'Sohbet okunuyor…',
+  'progress.unpack': 'Döküm açılıyor…',
+  'progress.parse': 'Mesajlar okunuyor…',
   'welcome.remember': 'Açtığım sohbetleri bu bilgisayarda hatırla',
   'welcome.saved': 'Kayıtlı sohbetler',
   'welcome.savedNote': 'Yalnızca bu bilgisayarda, bu tarayıcıda saklanır.',
@@ -79,6 +81,7 @@ export const tr: Dictionary = {
   'stats.colMonth': 'Ay',
   'stats.colCount': 'Sayı',
   'stats.none': 'Sayılacak mesaj yok.',
+  'stats.loading': 'Sayılıyor…',
 
   'gallery.media': 'Medya',
   'gallery.files': 'Dosyalar',

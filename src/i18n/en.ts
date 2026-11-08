@@ -18,6 +18,8 @@ export const en = {
   'welcome.howToIos': 'iPhone: open the chat, tap its name at the top, then Export chat › Attach media.',
   'welcome.howToSend': 'Save the file to this computer and open it here.',
   'welcome.loading': 'Reading the chat…',
+  'progress.unpack': 'Unpacking the export…',
+  'progress.parse': 'Reading the messages…',
   'welcome.remember': 'Remember chats I open on this computer',
   'welcome.saved': 'Saved chats',
   'welcome.savedNote': 'They are kept in this browser, on this computer only.',
@@ -82,6 +84,7 @@ export const en = {
   'stats.colMonth': 'Month',
   'stats.colCount': 'Count',
   'stats.none': 'There are no messages to count.',
+  'stats.loading': 'Counting…',
 
   'gallery.media': 'Media',
   'gallery.files': 'Files',

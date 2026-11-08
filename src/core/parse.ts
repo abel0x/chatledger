@@ -11,6 +11,8 @@ export interface ParseOptions {
   fileName?: string | string[];
   /** Force a locale pack instead of detecting it. */
   locale?: string;
+  /** Called now and then with how many messages have been read out of how many. */
+  onProgress?: (done: number, total: number) => void;
 }
 
 export class NotAChatError extends Error {
@@ -233,7 +235,9 @@ export function parseChat(input: string, options: ParseOptions = {}): Chat {
   const seen = new Map<string, number>();
   const messages: Message[] = [];
 
-  for (const entry of entries) {
+  const step = Math.max(2000, Math.floor(entries.length / 50));
+  for (const [n, entry] of entries.entries()) {
+    if (options.onProgress && n % step === 0) options.onProgress(n, entries.length);
     const time = toSeconds(entry.header, order);
     const key = hash(`${time}|${entry.body}`);
     const dup = seen.get(key) ?? 0;

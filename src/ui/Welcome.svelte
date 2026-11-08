@@ -1,7 +1,7 @@
 <script lang="ts">
   import { locale, t } from '../i18n/index.svelte';
   import type { SavedChat } from '../loader/library';
-  import type { LoadErrorCode } from '../loader/open';
+  import type { LoadErrorCode, Phase } from '../loader/open';
   import { filesFromDrop } from './drop';
   import { formatBytes, formatDayRange } from './format';
   import Icon from './Icon.svelte';
@@ -9,6 +9,7 @@
 
   interface Props {
     busy: boolean;
+    progress: { phase: Phase; fraction: number } | null;
     error: LoadErrorCode | null;
     library: SavedChat[];
     remember: boolean;
@@ -19,7 +20,7 @@
     onremember: (value: boolean) => void;
   }
 
-  let { busy, error, library, remember, canRemember, onopen, onopensaved, onremove, onremember }: Props = $props();
+  let { busy, progress, error, library, remember, canRemember, onopen, onopensaved, onremove, onremember }: Props = $props();
 
   let dragging = $state(false);
   let confirming = $state<string | null>(null);
@@ -67,8 +68,14 @@
 
     <div class="drop">
       {#if busy}
-        <div class="spinner" aria-hidden="true"></div>
-        <p role="status">{t('welcome.loading')}</p>
+        {#if progress}
+          <p role="status">{t(`progress.${progress.phase}`)}</p>
+          <progress class="bar" max="1" value={progress.fraction} aria-label={t(`progress.${progress.phase}`)}></progress>
+          <span class="percent">{new Intl.NumberFormat(locale(), { style: 'percent' }).format(progress.fraction)}</span>
+        {:else}
+          <div class="spinner" aria-hidden="true"></div>
+          <p role="status">{t('welcome.loading')}</p>
+        {/if}
       {:else}
         <Icon name="upload" size={36} />
         <p>{t('welcome.drop')}</p>
@@ -325,6 +332,18 @@
     margin-top: 6px;
   }
 
+  .bar {
+    width: min(320px, 100%);
+    height: 8px;
+    accent-color: var(--accent);
+  }
+
+  .percent {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
   .spinner {
     width: 32px;
     height: 32px;
@@ -341,7 +360,19 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .spinner {
+    .bar {
+    width: min(320px, 100%);
+    height: 8px;
+    accent-color: var(--accent);
+  }
+
+  .percent {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .spinner {
       animation-duration: 3s;
     }
   }

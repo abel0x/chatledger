@@ -1,12 +1,20 @@
 <script lang="ts">
-  import { chatStats, type Chat } from '../core';
+  import type { Chat, ChatStats } from '../core';
   import { locale, t } from '../i18n/index.svelte';
   import { formatDay, formatDayRange, formatMonth, formatMonthShort } from './format';
   import { readSetting, writeSetting } from './settings';
 
-  let { chat, onshow }: { chat: Chat; onshow?: (messageIndex: number) => void } = $props();
+  let { chat, load, onshow }: { chat: Chat; load: () => Promise<ChatStats | null>; onshow?: (messageIndex: number) => void } = $props();
 
-  const stats = $derived(chatStats(chat));
+  let loaded = $state.raw<ChatStats | null>(null);
+  $effect(() => {
+    void load().then(s => (loaded = s));
+  });
+  const EMPTY: ChatStats = {
+    messages: 0, first: 0, last: 0, activeDays: 0, spanDays: 0, people: [], heat: new Array(168).fill(0), months: [],
+    busiestDay: null, longestStreak: null, longestSilence: null, emojis: [], longest: null, media: 0, links: 0, deleted: 0, edited: 0, polls: 0,
+  };
+  const stats = $derived(loaded ?? EMPTY);
   const TOP = 10;
 
   let showAll = $state(false);
@@ -77,7 +85,9 @@
 
 <div class="stats" onscroll={hide}>
   <div class="column">
-    {#if !stats.messages}
+    {#if !loaded}
+      <p class="empty" role="status">{t('stats.loading')}</p>
+    {:else if !stats.messages}
       <p class="empty">{t('stats.none')}</p>
     {:else}
       <p class="period">{formatDayRange(stats.first, stats.last, locale())}</p>
