@@ -1,11 +1,17 @@
 import type { ChatEvent, Party } from '../core';
+import { de } from './de';
 import { en, type Dictionary, type Key } from './en';
+import { es } from './es';
+import { fr } from './fr';
+import { it } from './it';
+import { pt } from './pt';
 import { tr } from './tr';
 
-export type Lang = 'en' | 'tr';
-export const LANGS: readonly Lang[] = ['en', 'tr'];
+export type Lang = 'en' | 'de' | 'es' | 'fr' | 'it' | 'pt' | 'tr';
+/** In the order their own names sort, as the language menu lists them. */
+export const LANGS: readonly Lang[] = ['en', 'de', 'es', 'fr', 'it', 'pt', 'tr'];
 
-const DICTIONARIES: Record<Lang, Dictionary> = { en, tr };
+export const DICTIONARIES: Record<Lang, Dictionary> = { en, de, es, fr, it, pt, tr };
 
 export type Params = Record<string, string | number>;
 

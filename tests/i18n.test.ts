@@ -1,17 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import type { ChatEvent } from '../src/core';
 import { en, type Key } from '../src/i18n/en';
-import { tr } from '../src/i18n/tr';
-import { describeEvent, formatLocale, translate } from '../src/i18n/translate';
+import { describeEvent, DICTIONARIES, formatLocale, LANGS, translate } from '../src/i18n/translate';
 
 const placeholders = (value: string | { one: string; other: string }) =>
   [...new Set((typeof value === 'string' ? value : value.one + value.other).match(/\{\w+\}/g) ?? [])].sort();
 
 describe('dictionaries', () => {
   it('use the same placeholders in every language', () => {
-    for (const key of Object.keys(en) as Key[]) {
-      expect(placeholders(tr[key]), key).toEqual(placeholders(en[key]));
+    for (const lang of LANGS) {
+      for (const key of Object.keys(en) as Key[]) {
+        expect(placeholders(DICTIONARIES[lang][key]), `${lang} ${key}`).toEqual(placeholders(en[key]));
+      }
     }
+  });
+
+  it('are all translated, not copied from English', () => {
+    for (const lang of LANGS.filter(l => l !== 'en')) {
+      const same = (Object.keys(en) as Key[]).filter(k => JSON.stringify(DICTIONARIES[lang][k]) === JSON.stringify(en[k]));
+      // Single words ("Video", "message") can be the same in another language; whole sentences never are.
+      expect(same.filter(k => typeof en[k] === 'string' && (en[k] as string).split(' ').length >= 3), lang).toEqual([]);
+    }
+  });
+
+  it('plural forms work with each language’s own rules', () => {
+    expect(translate('fr', 'chat.messages', { count: 0 })).toBe('0 message');
+    expect(translate('de', 'chat.messages', { count: 1200 })).toBe('1.200 Nachrichten');
+    expect(translate('es', 'chat.people', { count: 1 })).toBe('1 persona');
   });
 });
 
