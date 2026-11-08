@@ -20,13 +20,36 @@
 <script lang="ts">
   import { locale, t } from '../i18n/index.svelte';
   import Icon from './Icon.svelte';
+  import { waveform } from './waveform';
 
-  let { src, voice = true, onerror }: { src: string; voice?: boolean; onerror?: () => void } = $props();
+  let {
+    src,
+    voice = true,
+    load,
+    onerror,
+  }: { src: string; voice?: boolean; load?: () => Promise<Blob | null>; onerror?: () => void } = $props();
+
+  let bars = $state.raw<number[] | null>(null);
+
+  $effect(() => {
+    if (!load) return;
+    let live = true;
+    void load()
+      .then(blob => (blob ? waveform(blob) : null))
+      .then(peaks => {
+        if (live) bars = peaks;
+      });
+    return () => {
+      live = false;
+    };
+  });
+
 
   let audio = $state<HTMLAudioElement>();
   let paused = $state(true);
   let time = $state(0);
   let duration = $state(0);
+  const played = $derived(duration ? time / duration : 0);
 
   $effect(() => {
     if (audio) audio.playbackRate = speed;
@@ -55,7 +78,15 @@
     <Icon name={paused ? 'play' : 'pause'} size={20} filled={paused} />
   </button>
   <div class="track">
+    {#if bars}
+      <div class="wave" aria-hidden="true">
+        {#each bars as level, i (i)}
+          <span class:done={i / bars.length < played} style:height={`${Math.max(12, level * 100)}%`}></span>
+        {/each}
+      </div>
+    {/if}
     <input
+      class:over={!!bars}
       type="range"
       min="0"
       max={duration || 0}
@@ -94,9 +125,38 @@
   }
 
   .track {
+    position: relative;
     flex: 1;
     min-width: 0;
     display: grid;
+  }
+
+  .wave {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 26px;
+  }
+
+  .wave span {
+    flex: 1;
+    min-width: 2px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--muted) 55%, transparent);
+  }
+
+  .wave span.done {
+    background: var(--accent);
+  }
+
+  /* With a waveform, the slider stays for keyboard and screen readers but lies invisibly on top. */
+  input.over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 26px;
+    opacity: 0;
+    cursor: pointer;
   }
 
   input[type='range'] {
