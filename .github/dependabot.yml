@@ -11,6 +11,9 @@ updates:
       # svelte-check only accepts TypeScript 5 and 6 so far.
       - dependency-name: typescript
         update-types: ['version-update:semver-major']
+      # Node types follow the oldest supported Node, not the newest.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       development:
         dependency-type: development
