@@ -7,6 +7,10 @@ updates:
     # New releases get two weeks to settle before they are proposed.
     cooldown:
       default-days: 14
+    ignore:
+      # svelte-check only accepts TypeScript 5 and 6 so far.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
     groups:
       development:
         dependency-type: development
