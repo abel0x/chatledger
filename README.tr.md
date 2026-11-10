@@ -1,6 +1,6 @@
 # chatledger
 
-Bir WhatsApp sohbet dökümünü kendi bilgisayarınızda açın ve o sohbette olan her şeyi okuyun.
+Bir WhatsApp veya Telegram sohbet dökümünü kendi bilgisayarınızda açın ve o sohbette olan her şeyi okuyun.
 
 chatledger sizin bilgisayarınızda çalışır ve sohbeti tarayıcınızda gösterir. Mesajlarınız, fotoğraflarınız ve sesli mesajlarınız hiçbir yere yüklenmez. Uygulama hiçbir ağ isteği yapmaz; yapmaya kalkarsa içerik güvenlik politikası bunu engeller.
 
@@ -11,6 +11,7 @@ chatledger sizin bilgisayarınızda çalışır ve sohbeti tarayıcınızda gös
 ## Neler yapar
 
 - WhatsApp'ın dışa aktardığı `.zip` veya `.txt` dosyasını ya da dosyaların bulunduğu bir klasörü açar. Android dökümleri tam olarak desteklenir; iPhone dökümleri şimdilik deneyseldir (bkz. *Bilinen sınırlar*).
+- Telegram Desktop'tan JSON veya HTML olarak dışa aktarılan Telegram sohbetlerini de yanıtları, iletilen mesajları, tepkileri ve gizli (spoiler) metinleriyle açar. Bu da şimdilik deneyseldir.
 - Sohbeti hatırladığınız gibi gösterir: fotoğraflar, videolar, çıkartmalar, sesli mesajlar, belgeler, anketler ve grup olayları. Yüz binlerce mesajlık sohbetlerde de akıcı kalır.
 - Mesajları hızlı bulur. Büyük/küçük harf ve Türkçe karakterler fark etmez, `ogretmen` yazınca `Öğretmen` de bulunur. Tam bir ifadeyi tırnak içinde arayabilir, kişiye, medyaya ya da bağlantılara göre süzebilirsiniz.
 - Biçimlendirmeyi WhatsApp'taki gibi gösterir: *kalın*, _italik_, ~üstü çizili~, `kod`, @bahsetmeler ve büyük emojiler.
@@ -41,6 +42,8 @@ Görsellerdeki sohbet, testlerle birlikte gelen uydurma bir sohbettir.
 
 Dosyayı bilgisayarınıza kaydedin.
 
+**Telegram:** sohbetler yalnızca [Telegram Desktop](https://desktop.telegram.org)'tan dışa aktarılabilir. Sohbeti açın, ⋮ › **Sohbet geçmişini dışa aktar**'a tıklayın, istediğiniz medyayı ve iki biçimden birini seçin. Telegram bir klasör oluşturur; bu klasörü chatledger'da açın ya da sıkıştırıp zip dosyasını açın.
+
 ### 2. chatledger'ı indirin
 
 Sürümler sayfasından bilgisayarınıza uygun dosyayı seçin. Hiçbir şey kurmanız gerekmez.
@@ -70,6 +73,7 @@ chatledger, Firefox'un ve Chrome, Edge gibi Chromium tabanlı tarayıcıların g
 - **iPhone dökümleri deneyseldir.** chatledger iPhone'un dışa aktarma biçimine göre yazıldı, ancak henüz pek çok gerçek iPhone dökümüyle denenmedi. Biri açılmazsa ya da yanlış görünürse lütfen bildirin (aşağıya bakın).
 - Almanca, İspanyolca, Fransızca, İtalyanca veya Portekizce ayarlı telefonlardan gelen dökümler, WhatsApp'ın bu dillerdeki ifadelerine göre okunur ancak henüz pek çok gerçek dökümle denenmedi. Bir grup olayı sizin diliniz yerine telefonun dilinde görünürse ya da bir ek tanınmazsa lütfen o satırı (adları değiştirerek) bildirin.
 - Başka dillere ayarlı telefonlardan gelen grup olayları çevrilmeden, WhatsApp'ın yazdığı gibi gösterilir. Mesajlar, tarihler ve medya her dilde çalışır.
+- **Telegram desteği deneyseldir.** Telegram Desktop'ın yazdığı biçime göre yazıldı, ancak henüz pek çok gerçek dökümle denenmedi. HTML dökümlerinde "Ada, Bora'yı ekledi" gibi sistem mesajları Telegram'ın İngilizce ifadelerinden okunur; tanınmayanlar yazıldığı gibi gösterilir. Hareketli çıkartmalar sabit resimleriyle görünür. Bütün bir hesabın dökümü açılmaz; sohbetleri tek tek dışa aktarın.
 
 ## Sohbetleriniz nerede saklanır
 
@@ -104,9 +108,9 @@ Güvenlik sorunlarını herkese açık bir issue yerine [SECURITY.md](SECURITY.m
 
 Bir döküm açılmıyorsa ya da bir şey yanlış görünüyorsa lütfen bir issue açıp anlatın. Telefonunuzun dilini ve Android mi iPhone mu olduğunu da yazın. Sohbetinizi eklemeyin. Yanlış okunan bir satır varsa, paylaşmadan önce içindeki adları ve metni değiştirin.
 
-## WhatsApp ile bağlantısı yoktur
+## WhatsApp veya Telegram ile bağlantısı yoktur
 
-chatledger bağımsız bir projedir. WhatsApp ya da Meta tarafından yapılmamış, onaylanmamış ve desteklenmemektedir. WhatsApp, sahibine ait bir ticari markadır.
+chatledger bağımsız bir projedir. WhatsApp, Meta ya da Telegram tarafından yapılmamış, onaylanmamış ve desteklenmemektedir. WhatsApp ve Telegram, sahiplerine ait ticari markalardır.
 
 ## Lisans
 

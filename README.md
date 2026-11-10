@@ -1,6 +1,6 @@
 # chatledger
 
-Open a WhatsApp chat export on your own computer and read everything that happened in it.
+Open a WhatsApp or Telegram chat export on your own computer and read everything that happened in it.
 
 chatledger runs on your machine and shows the chat in your browser. Your messages, photos and voice notes are never uploaded anywhere: the app makes no network requests at all, and its content security policy would block them if it tried.
 
@@ -11,6 +11,7 @@ chatledger runs on your machine and shows the chat in your browser. Your message
 ## What it does
 
 - Opens the `.zip` or `.txt` that WhatsApp exports, or a folder of loose files. Android exports are fully supported; iPhone exports are experimental for now (see *Known limits*).
+- Opens Telegram chats too, exported from Telegram Desktop as JSON or HTML, with their replies, forwarded messages, reactions and hidden spoiler text. This is experimental for now as well.
 - Shows the chat the way you remember it, with photos, videos, stickers, voice messages, documents, polls and group events, and stays smooth on chats with hundreds of thousands of messages.
 - Finds messages fast. Capitals and accents do not matter, so `ogretmen` finds `Öğretmen`. Put an exact phrase in quotes, or filter by person, media or links.
 - Shows formatting the way WhatsApp does: *bold*, _italic_, ~strikethrough~, `code`, @mentions and large emoji.
@@ -41,6 +42,8 @@ The pictures show a made-up chat that comes with the tests.
 
 Save the file to your computer.
 
+**Telegram:** chats can only be exported from [Telegram Desktop](https://desktop.telegram.org). Open the chat, click ⋮ › **Export chat history**, choose the media you want and either format. Telegram makes a folder; open that folder in chatledger, or zip it and open the zip.
+
 ### 2. Download chatledger
 
 Pick the file for your computer on the releases page. Nothing needs to be installed.
@@ -70,6 +73,7 @@ chatledger is tested in current versions of Firefox and of Chrome, Edge and othe
 - **iPhone exports are experimental.** chatledger follows the iPhone export format, but it has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please report it (see below).
 - Exports from phones set to German, Spanish, French, Italian or Portuguese follow WhatsApp's wording in those languages but have not yet been checked against many real exports. If a group event shows up in the phone's language instead of yours, or an attachment is not recognised, please report the line (with the names changed).
 - Group events from phones set to any other language are shown as WhatsApp wrote them, without translation. Messages, dates and media work in every language.
+- **Telegram support is experimental.** It follows the format Telegram Desktop writes but has not yet been tried on many real exports. In HTML exports, service messages such as "Ada invited Bora" are read from Telegram's English wording; ones it does not know are shown as written. Animated stickers show their still picture. An export of a whole account is not opened: export one chat at a time.
 
 ## Where your chats are kept
 
@@ -104,9 +108,9 @@ For security problems, follow [SECURITY.md](SECURITY.md) instead and report them
 
 If an export does not open or something looks wrong, please open an issue and describe it. Include your phone's language and whether it is Android or iPhone. Do not attach your chat. If a line is read wrongly, change the names and text in it before sharing.
 
-## Not affiliated with WhatsApp
+## Not affiliated with WhatsApp or Telegram
 
-chatledger is an independent project. It is not made, endorsed or supported by WhatsApp or Meta. WhatsApp is a trademark of its owner.
+chatledger is an independent project. It is not made, endorsed or supported by WhatsApp, Meta or Telegram. WhatsApp and Telegram are trademarks of their owners.
 
 ## License
 
