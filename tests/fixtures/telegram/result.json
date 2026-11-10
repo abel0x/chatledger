@@ -1,0 +1,249 @@
+{
+ "name": "Weekend Hikers",
+ "type": "private_supergroup",
+ "id": 1700000001,
+ "messages": [
+  {
+   "id": 1,
+   "type": "service",
+   "date": "2025-03-01T09:00:00",
+   "date_unixtime": "1740819600",
+   "actor": "Ada Demir",
+   "actor_id": "user101",
+   "action": "create_group",
+   "title": "Hikers",
+   "members": ["Bora Kaya", "Cem Aydın"],
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 2,
+   "type": "service",
+   "date": "2025-03-01T09:01:00",
+   "date_unixtime": "1740819660",
+   "actor": "Ada Demir",
+   "actor_id": "user101",
+   "action": "edit_group_title",
+   "title": "Weekend Hikers",
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 3,
+   "type": "message",
+   "date": "2025-03-01T09:02:10",
+   "date_unixtime": "1740819730",
+   "from": "Ada Demir",
+   "from_id": "user101",
+   "text": ["Welcome! Read the ", {"type": "bold", "text": "rules"}, " at ", {"type": "link", "text": "https://example.org/rules"}],
+   "text_entities": [
+    {"type": "plain", "text": "Welcome! Read the "},
+    {"type": "bold", "text": "rules"},
+    {"type": "plain", "text": " at "},
+    {"type": "link", "text": "https://example.org/rules"}
+   ],
+   "reactions": [
+    {"type": "emoji", "count": 2, "emoji": "👍"},
+    {"type": "custom_emoji", "count": 1, "document_id": "5000"}
+   ]
+  },
+  {
+   "id": 4,
+   "type": "message",
+   "date": "2025-03-01T09:05:00",
+   "date_unixtime": "1740819900",
+   "edited": "2025-03-01T09:06:00",
+   "edited_unixtime": "1740819960",
+   "from": "Bora Kaya",
+   "from_id": "user102",
+   "reply_to_message_id": 3,
+   "text": "Thanks *Ada*, see you Saturday",
+   "text_entities": [{"type": "plain", "text": "Thanks *Ada*, see you Saturday"}]
+  },
+  {
+   "id": 5,
+   "type": "message",
+   "date": "2025-03-01T10:00:00",
+   "date_unixtime": "1740823200",
+   "from": "Cem Aydın",
+   "from_id": "user103",
+   "photo": "photos/photo_1@01-03-2025_10-00-00.jpg",
+   "photo_file_size": 1024,
+   "width": 800,
+   "height": 600,
+   "text": "The trail",
+   "text_entities": [{"type": "plain", "text": "The trail"}]
+  },
+  {
+   "id": 6,
+   "type": "message",
+   "date": "2025-03-01T10:01:00",
+   "date_unixtime": "1740823260",
+   "from": "Cem Aydın",
+   "from_id": "user103",
+   "file": "voice_messages/audio_1@01-03-2025_10-01-00.ogg",
+   "file_size": 2048,
+   "media_type": "voice_message",
+   "mime_type": "audio/ogg",
+   "duration_seconds": 4,
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 7,
+   "type": "message",
+   "date": "2025-03-01T10:02:00",
+   "date_unixtime": "1740823320",
+   "from": "Bora Kaya",
+   "from_id": "user102",
+   "file": "stickers/sticker.tgs",
+   "thumbnail": "stickers/sticker.tgs_thumb.jpg",
+   "media_type": "sticker",
+   "sticker_emoji": "🏔",
+   "mime_type": "application/x-tgsticker",
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 8,
+   "type": "message",
+   "date": "2025-03-01T10:03:00",
+   "date_unixtime": "1740823380",
+   "from": "Ada Demir",
+   "from_id": "user101",
+   "file": "(File not included. Change data exporting settings to download.)",
+   "file_size": 99999999,
+   "media_type": "video_file",
+   "mime_type": "video/mp4",
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 9,
+   "type": "message",
+   "date": "2025-03-01T11:00:00",
+   "date_unixtime": "1740826800",
+   "from": "Ada Demir",
+   "from_id": "user101",
+   "forwarded_from": "Mountain News",
+   "text": [{"type": "italic", "text": "Snow expected"}, " on the pass. ", {"type": "spoiler", "text": "Bring gloves"}],
+   "text_entities": [
+    {"type": "italic", "text": "Snow expected"},
+    {"type": "plain", "text": " on the pass. "},
+    {"type": "spoiler", "text": "Bring gloves"}
+   ]
+  },
+  {
+   "id": 10,
+   "type": "message",
+   "date": "2025-03-01T12:00:00",
+   "date_unixtime": "1740830400",
+   "from": "Ada Demir",
+   "from_id": "user101",
+   "poll": {
+    "question": "Start time?",
+    "closed": false,
+    "total_voters": 3,
+    "answers": [
+     {"text": "7:00", "voters": 1, "chosen": false},
+     {"text": "8:00", "voters": 2, "chosen": true}
+    ]
+   },
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 11,
+   "type": "message",
+   "date": "2025-03-02T07:30:00",
+   "date_unixtime": "1740900600",
+   "from": "Bora Kaya",
+   "from_id": "user102",
+   "location_information": {"latitude": 40.5, "longitude": 29.25},
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 12,
+   "type": "message",
+   "date": "2025-03-02T07:31:00",
+   "date_unixtime": "1740900660",
+   "from": "Cem Aydın",
+   "from_id": "user103",
+   "contact_information": {"first_name": "Deniz", "last_name": "Guide", "phone_number": "+90 555 000 0000"},
+   "contact_vcard": "contacts/contact_1.vcf",
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 13,
+   "type": "message",
+   "date": "2025-03-02T07:32:00",
+   "date_unixtime": "1740900720",
+   "from": "Ada Demir",
+   "from_id": "user104",
+   "text": "Another Ada here",
+   "text_entities": [{"type": "plain", "text": "Another Ada here"}]
+  },
+  {
+   "id": 14,
+   "type": "message",
+   "date": "2025-03-02T07:33:00",
+   "date_unixtime": "1740900780",
+   "from": "Bora Kaya",
+   "from_id": "user102",
+   "text": [{"type": "text_link", "text": "map", "href": "javascript:alert(1)"}, " and ", {"type": "text_link", "text": "site", "href": "https://example.org"}],
+   "text_entities": [
+    {"type": "text_link", "text": "map", "href": "javascript:alert(1)"},
+    {"type": "plain", "text": " and "},
+    {"type": "text_link", "text": "site", "href": "https://example.org"}
+   ]
+  },
+  {
+   "id": 15,
+   "type": "service",
+   "date": "2025-03-02T08:00:00",
+   "date_unixtime": "1740902400",
+   "actor": "Ada Demir",
+   "actor_id": "user101",
+   "action": "pin_message",
+   "message_id": 10,
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 16,
+   "type": "service",
+   "date": "2025-03-02T09:00:00",
+   "date_unixtime": "1740906000",
+   "actor": "Cem Aydın",
+   "actor_id": "user103",
+   "action": "remove_members",
+   "members": ["Cem Aydın"],
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 17,
+   "type": "service",
+   "date": "2025-03-02T09:05:00",
+   "date_unixtime": "1740906300",
+   "actor": "Ada Demir",
+   "actor_id": "user101",
+   "action": "set_chat_theme",
+   "emoticon": "🏔",
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 18,
+   "type": "message",
+   "date": "2025-03-02T09:10:00",
+   "date_unixtime": "1740906600",
+   "from": null,
+   "from_id": "user105",
+   "text": "old message",
+   "text_entities": [{"type": "plain", "text": "old message"}]
+  }
+ ]
+}

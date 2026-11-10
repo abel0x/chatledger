@@ -2,7 +2,7 @@ import { baseName, mediaHintFor } from './files';
 import { BIDI, detectDateOrder, detectPlatform, matchHeader, toSeconds, type RawHeader } from './header';
 import { LIMITS } from './limits';
 import { LOCALES, type LocalePack } from './locales';
-import type { Chat, ChatEvent, Message, ParseWarning, Party, Platform, Poll } from './model';
+import type { Chat, ChatEvent, Message, ParseWarning, Party, Poll, WhatsAppPlatform as Platform } from './model';
 
 export interface ParseOptions {
   /**

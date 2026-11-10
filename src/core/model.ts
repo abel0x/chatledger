@@ -1,4 +1,5 @@
-export type Platform = 'android' | 'ios';
+export type Platform = 'android' | 'ios' | 'telegram';
+export type WhatsAppPlatform = Exclude<Platform, 'telegram'>;
 
 /** Who an event is about: the person who exported the chat, or someone by name. */
 export type Party = { self: true } | { name: string };
@@ -47,6 +48,15 @@ export type EventType =
   | 'pinned'
   | 'disappearingOn'
   | 'disappearingOff'
+  | 'entered'
+  | 'call'
+  | 'missedCall'
+  | 'groupCall'
+  | 'channelCreated'
+  | 'migrated'
+  | 'historyCleared'
+  | 'signedUp'
+  | 'topicCreated'
   | 'unknown';
 
 export interface ChatEvent {
@@ -59,6 +69,28 @@ export interface ChatEvent {
   previous?: string;
   /** The line as WhatsApp wrote it, kept so nothing is ever lost. */
   raw: string;
+}
+
+/** A run of text and the styles Telegram gives it; WhatsApp writes its styles into the text instead. */
+export interface Span {
+  text: string;
+  b?: true;
+  i?: true;
+  u?: true;
+  s?: true;
+  code?: true;
+  pre?: true;
+  spoiler?: true;
+  quote?: true;
+  mention?: true;
+  /** Where the text links to, as the export gives it; only web and mail links are ever followed. */
+  href?: string;
+}
+
+export interface Reaction {
+  /** Null for custom emoji, which exports do not include. */
+  emoji: string | null;
+  count: number;
 }
 
 export interface PollOption {
@@ -86,6 +118,13 @@ export interface Message {
   edited?: true;
   event?: ChatEvent;
   poll?: Poll;
+  /** The text with its styles, when the export marks them separately; `text` stays the plain version. */
+  spans?: Span[];
+  /** Id of the message this one answers. */
+  replyTo?: string;
+  /** Who first wrote a forwarded message. */
+  forwardedFrom?: string;
+  reactions?: Reaction[];
 }
 
 export interface ParseWarning {
@@ -97,7 +136,7 @@ export interface ParseWarning {
 export interface Chat {
   title: string | null;
   platform: Platform;
-  /** Locale of the phone that made the export, as far as it could be told. */
+  /** Locale of the phone that made the export, as far as it could be told; empty when it does not matter. */
   locale: string;
   /** Name the exporter appears under, when the export gives it away. */
   self: string | null;

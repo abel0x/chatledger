@@ -30,6 +30,7 @@ interface Entry {
 
 /** Two exports describe the same chat when they share a message or carry the same title. */
 export function sameChat(a: Chat, b: Chat): boolean {
+  if ((a.platform === 'telegram') !== (b.platform === 'telegram')) return false;
   if (a.title && b.title && a.title === b.title) return true;
   const ids = new Set(a.messages.map(m => m.id));
   return b.messages.some(m => ids.has(m.id));
@@ -49,19 +50,21 @@ export function mergeChats(chats: Chat[]): Chat {
   const ordered = [...chats].sort((a, b) => (a.messages.at(-1)?.time ?? 0) - (b.messages.at(-1)?.time ?? 0));
   for (const chat of ordered.slice(1)) if (!sameChat(ordered[0] as Chat, chat)) throw new DifferentChatsError();
 
-  // Messages are matched by minute and sender, then by their order within that minute.
-  const groups = new Map<string, { time: number; order: number; slots: Entry[][] }>();
+  // WhatsApp messages are matched by minute and sender, then by their order
+  // within that minute; Telegram numbers its messages, so the number is enough.
+  const numbered = ordered.every(c => c.platform === 'telegram');
+  const groups = new Map<string, { order: number; slots: Entry[][] }>();
   let order = 0;
   ordered.forEach((chat, age) => {
     const seen = new Map<string, number>();
     for (const m of chat.messages) {
       const name = m.sender == null ? null : (chat.people[m.sender] ?? null);
-      const key = `${m.time}|${name ?? ''}`;
+      const key = numbered ? m.id : `${m.time}|${name ?? ''}`;
       const position = seen.get(key) ?? 0;
       seen.set(key, position + 1);
       let group = groups.get(key);
       if (!group) {
-        group = { time: m.time, order: order++, slots: [] };
+        group = { order: order++, slots: [] };
         groups.set(key, group);
       }
       (group.slots[position] ??= []).push({ m, age, name });
@@ -80,22 +83,29 @@ export function mergeChats(chats: Chat[]): Chat {
     return i;
   };
 
-  const used = new Set<string>();
-  const messages: Message[] = [];
-  const sorted = [...groups.values()].sort((a, b) => a.time - b.time || a.order - b.order);
-  for (const group of sorted) {
-    for (const versions of group.slots) {
+  // The chosen version decides where a message goes: an HTML export only
+  // knows roughly when a service message happened, a JSON export knows exactly.
+  const chosen: { best: Entry; order: number; slot: number }[] = [];
+  for (const group of groups.values()) {
+    group.slots.forEach((versions, slot) => {
       const best = versions.reduce((a, b) => {
         const ra = RICHNESS[a.m.kind];
         const rb = RICHNESS[b.m.kind];
         if (ra !== rb) return rb > ra ? b : a;
         return b.age > a.age ? b : a;
       });
-      let id = best.m.id;
-      for (let n = 1; used.has(id); n++) id = `${best.m.id}-${n}`;
-      used.add(id);
-      messages.push({ ...best.m, id, sender: best.name == null ? null : person(best.name) });
-    }
+      chosen.push({ best, order: group.order, slot });
+    });
+  }
+  chosen.sort((a, b) => a.best.m.time - b.best.m.time || a.order - b.order || a.slot - b.slot);
+
+  const used = new Set<string>();
+  const messages: Message[] = [];
+  for (const { best } of chosen) {
+    let id = best.m.id;
+    for (let n = 1; used.has(id); n++) id = `${best.m.id}-${n}`;
+    used.add(id);
+    messages.push({ ...best.m, id, sender: best.name == null ? null : person(best.name) });
   }
 
   const newest = ordered.at(-1) as Chat;

@@ -38,6 +38,14 @@ export function translate(lang: Lang, key: Key, params: Params = {}, locale: str
   });
 }
 
+/** How long a call took, as 0:42, 12:05 or 1:02:05. */
+function callLength(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = String(seconds % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+}
+
 /** Writes a chat event in the reader's language instead of the exporting phone's. */
 export function describeEvent(event: ChatEvent, lang: Lang, selfName: string | null, locale: string = lang): string {
   if (event.type === 'unknown') return event.raw;
@@ -45,5 +53,8 @@ export function describeEvent(event: ChatEvent, lang: Lang, selfName: string | n
   if (event.type === 'onlyAdminsSend' && !event.actor) return translate(lang, 'event.adminsOnly');
   const actor = event.actor ? who(event.actor) : translate(lang, 'party.someone');
   const targets = new Intl.ListFormat(locale, { type: 'conjunction' }).format((event.targets ?? []).map(who));
+  if (event.type === 'call' && event.value && /^\d+$/.test(event.value)) {
+    return translate(lang, 'event.callLasted', { actor, value: callLength(Number(event.value)) }, locale);
+  }
   return translate(lang, `event.${event.type}`, { actor, targets, value: event.value ?? '' }, locale);
 }

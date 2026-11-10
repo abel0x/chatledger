@@ -11,13 +11,26 @@ import {
   mimeTypeFor,
   NotAChatError,
   parseChat,
+  parseTelegramHtml,
+  parseTelegramJson,
+  telegramExports,
+  WholeAccountError,
   type Chat,
 } from '../core';
 
 // This code already runs off the main thread; zip.js needs no workers of its own.
 configure({ useWebWorkers: false });
 
-export type LoadErrorCode = 'empty' | 'noChat' | 'notAChat' | 'badArchive' | 'tooLarge' | 'differentChats' | 'notSaved' | 'unknown';
+export type LoadErrorCode =
+  | 'empty'
+  | 'noChat'
+  | 'notAChat'
+  | 'badArchive'
+  | 'tooLarge'
+  | 'differentChats'
+  | 'wholeAccount'
+  | 'notSaved'
+  | 'unknown';
 
 export class LoadError extends Error {
   constructor(
@@ -113,9 +126,46 @@ async function zipSources(file: File, readers: ZipReader<unknown>[], limits: Lim
   return out;
 }
 
+/** A Telegram Desktop export among the files, if there is one; null lets the WhatsApp reader try. */
+async function readTelegram(
+  paths: string[],
+  byPath: Map<string, Source>,
+  limits: Limits,
+  onProgress?: Progress,
+): Promise<{ chat: Chat; sources: Source[] } | null> {
+  const found = telegramExports(paths);
+  const pageFolders = found.filter(e => e.format === 'html').length;
+  for (const candidate of found) {
+    try {
+      if (candidate.format === 'json') {
+        const source = byPath.get(candidate.path) as Source;
+        const text = await source.text((done, total) => onProgress?.('unpack', done, total));
+        return { chat: parseTelegramJson(text, { onProgress: (done, total) => onProgress?.('parse', done, total) }), sources: [source] };
+      }
+      if (pageFolders > 1) throw new WholeAccountError();
+      const sources = candidate.paths.map(p => byPath.get(p) as Source);
+      const pages: string[] = [];
+      let bytes = 0;
+      for (const [i, source] of sources.entries()) {
+        const page = await source.text();
+        bytes += page.length;
+        if (bytes > limits.chatTextBytes) throw new LoadError('tooLarge');
+        pages.push(page);
+        onProgress?.('unpack', i + 1, sources.length);
+      }
+      return { chat: parseTelegramHtml(pages, { onProgress: (done, total) => onProgress?.('parse', done, total) }), sources };
+    } catch (err) {
+      if (err instanceof WholeAccountError) throw new LoadError('wholeAccount', { cause: err });
+      if (!(err instanceof NotAChatError)) throw err;
+    }
+  }
+  return null;
+}
+
 /**
- * Opens what the user picked: an exported .zip, a bare .txt, or a folder of
- * loose files. Attachments are not read until something asks for them.
+ * Opens what the user picked: an exported .zip, a bare .txt, a Telegram
+ * result.json or HTML pages, or a folder of loose files. Attachments are
+ * not read until something asks for them.
  */
 export async function openExport(files: File[], onProgress?: Progress, limits: Limits = LIMITS): Promise<OpenedExport> {
   if (!files.length) throw new LoadError('empty');
@@ -140,7 +190,15 @@ export async function openExport(files: File[], onProgress?: Progress, limits: L
     let anyCandidate = false;
     for (const group of groups) {
       const byPath = new Map(group.sources.map(src => [src.path, src]));
-      for (const path of chatCandidates(group.sources.map(src => src.path))) {
+      const paths = group.sources.map(src => src.path);
+      const telegram = await readTelegram(paths, byPath, limits, onProgress);
+      if (telegram) {
+        anyCandidate = true;
+        chats.push(telegram.chat);
+        for (const src of telegram.sources) chatSources.add(src);
+        continue;
+      }
+      for (const path of chatCandidates(paths)) {
         anyCandidate = true;
         const source = byPath.get(path) as Source;
         const text = await source.text((done, total) => onProgress?.('unpack', done, total));

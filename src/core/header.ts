@@ -1,4 +1,4 @@
-import type { Platform } from './model';
+import type { WhatsAppPlatform as Platform } from './model';
 
 const SP = '[ \\u00a0\\u202f]';
 const DATE = '(\\d{1,4})([./-])(\\d{1,2})\\2(\\d{1,4})';
