@@ -46,6 +46,9 @@ export function estimateHeight(row: Row, m: Message | undefined, showName: boole
   if (row.kind === 'day') return 44;
   if (row.kind === 'event' || !m) return 40;
   let h = 36 + (row.first ? 8 : 0) + (showName ? 20 : 0);
+  if (m.forwardedFrom) h += 20;
+  if (m.replyTo) h += 46;
+  if (m.reactions) h += 30;
   if (m.text) {
     let lines = 0;
     for (const line of m.text.split('\n')) lines += Math.max(1, Math.ceil(line.length / CHARS_PER_LINE));

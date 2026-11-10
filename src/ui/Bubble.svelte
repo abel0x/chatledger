@@ -6,7 +6,7 @@
   import { useChatActions } from './context';
   import { formatClock, formatFull } from './format';
   import Icon from './Icon.svelte';
-  import { emojiOnly, richText, type RichNode } from './richtext';
+  import { emojiOnly, richText, spanText, type RichNode } from './richtext';
   import { highlight } from './search';
 
   let {
@@ -49,15 +49,45 @@
   });
 
   const total = $derived(m.poll ? m.poll.options.reduce((n, o) => n + o.votes, 0) : 0);
-  const nodes = $derived(m.text && !note ? richText(m.text, chat.people) : []);
+  const nodes = $derived.by(() => {
+    if (!m.text || note) return [];
+    // Telegram gives styles apart from the text; its stars and underscores are just characters.
+    if (chat.platform === 'telegram') return spanText(m.spans ?? [{ text: m.text }], chat.people);
+    return richText(m.text, chat.people);
+  });
   const big = $derived(m.kind === 'text' && m.text ? emojiOnly(m.text) : 0);
   const actions = useChatActions();
   const starred = $derived(actions?.isStarred(m.id) ?? false);
+
+  const replied = $derived.by(() => {
+    if (!m.replyTo || !actions) return null;
+    const index = actions.messageIndex(m.replyTo);
+    const target = chat.messages[index];
+    if (!target) return { index: -1, name: null, preview: t('msg.replyMissing') };
+    const name = target.sender == null ? null : (chat.people[target.sender] ?? null);
+    const first = target.text?.split('\n').find(l => l.trim()) ?? '';
+    const preview = first
+      ? first.slice(0, 160)
+      : target.poll
+        ? target.poll.question
+        : target.media
+          ? t(`media.${target.media}`)
+          : t('msg.empty');
+    return { index, name, sender: target.sender, preview };
+  });
+
+  function reveal(e: Event) {
+    const el = e.currentTarget as HTMLElement | null;
+    el?.classList.add('shown');
+    el?.removeAttribute('role');
+    el?.removeAttribute('tabindex');
+    el?.removeAttribute('aria-label');
+  }
 </script>
 
 {#snippet marked(text: string)}{#each highlight(text, terms) as part, k (k)}{#if part.hit}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}{/snippet}
 
-{#snippet rich(list: RichNode[])}{#each list as n, k (k)}{#if n.t === 'text'}{@render marked(n.v)}{:else if n.t === 'link'}<a href={n.href} target="_blank" rel="noopener noreferrer">{@render marked(n.v)}</a>{:else if n.t === 'mention'}{#if n.person != null}<button type="button" class={`mention c${n.person % 12}`} onclick={() => actions?.searchPerson(n.person ?? 0)}>{n.v}</button>{:else}<span class="mention">{n.v}</span>{/if}{:else if n.t === 'block'}<code class="block">{n.v}</code>{:else if n.s === 'b'}<strong>{@render rich(n.c)}</strong>{:else if n.s === 'i'}<em>{@render rich(n.c)}</em>{:else if n.s === 's'}<s>{@render rich(n.c)}</s>{:else}<code>{@render rich(n.c)}</code>{/if}{/each}{/snippet}
+{#snippet rich(list: RichNode[])}{#each list as n, k (k)}{#if n.t === 'text'}{@render marked(n.v)}{:else if n.t === 'link'}<a href={n.href} target="_blank" rel="noopener noreferrer">{@render marked(n.v)}</a>{:else if n.t === 'mention'}{#if n.person != null}<button type="button" class={`mention c${n.person % 12}`} onclick={() => actions?.searchPerson(n.person ?? 0)}>{n.v}</button>{:else}<span class="mention">{n.v}</span>{/if}{:else if n.t === 'block'}<code class="block">{n.v}</code>{:else if n.t === 'quote'}<blockquote>{@render rich(n.c)}</blockquote>{:else if n.s === 'b'}<strong>{@render rich(n.c)}</strong>{:else if n.s === 'i'}<em>{@render rich(n.c)}</em>{:else if n.s === 's'}<s>{@render rich(n.c)}</s>{:else if n.s === 'u'}<u>{@render rich(n.c)}</u>{:else if n.s === 'spoiler'}<span class="spoiler" role="button" tabindex="0" aria-label={t('msg.spoiler')} title={t('msg.spoiler')} onclick={reveal} onkeydown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), reveal(e))}>{@render rich(n.c)}</span>{:else}<code>{@render rich(n.c)}</code>{/if}{/each}{/snippet}
 
 <div class="row" class:mine class:first class:flash id={`m-${m.id}`}>
   <div class="bubble" class:bare={big > 0 || (m.kind === 'file' && m.media === 'sticker')}>
@@ -75,6 +105,26 @@
     {/if}
     {#if showName && m.sender != null}
       <div class={`sender c${m.sender % 12}`}>{chat.people[m.sender]}</div>
+    {/if}
+
+    {#if m.forwardedFrom}
+      <div class="forwarded"><Icon name="forward" size={14} /> {t('msg.forwarded', { name: m.forwardedFrom })}</div>
+    {/if}
+
+    {#if replied}
+      {#if replied.index >= 0}
+        <button
+          class="reply"
+          type="button"
+          aria-label={t('msg.reply', { name: replied.name ?? t('party.someone') })}
+          onclick={() => actions?.showMessage(replied.index)}
+        >
+          {#if replied.name}<span class={`sender c${(replied.sender ?? 0) % 12}`}>{replied.name}</span>{/if}
+          <span class="preview">{replied.preview}</span>
+        </button>
+      {:else}
+        <div class="reply missing">{replied.preview}</div>
+      {/if}
     {/if}
 
     {#if m.kind === 'file' && m.file}
@@ -116,6 +166,17 @@
         </time>
       </span>
     </div>
+
+    {#if m.reactions}
+      <ul class="reactions" aria-label={t('msg.reactions')}>
+        {#each m.reactions as r, k (k)}
+          <li title={r.emoji ?? t('msg.customEmoji')}>
+            {#if r.emoji}<span class="emoji">{r.emoji}</span>{:else}<span class="custom" aria-label={t('msg.customEmoji')}>?</span>{/if}
+            {#if r.count > 1}<span class="count">{new Intl.NumberFormat(locale()).format(r.count)}</span>{/if}
+          </li>
+        {/each}
+      </ul>
+    {/if}
   </div>
 </div>
 
@@ -326,6 +387,106 @@
   .votes {
     color: var(--muted);
     font-size: 0.85rem;
+  }
+
+  .forwarded {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 3px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-style: italic;
+  }
+
+  .reply {
+    display: grid;
+    gap: 1px;
+    width: 100%;
+    margin: 0 0 4px;
+    padding: 4px 8px;
+    border: 0;
+    border-inline-start: 3px solid var(--accent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--text) 6%, transparent);
+    color: inherit;
+    font: inherit;
+    font-size: 0.86rem;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .reply.missing {
+    color: var(--muted);
+    font-style: italic;
+    cursor: default;
+  }
+
+  .reply .sender {
+    margin: 0;
+    font-size: 0.82rem;
+  }
+
+  .reply .preview {
+    overflow: hidden;
+    color: var(--muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  blockquote {
+    margin: 2px 0;
+    padding: 2px 8px;
+    border-inline-start: 3px solid var(--accent);
+  }
+
+  .spoiler {
+    border-radius: 3px;
+    background: var(--muted);
+    color: transparent;
+    cursor: pointer;
+  }
+
+  .spoiler :global(*) {
+    color: transparent;
+  }
+
+  .spoiler:global(.shown) {
+    background: color-mix(in srgb, var(--text) 8%, transparent);
+    color: inherit;
+    cursor: text;
+  }
+
+  .spoiler:global(.shown) :global(*) {
+    color: inherit;
+  }
+
+  .reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .reactions li {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text) 8%, transparent);
+    font-size: 0.85rem;
+  }
+
+  .reactions .count {
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .reactions .custom {
+    color: var(--muted);
   }
 
   progress {

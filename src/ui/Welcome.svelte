@@ -138,7 +138,7 @@
           <label class="button">
             <Icon name="file" size={18} />
             {t('welcome.pickFile')}
-            <input class="visually-hidden" type="file" accept=".zip,.txt,application/zip,text/plain" multiple onchange={picked} />
+            <input class="visually-hidden" type="file" accept=".zip,.txt,.json,.html,application/zip,text/plain,application/json,text/html" multiple onchange={picked} />
           </label>
           <label class="button secondary">
             <Icon name="folder" size={18} />
@@ -231,6 +231,7 @@
       <ul>
         <li>{t('welcome.howToAndroid')}</li>
         <li>{t('welcome.howToIos')}</li>
+        <li>{t('welcome.howToTelegram')}</li>
         <li>{t('welcome.howToSend')}</li>
         <li>{t('welcome.howToMerge')}</li>
       </ul>

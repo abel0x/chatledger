@@ -6,7 +6,7 @@ test.describe('a browser set to French', () => {
 
   test('starts in French', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Ouvrir une discussion WhatsApp exportée' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ouvrir une discussion WhatsApp ou Telegram exportée' })).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
   });
 });
@@ -22,9 +22,9 @@ test('writes group events of an English export in German', async ({ page }) => {
 });
 
 for (const [lang, title] of [
-  ['es', 'Abre una exportación de chat de WhatsApp'],
-  ['pt', 'Abra uma conversa exportada do WhatsApp'],
-  ['it', 'Apri una chat di WhatsApp esportata'],
+  ['es', 'Abre una exportación de chat de WhatsApp o Telegram'],
+  ['pt', 'Abra uma conversa exportada do WhatsApp ou do Telegram'],
+  ['it', 'Apri una chat di WhatsApp o Telegram esportata'],
 ] as const) {
   test(`offers ${lang}`, async ({ page }) => {
     await page.goto('/');

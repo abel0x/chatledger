@@ -253,8 +253,24 @@ describe('opening Telegram exports', () => {
 
   it('asks for a single chat when a whole account was exported', async () => {
     const page = fixture('telegram/messages.html');
-    const file = await zip('DataExport.zip', { 'chats/chat_01/messages.html': page, 'chats/chat_02/messages.html': page });
+    const file = await zip('DataExport.zip', {
+      'export_results.html': '<html></html>',
+      'chats/chat_01/messages.html': page,
+      'chats/chat_02/messages.html': page,
+    });
     expect(await failure(openExport([file]))).toBe('wholeAccount');
+  });
+
+  it('joins two exports of the same chat picked together', async () => {
+    const all = JSON.parse(fixture('telegram/result.json'));
+    const early = { ...all, messages: all.messages.slice(0, 10) };
+    const late = { ...all, messages: all.messages.slice(6) };
+    const opened = await openExport([
+      new File([JSON.stringify(late)], 'result.json'),
+      new File([JSON.stringify(early)], 'result.json'),
+    ]);
+    expect(opened.chat.messages).toHaveLength(all.messages.length);
+    await opened.close();
   });
 
   it('still opens a WhatsApp export that carries a result.json attachment', async () => {
@@ -265,5 +281,29 @@ describe('opening Telegram exports', () => {
     const opened = await openExport([file]);
     expect(opened.chat.platform).toBe('android');
     await opened.close();
+  });
+});
+
+describe('group info from Telegram events', () => {
+  it('counts people who joined by themselves and who left', async () => {
+    const { groupInfo } = await import('../src/ui/groupinfo');
+    const chat = parseTelegramJson(
+      JSON.stringify({
+        name: 'Club',
+        type: 'private_group',
+        id: 9,
+        messages: [
+          { id: 1, type: 'service', date: '2025-01-01T09:00:00', actor: 'Ada', actor_id: 'user1', action: 'create_group', title: 'Club', members: ['Bora'] },
+          { id: 2, type: 'service', date: '2025-01-01T10:00:00', actor: 'Cem', actor_id: 'user3', action: 'invite_members', members: ['Cem'] },
+          { id: 3, type: 'service', date: '2025-01-01T11:00:00', actor: 'Ada', actor_id: 'user1', action: 'remove_members', members: ['Ada'] },
+        ],
+      }),
+    );
+    const info = groupInfo(chat);
+    expect(info.created).toMatchObject({ actor: 'Ada', value: 'Club' });
+    expect(info.members.map(m => [m.name, m.inGroup])).toEqual([
+      ['Cem', true],
+      ['Ada', false],
+    ]);
   });
 });

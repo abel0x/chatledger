@@ -8,6 +8,8 @@ export interface ChatActions {
   searchPerson(person: number): void;
   openMenu(messageIndex: number, anchor: HTMLElement): void;
   isStarred(messageId: string): boolean;
+  /** Where a message is in the chat, or -1 when the export does not have it. */
+  messageIndex(messageId: string): number;
 }
 
 const KEY = Symbol('chat-actions');

@@ -27,7 +27,7 @@ export function telegramExports(paths: string[]): TelegramExport[] {
   const json = paths.filter(p => baseName(p).toLowerCase() === 'result.json').sort((a, b) => depth(a) - depth(b));
   for (const path of json) out.push({ format: 'json', path });
   const folders = new Map<string, { path: string; n: number }[]>();
-  for (const path of paths) {
+  for (const path of new Set(paths)) {
     const m = PAGE.exec(baseName(path));
     if (!m) continue;
     const folder = folderOf(path);

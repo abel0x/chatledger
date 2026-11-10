@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emojiOnly, parseStyles, richText } from '../src/ui/richtext';
+import { emojiOnly, parseStyles, richText, spanText } from '../src/ui/richtext';
 
 describe('parseStyles', () => {
   it('reads the four inline styles', () => {
@@ -65,5 +65,48 @@ describe('emojiOnly', () => {
     expect(emojiOnly('😂😂😂😂')).toBe(0);
     expect(emojiOnly('ok 😂')).toBe(0);
     expect(emojiOnly('123')).toBe(0);
+  });
+});
+
+describe('spanText', () => {
+  it('wraps runs in their styles and keeps stars as plain text', () => {
+    expect(spanText([{ text: '*not bold* ' }, { text: 'bold', b: true, i: true }])).toEqual([
+      { t: 'text', v: '*not bold* ' },
+      { t: 'style', s: 'b', c: [{ t: 'style', s: 'i', c: [{ t: 'text', v: 'bold' }] }] },
+    ]);
+  });
+
+  it('groups quoted runs, keeps code blocks and finds people by mention', () => {
+    expect(
+      spanText(
+        [
+          { text: 'said ', quote: true },
+          { text: 'this', quote: true, u: true },
+          { text: '\n' },
+          { text: 'x = 1', pre: true },
+          { text: '@Ada Demir', mention: true },
+        ],
+        ['Ada Demir'],
+      ),
+    ).toEqual([
+      { t: 'quote', c: [{ t: 'text', v: 'said ' }, { t: 'style', s: 'u', c: [{ t: 'text', v: 'this' }] }] },
+      { t: 'text', v: '\n' },
+      { t: 'block', v: 'x = 1' },
+      { t: 'mention', v: '@Ada Demir', person: 0 },
+    ]);
+  });
+
+  it('turns bare addresses in plain runs into links', () => {
+    expect(spanText([{ text: 'see www.example.org now', spoiler: true }])).toEqual([
+      {
+        t: 'style',
+        s: 'spoiler',
+        c: [
+          { t: 'text', v: 'see ' },
+          { t: 'link', v: 'www.example.org', href: 'https://www.example.org' },
+          { t: 'text', v: ' now' },
+        ],
+      },
+    ]);
   });
 });

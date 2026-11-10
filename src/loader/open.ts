@@ -1,5 +1,6 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader, configure } from '@zip.js/zip.js/lib/zip-core-native.js';
 import {
+  baseName,
   LIMITS,
   type Limits,
   chatCandidates,
@@ -126,40 +127,48 @@ async function zipSources(file: File, readers: ZipReader<unknown>[], limits: Lim
   return out;
 }
 
-/** A Telegram Desktop export among the files, if there is one; null lets the WhatsApp reader try. */
-async function readTelegram(
-  paths: string[],
-  byPath: Map<string, Source>,
-  limits: Limits,
-  onProgress?: Progress,
-): Promise<{ chat: Chat; sources: Source[] } | null> {
-  const found = telegramExports(paths);
-  const pageFolders = found.filter(e => e.format === 'html').length;
-  for (const candidate of found) {
+/**
+ * The Telegram Desktop exports among the files, if there are any; an empty
+ * list lets the WhatsApp reader try.
+ */
+async function readTelegram(group: Source[], limits: Limits, onProgress?: Progress): Promise<{ chats: Chat[]; sources: Source[] }> {
+  const paths = group.map(src => src.path);
+  // An export of a whole account has an index page next to its chat folders.
+  if (paths.some(p => baseName(p).toLowerCase() === 'export_results.html')) throw new LoadError('wholeAccount');
+  // Loose files picked together can share a name, such as two result.json.
+  const pool = new Map<string, Source[]>();
+  for (const src of group) pool.set(src.path, [...(pool.get(src.path) ?? []), src]);
+  const take = (path: string) => pool.get(path)?.shift() as Source;
+  const chats: Chat[] = [];
+  const sources: Source[] = [];
+  const parse = (done: number, total: number) => onProgress?.('parse', done, total);
+  for (const candidate of telegramExports(paths)) {
     try {
       if (candidate.format === 'json') {
-        const source = byPath.get(candidate.path) as Source;
+        const source = take(candidate.path);
         const text = await source.text((done, total) => onProgress?.('unpack', done, total));
-        return { chat: parseTelegramJson(text, { onProgress: (done, total) => onProgress?.('parse', done, total) }), sources: [source] };
+        chats.push(parseTelegramJson(text, { onProgress: parse }));
+        sources.push(source);
+        continue;
       }
-      if (pageFolders > 1) throw new WholeAccountError();
-      const sources = candidate.paths.map(p => byPath.get(p) as Source);
       const pages: string[] = [];
+      const read = candidate.paths.map(take);
       let bytes = 0;
-      for (const [i, source] of sources.entries()) {
+      for (const [i, source] of read.entries()) {
         const page = await source.text();
         bytes += page.length;
         if (bytes > limits.chatTextBytes) throw new LoadError('tooLarge');
         pages.push(page);
-        onProgress?.('unpack', i + 1, sources.length);
+        onProgress?.('unpack', i + 1, read.length);
       }
-      return { chat: parseTelegramHtml(pages, { onProgress: (done, total) => onProgress?.('parse', done, total) }), sources };
+      chats.push(parseTelegramHtml(pages, { onProgress: parse }));
+      sources.push(...read);
     } catch (err) {
       if (err instanceof WholeAccountError) throw new LoadError('wholeAccount', { cause: err });
       if (!(err instanceof NotAChatError)) throw err;
     }
   }
-  return null;
+  return { chats, sources };
 }
 
 /**
@@ -191,10 +200,10 @@ export async function openExport(files: File[], onProgress?: Progress, limits: L
     for (const group of groups) {
       const byPath = new Map(group.sources.map(src => [src.path, src]));
       const paths = group.sources.map(src => src.path);
-      const telegram = await readTelegram(paths, byPath, limits, onProgress);
-      if (telegram) {
+      const telegram = await readTelegram(group.sources, limits, onProgress);
+      if (telegram.chats.length) {
         anyCandidate = true;
-        chats.push(telegram.chat);
+        chats.push(...telegram.chats);
         for (const src of telegram.sources) chatSources.add(src);
         continue;
       }

@@ -35,6 +35,7 @@ export function groupInfo(chat: Chat): GroupInfo {
     if (!ev) return;
     switch (ev.type) {
       case 'created':
+      case 'channelCreated':
         created ??= { index, time: m.time, actor: nameOf(ev.actor), value: ev.value ?? null };
         break;
       case 'renamed':
@@ -44,6 +45,7 @@ export function groupInfo(chat: Chat): GroupInfo {
         for (const p of ev.targets ?? []) status.set(nameOf(p), true);
         break;
       case 'joined':
+      case 'entered':
         status.set(nameOf(ev.actor), true);
         break;
       case 'left':

@@ -89,7 +89,7 @@
         <input
           class="visually-hidden"
           type="file"
-          accept=".zip,.txt,application/zip,text/plain"
+          accept=".zip,.txt,.json,.html,application/zip,text/plain,application/json,text/html"
           multiple
           bind:this={picker}
           onchange={picked}

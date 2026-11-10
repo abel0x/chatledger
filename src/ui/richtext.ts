@@ -1,14 +1,16 @@
 import { LIMITS } from '../core/limits';
+import type { Span } from '../core/model';
 import { linkify } from './linkify';
 
-export type Style = 'b' | 'i' | 's' | 'code';
+export type Style = 'b' | 'i' | 's' | 'u' | 'code' | 'spoiler';
 
 export type RichNode =
   | { t: 'text'; v: string }
   | { t: 'link'; v: string; href: string }
   | { t: 'mention'; v: string; person: number | null }
   | { t: 'style'; s: Style; c: RichNode[] }
-  | { t: 'block'; v: string };
+  | { t: 'block'; v: string }
+  | { t: 'quote'; c: RichNode[] };
 
 const MARKS: Record<string, Style> = { '*': 'b', _: 'i', '~': 's', '`': 'code' };
 const WORD = /[\p{L}\p{N}]/u;
@@ -128,6 +130,47 @@ export function richText(text: string, people: readonly string[] = []): RichNode
     last = m.index + m[0].length;
   }
   inline(text.slice(last));
+  return out;
+}
+
+function wrap(node: RichNode[], span: Span): RichNode[] {
+  let out = node;
+  for (const [flag, s] of [['code', 'code'], ['s', 's'], ['u', 'u'], ['i', 'i'], ['b', 'b'], ['spoiler', 'spoiler']] as const) {
+    if (span[flag]) out = [{ t: 'style', s, c: out }];
+  }
+  return out;
+}
+
+/**
+ * Display nodes for text whose styles the export gives separately, as
+ * Telegram's does. Stars and underscores in it are plain characters.
+ */
+export function spanText(spans: readonly Span[], people: readonly string[] = []): RichNode[] {
+  const match = mentionMatcher(people);
+  const out: RichNode[] = [];
+  let quote: RichNode[] | null = null;
+  for (const span of spans) {
+    let nodes: RichNode[];
+    if (span.pre) nodes = [{ t: 'block', v: span.text }];
+    else if (span.href) nodes = wrap([{ t: 'link', v: span.text, href: span.href }], span);
+    else if (span.mention) {
+      const name = span.text.replace(/^@/, '');
+      const found = match(name);
+      nodes = wrap([{ t: 'mention', v: span.text, person: found && found.length === name.length ? found.person : null }], span);
+    } else if (span.code) nodes = wrap([{ t: 'text', v: span.text }], span);
+    else {
+      const plain: RichNode[] = [];
+      for (const part of linkify(span.text)) plain.push(part.href ? { t: 'link', v: part.text, href: part.href } : { t: 'text', v: part.text });
+      nodes = wrap(plain, span);
+    }
+    if (span.quote) {
+      if (!quote) out.push({ t: 'quote', c: (quote = []) });
+      quote.push(...nodes);
+    } else {
+      quote = null;
+      out.push(...nodes);
+    }
+  }
   return out;
 }
 

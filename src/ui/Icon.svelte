@@ -19,6 +19,7 @@
     play: 'M8 5v14l11-7z',
     download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
     chat: 'M4 5h16v11H9l-5 4z',
+    forward: 'M14 6l6 6-6 6M20 12H10a6 6 0 0 0-6 6v1',
     external: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
     chart: 'M4 20h16M7 16v-5M12 16V6M17 16v-8',
     chevron: 'M6 9l6 6 6-6',

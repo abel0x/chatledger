@@ -251,6 +251,7 @@
       menu = menu?.index === messageIndex ? null : { index: messageIndex, anchor };
     },
     isStarred: id => stars.has(id),
+    messageIndex: id => byId.get(id) ?? -1,
   });
 
   function typing(target: EventTarget | null): boolean {
