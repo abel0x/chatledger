@@ -206,7 +206,7 @@ function titleFrom(fileName: string | string[] | undefined, messages: Message[])
   }
   for (let i = messages.length - 1; i >= 0; i--) {
     const ev = messages[i]?.event;
-    if ((ev?.type === 'renamed' || ev?.type === 'created') && ev.value) return ev.value;
+    if ((ev?.type === 'renamed' || ev?.type === 'created' || ev?.type === 'channelRenamed') && ev.value) return ev.value;
   }
   return null;
 }

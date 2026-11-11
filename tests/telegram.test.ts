@@ -160,11 +160,13 @@ describe('Telegram HTML', () => {
     }
   });
 
-  it('reads styles, replies, edits, forwards and reactions', () => {
+  it('reads styles, replies, forwards and reactions', () => {
     const chat = html();
     expect(byId(chat, 'tg3').spans).toEqual(byId(json(), 'tg3').spans);
     expect(byId(chat, 'tg3').reactions).toEqual([{ emoji: '👍', count: 2 }]);
-    expect(byId(chat, 'tg4')).toMatchObject({ replyTo: 'tg3', edited: true, text: 'Thanks *Ada*, see you Saturday <3' });
+    expect(byId(chat, 'tg4')).toMatchObject({ replyTo: 'tg3', text: 'Thanks *Ada*, see you Saturday <3' });
+    // Telegram's HTML pages do not say which messages were edited.
+    expect(byId(chat, 'tg4').edited).toBeUndefined();
     expect(byId(chat, 'tg9').forwardedFrom).toBe('Mountain News');
     expect(byId(chat, 'tg9').spans?.find(s => s.spoiler)?.text).toBe('Bring gloves');
     expect(byId(chat, 'tg10').poll?.options).toEqual([
@@ -189,6 +191,75 @@ describe('Telegram HTML', () => {
 
   it('refuses pages Telegram did not write', () => {
     expect(() => parseTelegramHtml(['<html><body><p>hello</p></body></html>'])).toThrow(NotAChatError);
+  });
+});
+
+describe('Telegram channels', () => {
+  const channelJson = JSON.stringify({
+    name: 'Trail News 🏔',
+    type: 'public_channel',
+    id: 900,
+    messages: [
+      { id: 1, type: 'service', date: '2025-03-01T08:00:00', date_unixtime: '1740805200', actor: 'Trail News', actor_id: 'channel900', action: 'create_channel', title: 'Trail News', text: '', text_entities: [] },
+      { id: 2, type: 'service', date: '2025-03-01T08:00:00', date_unixtime: '1740805200', actor: 'Trail News', actor_id: 'channel900', action: 'edit_group_photo', photo: 'photos/photo_1@01-03-2025_08-00-00.jpg', text: '', text_entities: [] },
+      { id: 3, type: 'service', date: '2025-03-02T09:00:00', date_unixtime: '1740895200', actor: 'Trail News 🏔', actor_id: 'channel900', action: 'edit_group_title', title: 'Trail News 🏔', text: '', text_entities: [] },
+      { id: 4, type: 'service', date: '2025-03-03T10:00:00', date_unixtime: '1740985200', actor: 'Trail News 🏔', actor_id: 'channel900', action: 'paid_messages_price_change', price_stars: 300, is_broadcast_messages_allowed: true, text: '', text_entities: [] },
+      {
+        id: 5,
+        type: 'message',
+        date: '2025-03-03T11:00:00',
+        date_unixtime: '1740988800',
+        edited: '2025-03-03T11:05:00',
+        edited_unixtime: '1740989100',
+        from: 'Trail News 🏔',
+        from_id: 'channel900',
+        text: '',
+        text_entities: [
+          { type: 'plain', text: 'Ask ' },
+          { type: 'mention', text: '@ada_hikes' },
+          { type: 'plain', text: ' or see ' },
+          { type: 'link', text: 'example.org/trails' },
+        ],
+      },
+      { id: 6, type: 'message', date: '2025-03-03T12:00:00', date_unixtime: '1740992400', from: null, from_id: 'user7', author: 'Ada', text: 'Old post', text_entities: [{ type: 'plain', text: 'Old post' }] },
+    ],
+  });
+  const service = (id: number, text: string) => `<div class="message service" id="message${id}"><div class="body details">${text}</div></div>`;
+  const post = (id: number, time: string, from: string, text: string) =>
+    `<div class="message default clearfix" id="message${id}"><div class="body"><div class="pull_right date details" title="${time} UTC+03:00">x</div><div class="from_name">${from}</div><div class="text">${text}</div></div></div>`;
+  const channelHtml = `<div class="page_wrap"><div class="page_header"><div class="content"><div class="text bold">Trail News 🏔</div></div></div><div class="history">
+    ${service(-1, '1 March 2025')}
+    ${service(1, 'Channel &laquo;Trail News&raquo; created')}
+    ${service(2, 'Channel photo changed')}
+    ${service(-2, '2 March 2025')}
+    ${service(3, 'Channel title changed to &laquo;Trail News 🏔&raquo;')}
+    ${service(-3, '3 March 2025')}
+    ${service(4, 'Price per direct message changed to 300 Telegram Stars.')}
+    ${post(5, '03.03.2025 11:00:00', 'Trail News 🏔', 'Ask <a href="https://t.me/ada_hikes">@ada_hikes</a> or see <a href="https://example.org/trails">example.org/trails</a>')}
+    ${post(6, '03.03.2025 12:00:00', 'Deleted Account', 'Old post')}
+  </div></div>`;
+
+  it('reads the same channel events from JSON and HTML', () => {
+    for (const chat of [parseTelegramJson(channelJson), parseTelegramHtml([channelHtml])]) {
+      expect(chat.warnings).toEqual([]);
+      expect(chat.messages.slice(0, 4).map(m => [m.event?.type, m.event?.actor, m.event?.value])).toEqual([
+        ['channelCreated', undefined, 'Trail News'],
+        ['channelIconChanged', undefined, undefined],
+        ['channelRenamed', undefined, 'Trail News 🏔'],
+        ['messagePriceChanged', undefined, '300'],
+      ]);
+      expect(describeEvent(chat.messages[2]!.event!, 'en', null)).toBe('Channel name changed to “Trail News 🏔”');
+      expect(describeEvent(chat.messages[3]!.event!, 'tr', null)).toBe('Mesaj başına ücret ⭐ 300 olarak değiştirildi');
+    }
+  });
+
+  it('reads mentions, bare web addresses and deleted senders alike', () => {
+    const fromJson = parseTelegramJson(channelJson);
+    const fromHtml = parseTelegramHtml([channelHtml]);
+    const spans = [{ text: 'Ask ' }, { text: '@ada_hikes', mention: true }, { text: ' or see ' }, { text: 'example.org/trails', href: 'https://example.org/trails' }];
+    expect(byId(fromJson, 'tg5').spans).toEqual(spans);
+    expect(byId(fromHtml, 'tg5').spans).toEqual(spans);
+    for (const chat of [fromJson, fromHtml]) expect(chat.people[byId(chat, 'tg6').sender as number]).toBe('Deleted Account');
   });
 });
 

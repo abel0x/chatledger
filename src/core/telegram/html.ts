@@ -58,8 +58,10 @@ function spansOf(el: El): Span[] {
         break;
       case 'a': {
         const href = safeHref(n.attrs.get('href') ?? '');
-        if (href) next.href = href;
-        else if (labelOf(n).startsWith('@')) next.mention = true;
+        const label = labelOf(n);
+        // Usernames link to t.me; kept as a mention, the way the JSON export marks them.
+        if (label.startsWith('@') && (!href || href.toLowerCase() === `https://t.me/${label.slice(1).toLowerCase()}`)) next.mention = true;
+        else if (href) next.href = href;
         break;
       }
     }
@@ -173,6 +175,9 @@ const QUOTED = '[\u00AB"\u201C](.+)[\u00BB"\u201D]';
 const EVENTS: [RegExp, (g: string[], party: (s: string) => Party) => Omit<ChatEvent, 'raw'>][] = [
   [new RegExp(`^(.+?) created group ${QUOTED}$`), ([a, v], p) => ({ type: 'created', actor: p(a as string), value: v })],
   [new RegExp(`^Channel ${QUOTED} created$`), ([v]) => ({ type: 'channelCreated', value: v })],
+  [/^Channel photo changed$/, () => ({ type: 'channelIconChanged' })],
+  [new RegExp(`^Channel title changed to ${QUOTED}$`), ([v]) => ({ type: 'channelRenamed', value: v })],
+  [/^Price per (?:direct )?message changed to (\d+) Telegram Stars?\.?$/, ([v]) => ({ type: 'messagePriceChanged', value: v })],
   [new RegExp(`^(.+?) changed group title to ${QUOTED}$`), ([a, v], p) => ({ type: 'renamed', actor: p(a as string), value: v })],
   [/^(.+?) changed group photo$/, ([a], p) => ({ type: 'iconChanged', actor: p(a as string) })],
   [/^(.+?) deleted group photo$/, ([a], p) => ({ type: 'iconDeleted', actor: p(a as string) })],
@@ -316,7 +321,6 @@ export function parseTelegramHtml(pages: string[], options: ParseOptions = {}): 
       } else if (spans.text) msg = { id: messageId(n), time, sender, kind: 'text', ...spans };
       else msg = { id: messageId(n), time, sender, kind: 'empty' };
 
-      if (/\bedited\b/i.test(stamp)) msg.edited = true;
       if (forwarded) {
         const name = childByClass(forwarded, 'from_name');
         if (name && nameOf(name)) msg.forwardedFrom = nameOf(name);

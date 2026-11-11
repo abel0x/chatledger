@@ -73,7 +73,7 @@ chatledger is tested in current versions of Firefox and of Chrome, Edge and othe
 - **iPhone exports are experimental.** chatledger follows the iPhone export format, but it has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please report it (see below).
 - Exports from phones set to German, Spanish, French, Italian or Portuguese follow WhatsApp's wording in those languages but have not yet been checked against many real exports. If a group event shows up in the phone's language instead of yours, or an attachment is not recognised, please report the line (with the names changed).
 - Group events from phones set to any other language are shown as WhatsApp wrote them, without translation. Messages, dates and media work in every language.
-- **Telegram support is experimental.** It follows the format Telegram Desktop writes but has not yet been tried on many real exports. In HTML exports, service messages such as "Ada invited Bora" are read from Telegram's English wording; ones it does not know are shown as written. Animated stickers show their still picture. An export of a whole account is not opened: export one chat at a time.
+- **Telegram support is experimental.** It has been checked against real channel exports, but not yet against group or one-to-one chats. HTML exports do not say which messages were edited, or the exact time of service messages; JSON exports do. In HTML exports, service messages such as "Ada invited Bora" are read from Telegram's English wording; ones it does not know are shown as written. Animated stickers show their still picture. An export of a whole account is not opened: export one chat at a time.
 
 ## Where your chats are kept
 

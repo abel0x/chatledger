@@ -46,7 +46,8 @@ function entitySpan(e: unknown): Span | null {
     case 'mention_name':
       return { text, mention: true };
     case 'link': {
-      const href = safeHref(text);
+      // Telegram marks web addresses written without https:// too.
+      const href = safeHref(/^[a-z][a-z0-9+.-]*:/i.test(text) ? text : `https://${text}`);
       return href ? { text, href } : { text };
     }
     case 'text_link': {
@@ -152,9 +153,10 @@ function names(v: unknown): string[] {
   return Array.isArray(v) ? v.map(n => (typeof n === 'string' && n ? n : 'Deleted Account')) : [];
 }
 
-function event(m: Json, actorName: string | undefined): ChatEvent {
+function event(m: Json, actorName: string | undefined, channel: boolean): ChatEvent {
   const action = str(m.action) ?? '';
-  const actor: Party | undefined = actorName ? { name: actorName } : undefined;
+  // In a channel the channel itself does everything, and Telegram's own HTML names no one.
+  const actor: Party | undefined = actorName && !channel ? { name: actorName } : undefined;
   const members = names(m.members);
   const title = str(m.title);
   const base = { actor, raw: [actorName, action.replace(/_/g, ' ')].filter(Boolean).join(': ') };
@@ -165,9 +167,9 @@ function event(m: Json, actorName: string | undefined): ChatEvent {
     case 'create_channel':
       return { ...base, type: 'channelCreated', value: title };
     case 'edit_group_title':
-      return { ...base, type: 'renamed', value: title };
+      return { ...base, type: channel ? 'channelRenamed' : 'renamed', value: title };
     case 'edit_group_photo':
-      return { ...base, type: 'iconChanged' };
+      return { ...base, type: channel ? 'channelIconChanged' : 'iconChanged' };
     case 'delete_group_photo':
       return { ...base, type: 'iconDeleted' };
     case 'invite_members':
@@ -199,6 +201,10 @@ function event(m: Json, actorName: string | undefined): ChatEvent {
       const period = num(m.period) ?? num(m.period_seconds) ?? 0;
       return period > 0 ? { ...base, type: 'disappearingOn', value: String(period) } : { ...base, type: 'disappearingOff' };
     }
+    case 'paid_messages_price_change': {
+      const stars = num(m.price_stars);
+      return stars === undefined ? { ...base, type: 'unknown' } : { ...base, type: 'messagePriceChanged', value: String(stars) };
+    }
     case 'topic_created':
       return { ...base, type: 'topicCreated', value: title };
     default:
@@ -227,6 +233,7 @@ export function parseTelegramJson(input: string, options: ParseOptions = {}): Ch
   }
   const chat = pickChat(data);
   const list = chat.messages as unknown[];
+  const channel = /channel/.test(str(chat.type) ?? '');
   const people = new People();
   const warnings: ParseWarning[] = [];
   const messages: Message[] = [];
@@ -243,12 +250,12 @@ export function parseTelegramJson(input: string, options: ParseOptions = {}): Ch
     }
     if (raw.type === 'service') {
       const actor = raw.actor === null ? 'Deleted Account' : str(raw.actor);
-      const ev = event(raw, actor && people.name(actor, str(raw.actor_id)));
+      const ev = event(raw, actor && people.name(actor, str(raw.actor_id)), channel);
       if (ev.type === 'unknown' && warnings.length < MAX_WARNINGS) warnings.push({ line: n + 1, reason: 'unknownEvent', text: ev.raw });
       messages.push({ id: messageId(id), time, sender: null, kind: 'event', event: ev });
       return;
     }
-    const from = raw.from === null || raw.from === undefined ? (str(raw.author) ?? 'Deleted Account') : (str(raw.from) ?? 'Deleted Account');
+    const from = str(raw.from) || 'Deleted Account';
     const msg: Message = { id: messageId(id), time, sender: people.index(from, str(raw.from_id)), ...body(raw) };
     if (raw.edited !== undefined || raw.edited_unixtime !== undefined) msg.edited = true;
     const forwarded = str(raw.forwarded_from) ?? str(raw.saved_from);

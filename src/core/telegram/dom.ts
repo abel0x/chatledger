@@ -19,7 +19,7 @@ const KEPT = new Set(['class', 'id', 'href', 'src', 'title']);
 /** Deeper nesting than any real page has; past it, elements are flattened into their parent. */
 const MAX_DEPTH = 128;
 
-const NAMED: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00A0' };
+const NAMED: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00A0', laquo: '\u00AB', raquo: '\u00BB' };
 
 export function decodeEntities(s: string): string {
   if (!s.includes('&')) return s;

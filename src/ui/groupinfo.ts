@@ -39,6 +39,7 @@ export function groupInfo(chat: Chat): GroupInfo {
         created ??= { index, time: m.time, actor: nameOf(ev.actor), value: ev.value ?? null };
         break;
       case 'renamed':
+      case 'channelRenamed':
         if (ev.value) renames.push({ index, time: m.time, value: ev.value, previous: ev.previous ?? null, actor: nameOf(ev.actor) });
         break;
       case 'added':

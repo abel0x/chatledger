@@ -6,9 +6,9 @@ All notable changes to chatledger are listed here. Versions follow [semantic ver
 
 ### Added
 
-- Telegram chats, exported from Telegram Desktop as JSON or as HTML pages. Pick the folder Telegram makes, a zip of it, or its files. Replies show the message they answer and jump to it, forwarded messages say where they came from, reactions are listed under each message, and hidden spoiler text shows when selected. Telegram's bold, italic, underline, strikethrough, code, quotes and links are kept. Several exports of the same chat are joined by their message numbers, whichever format they use.
+- Telegram chats, exported from Telegram Desktop as JSON or as HTML pages. Pick the folder Telegram makes, a zip of it, or its files. Replies show the message they answer and jump to it, forwarded messages say where they came from, reactions are listed under each message, and hidden spoiler text shows when selected. Telegram's bold, italic, underline, strikethrough, code, quotes and links are kept. Several exports of the same chat are joined by their message numbers, whichever format they use. Channels open too, with their name and photo changes and the price of messages to them.
 - Calls, missed calls and other Telegram service messages are written in the language you read in. The events of HTML exports are read from Telegram's English wording; the ones it does not know are shown as written.
-- **Telegram support is experimental.** It follows the format Telegram Desktop writes but has not yet been tried on many real exports. Exports of a whole account are turned away with a note to export one chat at a time.
+- **Telegram support is experimental.** It has been checked against real channel exports, but not yet against group or one-to-one chats. HTML pages do not say which messages were edited, or the exact time of service messages; JSON exports do. Exports of a whole account are turned away with a note to export one chat at a time.
 
 ## [0.6.0] - 2026-11-08
 
