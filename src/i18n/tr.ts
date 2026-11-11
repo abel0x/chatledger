@@ -168,7 +168,7 @@ export const tr: Dictionary = {
   'msg.poll': 'Anket',
   'msg.votes': { one: '{count} oy', other: '{count} oy' },
   'msg.download': 'Kaydet',
-  'msg.view': '{what} aç',
+  'msg.view': 'Aç: {what}',
 
   'party.you': 'Siz',
   'party.someone': 'Biri',
@@ -242,7 +242,7 @@ export const tr: Dictionary = {
   'print.limit': 'Bu seçimin yalnızca ilk {count} mesajı yazdırılacak.',
   'print.none': 'Bu seçimde yazdırılacak bir şey yok.',
   'print.preparing': 'Hazırlanıyor…',
-  'print.pdfHint': 'PDF dosyası için yazıcı olarak PDF olarak kaydet seçeneğini seçin.',
+  'print.pdfHint': 'PDF dosyası almak için yazıcı listesinden “PDF olarak kaydet” seçeneğini seçin.',
   'settings.label': 'Ayarlar',
   'settings.theme': 'Tema',
   'settings.themeSystem': 'Sistemle aynı',

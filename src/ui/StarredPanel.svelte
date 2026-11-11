@@ -32,7 +32,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${(chat.title ?? 'chat').replace(/[\\/:*?"<>|]/g, '_')} - starred.json`;
+    a.download = `${(chat.title ?? t('chat.untitled')).replace(/[\\/:*?"<>|]/g, '_')} - ${t('chat.starred')}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }

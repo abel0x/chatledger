@@ -23,6 +23,16 @@ export function formatLocale(lang: Lang, preferred: readonly string[] = []): str
   return preferred.find(l => l.toLowerCase().split('-')[0] === lang) ?? lang;
 }
 
+/**
+ * French puts a thin space before ? ! : ; and inside « », one that never
+ * breaks, so a question mark never starts a line of its own. The
+ * dictionary keeps plain spaces for readability; this turns them into
+ * the right kind.
+ */
+function frenchSpaces(text: string): string {
+  return text.replace(/ ([?!:;»])/g, '\u202f$1').replace(/« /g, '«\u202f');
+}
+
 export function translate(lang: Lang, key: Key, params: Params = {}, locale: string = lang): string {
   const entry = DICTIONARIES[lang][key];
   let template: string;
@@ -31,6 +41,7 @@ export function translate(lang: Lang, key: Key, params: Params = {}, locale: str
     const count = Number(params.count ?? 0);
     template = new Intl.PluralRules(locale).select(count) === 'one' ? entry.one : entry.other;
   }
+  if (lang === 'fr') template = frenchSpaces(template);
   return template.replace(/\{(\w+)\}/g, (whole, name: string) => {
     const value = params[name];
     if (value === undefined) return whole;

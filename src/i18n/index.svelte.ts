@@ -5,7 +5,6 @@ import { describeEvent, formatLocale, LANGS, translate, type Lang, type Params }
 
 export { LANGS, type Lang };
 
-
 function browserLanguages(): readonly string[] {
   return typeof navigator === 'undefined' ? [] : navigator.languages;
 }

@@ -23,6 +23,20 @@ describe('dictionaries', () => {
     }
   });
 
+  it('keep French punctuation on the same line as the word before it', () => {
+    expect(translate('fr', 'lock.forgot')).toBe('Mot de passe oublié\u202f?');
+    expect(translate('fr', 'msg.view', { what: 'Photo' })).toBe('Ouvrir\u202f: Photo');
+    expect(describeEvent({ type: 'renamed', actor: { name: 'Ada' }, value: 'Rando', raw: '' }, 'fr', null)).toBe(
+      'Ada a renommé le groupe en «\u202fRando\u202f»',
+    );
+    for (const key of Object.keys(en) as Key[]) {
+      const text = translate('fr', key, { count: 2 });
+      expect(text, key).not.toMatch(/ [?!:;»]|« /);
+    }
+    // Names and other filled-in values are left exactly as they are.
+    expect(translate('fr', 'msg.forwarded', { name: 'Radio : Info' })).toBe('Transféré de Radio : Info');
+  });
+
   it('plural forms work with each language’s own rules', () => {
     expect(translate('fr', 'chat.messages', { count: 0 })).toBe('0 message');
     expect(translate('de', 'chat.messages', { count: 1200 })).toBe('1.200 Nachrichten');

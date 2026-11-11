@@ -54,7 +54,7 @@
   const result = $derived(index.search(applied, { sender, kind, from: toDay(from), to: toDay(to), limit: LIMIT }));
   const shown = $derived(result.hits.toReversed());
   const active = $derived(terms.length > 0 || sender != null || kind !== 'all' || !!from || !!to);
-  const people = $derived(chat.people.map((name, i) => ({ name, i })).sort((a, b) => a.name.localeCompare(b.name)));
+  const people = $derived(chat.people.map((name, i) => ({ name, i })).sort((a, b) => a.name.localeCompare(b.name, locale())));
   const firstDay = $derived(new Date((chat.messages[0]?.time ?? 0) * 1000).toISOString().slice(0, 10));
   const lastDay = $derived(new Date((chat.messages.at(-1)?.time ?? 0) * 1000).toISOString().slice(0, 10));
 

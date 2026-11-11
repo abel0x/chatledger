@@ -245,7 +245,7 @@ export const en = {
   'print.limit': 'Only the first {count} messages of this selection will be printed.',
   'print.none': 'There is nothing to print in this selection.',
   'print.preparing': 'Preparing…',
-  'print.pdfHint': 'Choose Save as PDF as the printer to get a PDF file.',
+  'print.pdfHint': 'Choose “Save as PDF” as the printer to get a PDF file.',
   'settings.label': 'Settings',
   'settings.theme': 'Theme',
   'settings.themeSystem': 'Follow the system',
