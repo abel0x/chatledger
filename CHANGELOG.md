@@ -4,6 +4,15 @@ All notable changes to chatledger are listed here. Versions follow [semantic ver
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-11
+
+### Changed
+
+- A review of all seven languages. In French, punctuation such as ? and : and the « » quotes now keep a thin space that never breaks, so they never start a line on their own.
+- Media missing from an export no longer takes the wrong gender in French, Spanish, Italian and Portuguese, and French and Italian group events no longer assume that the person is a man.
+- Clearer wording here and there: the Spanish hint for starred messages said the opposite of what it meant, two Turkish lines read awkwardly, and the "Save as PDF" printer name is now in quotes in every language.
+- Names in the search's sender list are sorted the way the chosen language sorts them, and exported starred messages get a file name in that language.
+
 ## [0.7.1] - 2026-11-11
 
 ### Added
@@ -121,7 +130,8 @@ The first release.
 - **iPhone support is experimental.** It follows the iPhone export format but has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please open an issue.
 - Group events from phones in other languages are shown as WhatsApp wrote them, without translation.
 
-[Unreleased]: https://github.com/abel0x/chatledger/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/abel0x/chatledger/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/abel0x/chatledger/releases/tag/v0.7.2
 [0.7.1]: https://github.com/abel0x/chatledger/releases/tag/v0.7.1
 [0.7.0]: https://github.com/abel0x/chatledger/releases/tag/v0.7.0
 [0.6.0]: https://github.com/abel0x/chatledger/releases/tag/v0.6.0
