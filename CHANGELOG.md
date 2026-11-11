@@ -4,6 +4,13 @@ All notable changes to chatledger are listed here. Versions follow [semantic ver
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-11
+
+### Added
+
+- Search every saved chat at once from the start page, WhatsApp and Telegram alike. Each chat lists its newest matches; pick one to open the chat right at that message, with the search already filled in. Saved chats protected with a password are searched once they are unlocked, and locking them again forgets everything that was read.
+- README pictures of a made-up Telegram chat and of the new search.
+
 ## [0.7.0] - 2026-11-11
 
 ### Added
@@ -114,7 +121,8 @@ The first release.
 - **iPhone support is experimental.** It follows the iPhone export format but has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please open an issue.
 - Group events from phones in other languages are shown as WhatsApp wrote them, without translation.
 
-[Unreleased]: https://github.com/abel0x/chatledger/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/abel0x/chatledger/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/abel0x/chatledger/releases/tag/v0.7.1
 [0.7.0]: https://github.com/abel0x/chatledger/releases/tag/v0.7.0
 [0.6.0]: https://github.com/abel0x/chatledger/releases/tag/v0.6.0
 [0.5.0]: https://github.com/abel0x/chatledger/releases/tag/v0.5.0
