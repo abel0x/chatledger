@@ -73,7 +73,7 @@ chatledger, Firefox'un ve Chrome, Edge gibi Chromium tabanlı tarayıcıların g
 - **iPhone dökümleri deneyseldir.** chatledger iPhone'un dışa aktarma biçimine göre yazıldı, ancak henüz pek çok gerçek iPhone dökümüyle denenmedi. Biri açılmazsa ya da yanlış görünürse lütfen bildirin (aşağıya bakın).
 - Almanca, İspanyolca, Fransızca, İtalyanca veya Portekizce ayarlı telefonlardan gelen dökümler, WhatsApp'ın bu dillerdeki ifadelerine göre okunur ancak henüz pek çok gerçek dökümle denenmedi. Bir grup olayı sizin diliniz yerine telefonun dilinde görünürse ya da bir ek tanınmazsa lütfen o satırı (adları değiştirerek) bildirin.
 - Başka dillere ayarlı telefonlardan gelen grup olayları çevrilmeden, WhatsApp'ın yazdığı gibi gösterilir. Mesajlar, tarihler ve medya her dilde çalışır.
-- **Telegram desteği deneyseldir.** Telegram Desktop'ın yazdığı biçime göre yazıldı, ancak henüz pek çok gerçek dökümle denenmedi. HTML dökümlerinde "Ada, Bora'yı ekledi" gibi sistem mesajları Telegram'ın İngilizce ifadelerinden okunur; tanınmayanlar yazıldığı gibi gösterilir. Hareketli çıkartmalar sabit resimleriyle görünür. Bütün bir hesabın dökümü açılmaz; sohbetleri tek tek dışa aktarın.
+- **Telegram desteği deneyseldir.** Gerçek kanal dökümleriyle denendi, ancak grup ve birebir sohbetlerle henüz denenmedi. HTML dökümleri hangi mesajların düzenlendiğini ve sistem mesajlarının tam saatini yazmaz; JSON dökümleri yazar. HTML dökümlerinde "Ada, Bora'yı ekledi" gibi sistem mesajları Telegram'ın İngilizce ifadelerinden okunur; tanınmayanlar yazıldığı gibi gösterilir. Hareketli çıkartmalar sabit resimleriyle görünür. Bütün bir hesabın dökümü açılmaz; sohbetleri tek tek dışa aktarın.
 
 ## Sohbetleriniz nerede saklanır
 

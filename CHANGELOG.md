@@ -4,6 +4,8 @@ All notable changes to chatledger are listed here. Versions follow [semantic ver
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-11
+
 ### Added
 
 - Telegram chats, exported from Telegram Desktop as JSON or as HTML pages. Pick the folder Telegram makes, a zip of it, or its files. Replies show the message they answer and jump to it, forwarded messages say where they came from, reactions are listed under each message, and hidden spoiler text shows when selected. Telegram's bold, italic, underline, strikethrough, code, quotes and links are kept. Several exports of the same chat are joined by their message numbers, whichever format they use. Channels open too, with their name and photo changes and the price of messages to them.
@@ -112,7 +114,8 @@ The first release.
 - **iPhone support is experimental.** It follows the iPhone export format but has not yet been tried on many real iPhone exports. If one does not open or looks wrong, please open an issue.
 - Group events from phones in other languages are shown as WhatsApp wrote them, without translation.
 
-[Unreleased]: https://github.com/abel0x/chatledger/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/abel0x/chatledger/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/abel0x/chatledger/releases/tag/v0.7.0
 [0.6.0]: https://github.com/abel0x/chatledger/releases/tag/v0.6.0
 [0.5.0]: https://github.com/abel0x/chatledger/releases/tag/v0.5.0
 [0.4.0]: https://github.com/abel0x/chatledger/releases/tag/v0.4.0
