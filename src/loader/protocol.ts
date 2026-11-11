@@ -1,5 +1,6 @@
 import type { Chat } from '../core';
 import type { DocBlock } from './docx';
+import type { ChatHits } from './everywhere';
 import type { SavedChat } from './library';
 import type { ChatStats } from '../core';
 import type { LoadErrorCode, Phase } from './open';
@@ -34,3 +35,11 @@ export type Thumbnail =
     }
   /** A picture whose header claims more pixels than is safe to decode. */
   | { tooLarge: true; width: number; height: number };
+
+/** Searches across the saved chats, run by a worker of their own. */
+export type FinderRequest = { type: 'search'; seq: number; query: string; ids: string[]; key: CryptoKey | null };
+
+export type FinderResponse =
+  | { type: 'chat'; seq: number; hits: ChatHits }
+  | { type: 'progress'; seq: number; done: number; total: number }
+  | { type: 'done'; seq: number };

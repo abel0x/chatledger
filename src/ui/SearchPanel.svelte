@@ -1,22 +1,25 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import type { Chat, Message } from '../core';
-  import { eventText, locale, t } from '../i18n/index.svelte';
+  import { locale, t } from '../i18n/index.svelte';
   import { dayOf, formatClock, formatDay } from './format';
   import Icon from './Icon.svelte';
-  import { highlight, parseQuery, searchableText, snippet, type KindFilter, type SearchIndex } from './search';
+  import { highlight, parseQuery, type KindFilter, type SearchIndex } from '../core/search';
+  import { hitText } from './hits';
 
   interface Props {
     chat: Chat;
     index: SearchIndex;
     /** Pre-selected sender, e.g. after clicking a mention. */
     person?: number | null;
+    /** Words to look for as the panel opens, e.g. from a search across all saved chats. */
+    initial?: string | null;
     onpick: (messageIndex: number) => void;
     onclose: () => void;
     onterms: (terms: string[]) => void;
   }
 
-  let { chat, index, person = null, onpick, onclose, onterms }: Props = $props();
+  let { chat, index, person = null, initial = null, onpick, onclose, onterms }: Props = $props();
 
   const LIMIT = 300;
 
@@ -33,6 +36,10 @@
 
   $effect.pre(() => {
     if (person != null) sender = person;
+  });
+
+  $effect.pre(() => {
+    if (initial) query = applied = initial;
   });
 
   // Typing stays smooth on very long chats: the search runs once typing pauses.
@@ -61,15 +68,6 @@
   $effect(() => {
     input?.focus();
   });
-
-  function summary(m: Message): string {
-    if (m.event) return eventText(m.event, chat.self);
-    const text = searchableText(m);
-    if (text) return snippet(text, terms);
-    if (m.kind === 'omitted') return t('msg.notIncluded', { what: t(`media.${m.media ?? 'unknown'}`) });
-    if (m.kind === 'deleted') return t('msg.deleted');
-    return '';
-  }
 
   /** Enter goes to older results, Shift+Enter to newer ones, starting from the newest. */
   async function step(older: boolean) {
@@ -182,7 +180,7 @@
               {#if m.sender != null}<span class={`who c${m.sender % 12}`}>{chat.people[m.sender]}</span>{/if}
               <time>{formatDay(dayOf(m.time), locale())} {formatClock(m.time, locale())}</time>
             </span>
-            <span class="text">{#each highlight(summary(m), terms) as part, p (p)}{#if part.hit}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}</span>
+            <span class="text">{#each highlight(hitText(m, chat.self, terms), terms) as part, p (p)}{#if part.hit}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}</span>
           </button>
         </li>
       {/each}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseChat } from '../src/core';
 import { buildRows } from '../src/ui/rows';
-import { fold, highlight, parseQuery, SearchIndex, snippet } from '../src/ui/search';
+import { fold, highlight, parseQuery, SearchIndex, snippet } from '../src/core/search';
 import { fixture } from './helpers';
 
 describe('fold', () => {

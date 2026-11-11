@@ -24,6 +24,7 @@ chatledger runs on your machine and shows the chat in your browser. Your message
 - Collects every photo and video, file and link of the chat in one place, with a full-screen viewer.
 - Counts who wrote the most and when the chat is busiest. Also shows messages per month, favourite emoji, the longest silence and more.
 - Remembers chats you open, so they are still there after a restart. You can turn this off, and you can remove any saved chat.
+- Searches all your saved chats at once, WhatsApp and Telegram alike, and opens the chat right at the message you pick.
 - Speaks English, German, Spanish, French, Italian, Portuguese and Turkish, and reads exports from phones set to any of them. Group events are written in the language you read in, whatever language the phone used.
 - Has a light and a dark theme, three text sizes and keyboard shortcuts (press `?`).
 
@@ -31,7 +32,11 @@ chatledger runs on your machine and shows the chat in your browser. Your message
 | --- | --- |
 | ![Photos of a chat grouped by month](docs/screenshots/gallery.png) | ![Who wrote the most and when](docs/screenshots/stats.png) |
 
-The pictures show a made-up chat that comes with the tests.
+| A Telegram chat | Searching every saved chat |
+| --- | --- |
+| ![A Telegram group with a reply, a forwarded message, reactions and a photo](docs/screenshots/telegram.png) | ![One word found in two saved chats](docs/screenshots/everywhere.png) |
+
+The pictures show made-up chats that come with the tests.
 
 ## Getting started
 
@@ -100,7 +105,7 @@ npm start
 | `npm run check` | Type-checks the code |
 | `npm run release` | Builds the zip that runs with Node.js, and the single program for this system (needs Node.js 26) |
 
-The code is in three layers: `src/core` reads exports and knows nothing about the screen, `src/loader` opens archives in a worker, and `src/ui` is the Svelte interface. Tests use made-up chats only; `tests/e2e/demo.ts` builds the demo export the browser tests and screenshots use. If you keep real exports in a `coldstorage/` folder, a few extra tests run against them on your machine. That folder is ignored by git.
+The code is in three layers: `src/core` reads exports and knows nothing about the screen, `src/loader` opens archives in a worker, and `src/ui` is the Svelte interface. Tests use made-up chats only; `tests/e2e/demo.ts` and `tests/e2e/telegram-demo.ts` build the demo exports the browser tests and screenshots use. If you keep real exports in a `coldstorage/` folder, a few extra tests run against them on your machine. That folder is ignored by git.
 
 ## Reporting a problem
 

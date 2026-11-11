@@ -1,9 +1,10 @@
 import type { Chat, ChatStats } from '../core';
 import type { SavedChat } from './library';
 import type { LoadErrorCode, Phase } from './open';
-import type { DocPreview, Thumbnail, WorkerRequest, WorkerResponse } from './protocol';
+import type { ChatHits } from './everywhere';
+import type { DocPreview, FinderRequest, FinderResponse, Thumbnail, WorkerRequest, WorkerResponse } from './protocol';
 
-export type { DocPreview };
+export type { ChatHits, DocPreview };
 
 export interface Session {
   chat: Chat;
@@ -197,4 +198,55 @@ export function openSession(source: Source, onProgress?: (phase: Phase, fraction
         : { type: 'openSaved', id: source.savedId, key: source.key ?? null },
     );
   });
+}
+
+export interface FinderState {
+  /** Chats with matches, in the order they were searched. */
+  chats: ChatHits[];
+  /** Chats looked through so far, out of `total`. */
+  done: number;
+  total: number;
+  finished: boolean;
+}
+
+export interface Finder {
+  /** Starts a search across the saved chats with these ids; a newer call replaces an older one. */
+  search(query: string, ids: string[], onUpdate: (state: FinderState) => void): void;
+  close(): void;
+}
+
+/** A worker that searches the saved chats; it keeps them read until it is closed. */
+export function openFinder(key: CryptoKey | null): Finder {
+  const worker = new Worker(new URL('./finder.ts', import.meta.url), { type: 'module' });
+  let seq = 0;
+  let state: FinderState = { chats: [], done: 0, total: 0, finished: true };
+  let update: (state: FinderState) => void = () => {};
+  const publish = (next: Partial<FinderState>) => {
+    state = { ...state, ...next };
+    update(state);
+  };
+  worker.addEventListener('error', e => {
+    e.preventDefault();
+    publish({ finished: true });
+  });
+  worker.addEventListener('message', (e: MessageEvent<FinderResponse>) => {
+    const msg = e.data;
+    if (msg.seq !== seq) return;
+    if (msg.type === 'chat') publish({ chats: [...state.chats, msg.hits] });
+    else if (msg.type === 'progress') publish({ done: msg.done, total: msg.total });
+    else publish({ finished: true });
+  });
+  return {
+    search(query, ids, onUpdate) {
+      seq++;
+      update = onUpdate;
+      publish({ chats: [], done: 0, total: ids.length, finished: false });
+      const req: FinderRequest = { type: 'search', seq, query, ids, key };
+      worker.postMessage(req);
+    },
+    close() {
+      update = () => {};
+      worker.terminate();
+    },
+  };
 }

@@ -3,7 +3,7 @@
   import { eventText, locale, t } from '../i18n/index.svelte';
   import { dayOf, formatClock, formatDay } from './format';
   import Icon from './Icon.svelte';
-  import { searchableText, snippet } from './search';
+  import { searchableText, snippet } from '../core/search';
   import { exportStars, importStars, type Stars } from './stars.svelte';
 
   interface Props {

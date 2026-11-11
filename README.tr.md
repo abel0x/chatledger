@@ -24,6 +24,7 @@ chatledger sizin bilgisayarınızda çalışır ve sohbeti tarayıcınızda gös
 - Sohbetteki bütün fotoğraf ve videoları, dosyaları ve bağlantıları tek yerde toplar; fotoğraflar tam ekran açılır.
 - En çok kimin yazdığını ve sohbetin en hareketli olduğu saatleri sayar. Aylara göre mesajları, sevilen emojileri, en uzun sessizliği ve daha fazlasını gösterir.
 - Açtığınız sohbetleri hatırlar, yeniden başlattığınızda da yerinde olurlar. Bunu kapatabilir, kayıtlı herhangi bir sohbeti kaldırabilirsiniz.
+- Kayıtlı bütün sohbetlerinizde, WhatsApp ve Telegram ayrımı olmadan aynı anda arar ve seçtiğiniz mesajda sohbeti açar.
 - Arayüzü İngilizce, Almanca, İspanyolca, Fransızca, İtalyanca, Portekizce ve Türkçedir; bu dillerden herhangi birine ayarlı telefonların dökümlerini okur. Grup olayları, telefonun dili ne olursa olsun sizin okuduğunuz dilde yazılır.
 - Açık ve koyu tema, üç yazı boyutu ve klavye kısayolları vardır (`?` tuşuna basın).
 
@@ -31,7 +32,11 @@ chatledger sizin bilgisayarınızda çalışır ve sohbeti tarayıcınızda gös
 | --- | --- |
 | ![Bir sohbetin fotoğrafları, aylara göre](docs/screenshots/gallery.png) | ![En çok kim ve ne zaman yazmış](docs/screenshots/stats.png) |
 
-Görsellerdeki sohbet, testlerle birlikte gelen uydurma bir sohbettir.
+| Bir Telegram sohbeti | Kayıtlı bütün sohbetlerde arama |
+| --- | --- |
+| ![Yanıt, iletilmiş mesaj, tepkiler ve fotoğraf içeren bir Telegram grubu](docs/screenshots/telegram.png) | ![Bir kelime, kayıtlı iki sohbette bulunmuş](docs/screenshots/everywhere.png) |
+
+Görsellerdeki sohbetler, testlerle birlikte gelen uydurma sohbetlerdir.
 
 ## Başlarken
 
@@ -100,7 +105,7 @@ npm start
 | `npm run check` | Kodun tiplerini denetler |
 | `npm run release` | Node.js ile çalışan zip'i ve bu sistem için tek dosyalık programı hazırlar (Node.js 26 gerekir) |
 
-Kod üç katmandan oluşur. `src/core` dökümleri okur ve ekrandan habersizdir. `src/loader` arşivleri bir worker içinde açar. `src/ui` ise Svelte arayüzüdür. Testler yalnızca uydurma sohbetler kullanır; tarayıcı testlerinin ve ekran görüntülerinin kullandığı demo dökümü `tests/e2e/demo.ts` üretir. Gerçek dökümleri bir `coldstorage/` klasöründe tutarsanız, birkaç ek test sizin bilgisayarınızda onlarla da çalışır. Bu klasör git tarafından yok sayılır.
+Kod üç katmandan oluşur. `src/core` dökümleri okur ve ekrandan habersizdir. `src/loader` arşivleri bir worker içinde açar. `src/ui` ise Svelte arayüzüdür. Testler yalnızca uydurma sohbetler kullanır; tarayıcı testlerinin ve ekran görüntülerinin kullandığı demo dökümlerini `tests/e2e/demo.ts` ve `tests/e2e/telegram-demo.ts` üretir. Gerçek dökümleri bir `coldstorage/` klasöründe tutarsanız, birkaç ek test sizin bilgisayarınızda onlarla da çalışır. Bu klasör git tarafından yok sayılır.
 
 ## Sorun bildirme
 

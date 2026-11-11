@@ -7,7 +7,7 @@
   import { formatClock, formatFull } from './format';
   import Icon from './Icon.svelte';
   import { emojiOnly, richText, spanText, type RichNode } from './richtext';
-  import { highlight } from './search';
+  import { highlight } from '../core/search';
 
   let {
     message: m,

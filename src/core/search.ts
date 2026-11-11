@@ -1,4 +1,4 @@
-import type { Chat, Message } from '../core';
+import type { Chat, Message } from './model';
 
 /** Characters that NFD does not take apart but people type without their marks. */
 const EXTRA: Record<string, string> = {

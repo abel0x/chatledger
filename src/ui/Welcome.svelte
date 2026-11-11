@@ -6,6 +6,7 @@
   import { formatBytes, formatDayRange } from './format';
   import Icon from './Icon.svelte';
   import LangSwitch from './LangSwitch.svelte';
+  import LibrarySearch from './LibrarySearch.svelte';
 
   interface Props {
     busy: boolean;
@@ -15,7 +16,9 @@
     remember: boolean;
     canRemember: boolean;
     onopen: (files: File[]) => void;
-    onopensaved: (id: string) => void;
+    onopensaved: (id: string, target?: { message: string | null; query: string }) => void;
+    /** Unlocks password-protected saved chats, for searching them. */
+    libraryKey: CryptoKey | null;
     onremove: (id: string) => void;
     onremember: (value: boolean) => void;
     locked: boolean;
@@ -37,6 +40,7 @@
     canRemember,
     onopen,
     onopensaved,
+    libraryKey,
     onremove,
     onremember,
     locked,
@@ -76,6 +80,7 @@
     if (confirm(t('lock.forgotConfirm'))) void onforget();
   }
 
+  let searchingAll = $state(false);
   let dragging = $state(false);
   let confirming = $state<string | null>(null);
   let depth = 0;
@@ -178,26 +183,35 @@
       <section class="saved" aria-labelledby="saved-title">
         <h2 id="saved-title">{t('welcome.saved')}</h2>
         <p class="note">{t('welcome.savedNote')}</p>
-        <ul>
-          {#each library as c (c.id)}
-            <li>
-              <button class="open" type="button" disabled={busy} onclick={() => onopensaved(c.id)}>
-                <span class="name">{c.title ?? t('chat.untitled')}</span>
-                <span class="info">
-                  {t('chat.messages', { count: c.messages })} · {formatDayRange(c.first, c.last, locale())} · {formatBytes(c.bytes, locale())}
-                </span>
-              </button>
-              {#if confirming === c.id}
-                <button class="button danger" type="button" onclick={() => { confirming = null; onremove(c.id); }}>
-                  {t('welcome.removeConfirm')}
+        <LibrarySearch
+          {library}
+          {libraryKey}
+          {busy}
+          onpick={(id, message, query) => onopensaved(id, { message, query })}
+          onactive={value => (searchingAll = value)}
+        />
+        {#if !searchingAll}
+          <ul>
+            {#each library as c (c.id)}
+              <li>
+                <button class="open" type="button" disabled={busy} onclick={() => onopensaved(c.id)}>
+                  <span class="name">{c.title ?? t('chat.untitled')}</span>
+                  <span class="info">
+                    {t('chat.messages', { count: c.messages })} · {formatDayRange(c.first, c.last, locale())} · {formatBytes(c.bytes, locale())}
+                  </span>
                 </button>
-                <button class="button secondary" type="button" onclick={() => (confirming = null)}>{t('welcome.cancel')}</button>
-              {:else}
-                <button class="button secondary" type="button" onclick={() => (confirming = c.id)}>{t('welcome.remove')}</button>
-              {/if}
-            </li>
-          {/each}
-        </ul>
+                {#if confirming === c.id}
+                  <button class="button danger" type="button" onclick={() => { confirming = null; onremove(c.id); }}>
+                    {t('welcome.removeConfirm')}
+                  </button>
+                  <button class="button secondary" type="button" onclick={() => (confirming = null)}>{t('welcome.cancel')}</button>
+                {:else}
+                  <button class="button secondary" type="button" onclick={() => (confirming = c.id)}>{t('welcome.remove')}</button>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
       </section>
     {/if}
 
@@ -528,19 +542,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .bar {
-    width: min(320px, 100%);
-    height: 8px;
-    accent-color: var(--accent);
-  }
-
-  .percent {
-    color: var(--muted);
-    font-size: 0.85rem;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .spinner {
+    .spinner {
       animation-duration: 3s;
     }
   }

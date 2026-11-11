@@ -19,7 +19,7 @@
   import PrintView from './PrintView.svelte';
   import { plainText } from './richtext';
   import { buildRows, estimateHeight, type Row } from './rows';
-  import { SearchIndex } from './search';
+  import { SearchIndex } from '../core/search';
   import SearchPanel from './SearchPanel.svelte';
   import { readSetting, writeSetting } from './settings';
   import SettingsPopover, { type Shortcut } from './SettingsPopover.svelte';
@@ -32,9 +32,16 @@
 
   let {
     session,
+    query = null,
     onclose,
     onaddexport,
-  }: { session: Session; onclose: () => void; onaddexport?: (files: File[]) => Promise<LoadErrorCode | null> } = $props();
+  }: {
+    session: Session;
+    /** Words to search for as the chat opens. */
+    query?: string | null;
+    onclose: () => void;
+    onaddexport?: (files: File[]) => Promise<LoadErrorCode | null>;
+  } = $props();
 
   type Panel = 'search' | 'gallery' | 'starred' | 'info';
 
@@ -68,6 +75,7 @@
   let atEnd = $state(false);
   let panel = $state<Panel | null>(null);
   let searchPerson = $state<number | null>(null);
+  let searchFirst = $state<string | null>(null);
   let viewer = $state<number | null>(null);
   let docIndex = $state<number | null>(null);
   let menu = $state<{ index: number; anchor: HTMLElement } | null>(null);
@@ -311,6 +319,10 @@
     media.addEventListener('change', update);
     window.addEventListener('hashchange', fromHash);
     index.prepare();
+    if (query) {
+      searchFirst = query;
+      panel = 'search';
+    }
     // A link to a message wins; otherwise open where the reader stopped last time.
     requestAnimationFrame(() => {
       if (fromHash()) return;
@@ -468,8 +480,12 @@
       {chat}
       {index}
       person={searchPerson}
+      initial={searchFirst}
       onpick={pick}
-      onclose={() => (panel = null)}
+      onclose={() => {
+        panel = null;
+        searchFirst = null;
+      }}
       onterms={next => (terms = next)}
     />
   {:else if panel === 'gallery'}
