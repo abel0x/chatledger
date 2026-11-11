@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { DEMO_TITLE, type Demo } from './demo';
-import { demo as loadDemo, openDemo } from './helpers';
+import { demo as loadDemo, openDemo, waitForSavedCopy } from './helpers';
 
 let demo: Demo;
 
@@ -53,7 +53,7 @@ test('draws the statistics', async ({ page }) => {
 
 test('keeps a chat after a reload and forgets it when removed', async ({ page }) => {
   await openDemo(page, true);
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('chatledger.last'))).not.toBeNull();
+  await waitForSavedCopy(page);
   await page.reload();
   await expect(page.getByRole('heading', { level: 1, name: DEMO_TITLE })).toBeVisible();
   await page.getByRole('button', { name: 'Close chat' }).click();

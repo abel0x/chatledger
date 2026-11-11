@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { DEMO_TITLE } from './demo';
-import { openDemo } from './helpers';
+import { openDemo, waitForSavedCopy } from './helpers';
 
 /** What the browser's private storage holds for saved chats: file names and whether any of them mention the chat. */
 function storage(page: Page) {
@@ -24,7 +24,7 @@ function storage(page: Page) {
 test('protects saved chats with a password', async ({ page }) => {
   test.setTimeout(90_000);
   await openDemo(page, true);
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('chatledger.last'))).not.toBeNull();
+  await waitForSavedCopy(page);
   await page.getByRole('button', { name: 'Close chat' }).click();
 
   await page.getByText('Protect saved chats with a password').click();

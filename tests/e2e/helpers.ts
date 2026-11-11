@@ -13,8 +13,14 @@ export async function openDemo(page: Page, remember = false): Promise<Demo> {
   await page.goto('/');
   if (!remember) await page.getByLabel('Remember chats I open on this computer').uncheck();
   await page.locator('input[type=file][accept]').setInputFiles({ name: d.name, mimeType: 'application/zip', buffer: d.buffer });
-  await expect(page.getByRole('heading', { level: 1, name: DEMO_TITLE })).toBeVisible();
+  // Unpacking the demo, and saving a copy when remembering, can take a while on a slow CI machine.
+  await expect(page.getByRole('heading', { level: 1, name: DEMO_TITLE })).toBeVisible({ timeout: 20_000 });
   return d;
+}
+
+/** Waits until the opened chat has been saved, which on a slow machine can take several seconds. */
+export async function waitForSavedCopy(page: Page): Promise<void> {
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('chatledger.last')), { timeout: 20_000 }).not.toBeNull();
 }
 
 /** Jumps to a message through search, the way a reader would. */

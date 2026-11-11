@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { TextReader, Uint8ArrayWriter, ZipWriter } from '@zip.js/zip.js/lib/zip-core-native.js';
 import { DEMO_TITLE } from './demo';
-import { goTo, openDemo } from './helpers';
+import { goTo, openDemo, waitForSavedCopy } from './helpers';
 
 test('shows WhatsApp formatting, mentions and large emoji', async ({ page }) => {
   await openDemo(page);
@@ -34,7 +34,7 @@ test('stars a message from its menu and lists it', async ({ page }) => {
 test('opens a link to a message after a reload', async ({ page }) => {
   await openDemo(page, true);
   // The copy in the browser's storage has to be finished before the page goes away.
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('chatledger.last'))).not.toBeNull();
+  await waitForSavedCopy(page);
   await goTo(page, 'Booked for six people');
   await expect(page).toHaveURL(/#m-[\w-]+$/);
   const link = page.url();
