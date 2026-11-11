@@ -57,6 +57,7 @@ jobs:
       - run: npm run release
       - if: needs.prepare.outputs.single == 'true'
         run: npx playwright install --with-deps chromium firefox
+        timeout-minutes: 10
       - name: Browser tests against the single executable
         if: needs.prepare.outputs.single == 'true'
         run: npm run test:e2e
