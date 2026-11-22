@@ -38,6 +38,6 @@
   },
   "dependencies": {
     "@zip.js/zip.js": "2.24.0",
-    "pdfjs-dist": "6.4.299"
+    "pdfjs-dist": "6.5.438"
   }
 }
